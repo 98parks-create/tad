@@ -29,7 +29,7 @@ export const saveQuote = async (userId, quoteData, quoteId = null) => {
 export const deleteQuote = async (quoteId) => {
   try {
     const docRef = doc(db, QUOTES_COLLECTION, quoteId);
-    await deleteDoc(docRef);
+    await updateDoc(docRef, { deleted: true, updatedAt: serverTimestamp() });
     return true;
   } catch (error) {
     console.error("Error deleting quote: ", error);
@@ -48,7 +48,7 @@ export const updateQuoteStatus = async (quoteId, status) => {
   }
 };
 
-export const getQuotes = async (userId) => {
+export const getQuotes = async (userId, includeDeleted = false) => {
   try {
     const q = query(collection(db, QUOTES_COLLECTION), where('userId', '==', userId));
     const querySnapshot = await getDocs(q);
@@ -56,8 +56,9 @@ export const getQuotes = async (userId) => {
       id: doc.id,
       ...doc.data()
     }));
+    const filteredDocs = includeDeleted ? docs : docs.filter(d => !d.deleted);
     // Sort in memory to avoid needing composite indexes in Firestore
-    return docs.sort((a, b) => {
+    return filteredDocs.sort((a, b) => {
       const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
       const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
       return timeB - timeA;

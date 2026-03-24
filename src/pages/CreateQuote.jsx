@@ -37,9 +37,8 @@ export default function CreateQuote() {
           }
         }
         
-        // Freemium Quota Check
         if (!editQuote) {
-          getQuotes(currentUser.uid).then(quotes => {
+          getQuotes(currentUser.uid, true).then(quotes => {
             if (quotes.length >= 3 && profile?.subscriptionPlan !== 'pro') {
               setShowPaywall(true);
             }
