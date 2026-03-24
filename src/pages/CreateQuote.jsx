@@ -6,14 +6,20 @@ import PrintTemplate from '../components/PrintTemplate';
 import { saveQuote } from '../services/quoteService';
 import { getProfile } from '../services/profileService';
 import { useAuth } from '../contexts/AuthContext';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function CreateQuote() {
   const { currentUser } = useAuth();
-  const [customerInfo, setCustomerInfo] = useState({ name: '', company: '', phone: '', project: '', date: new Date().toISOString().split('T')[0] });
-  const [items, setItems] = useState([]);
-  const [includeVat, setIncludeVat] = useState(true);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const editQuote = location.state?.editQuote;
+
+  const [customerInfo, setCustomerInfo] = useState(editQuote?.customerInfo || { name: '', company: '', phone: '', project: '', date: new Date().toISOString().split('T')[0] });
+  const [items, setItems] = useState(editQuote?.items || []);
+  const [includeVat, setIncludeVat] = useState(editQuote ? editQuote.includeVat : true);
   const [isSaving, setIsSaving] = useState(false);
   const [companyProfile, setCompanyProfile] = useState(null);
+  const [editId, setEditId] = useState(editQuote?.id || null);
 
   React.useEffect(() => {
     if (currentUser) {
@@ -84,9 +90,9 @@ export default function CreateQuote() {
     
     setIsSaving(true);
     try {
-      await saveQuote(currentUser.uid, { customerInfo, items, subTotal, vat, grandTotal, includeVat, status: 'pending' });
-      alert("견서 데이터가 성공적으로 저장되었습니다.");
-      // Optional: Redirect to list or reset form
+      await saveQuote(currentUser.uid, { customerInfo, items, subTotal, vat, grandTotal, includeVat, status: 'pending' }, editId);
+      alert(editId ? "견적서가 성공적으로 수정되었습니다." : "견적 데이터가 성공적으로 저장되었습니다.");
+      navigate('/list');
     } catch (err) {
       alert("저장에 실패했습니다. Firebase 설정을 확인해주세요.");
     } finally {
@@ -97,7 +103,7 @@ export default function CreateQuote() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h2 style={{ margin: 0 }}>새 견적 작성</h2>
+        <h2 style={{ margin: 0 }}>{editId ? '견적 내역 수정' : '새 견적 작성'}</h2>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <button className="btn btn-outline" onClick={handlePrint}><Printer size={18} /> 견적서 출력/PDF</button>
           <button className="btn btn-primary" onClick={handleSave} disabled={isSaving}>

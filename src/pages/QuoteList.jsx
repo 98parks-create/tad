@@ -1,13 +1,17 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { getQuotes } from '../services/quoteService';
+import { getQuotes, deleteQuote } from '../services/quoteService';
 import { getProfile } from '../services/profileService';
 import { useAuth } from '../contexts/AuthContext';
-import { Printer, X } from 'lucide-react';
+import { Printer, X, Edit, Trash2 } from 'lucide-react';
+import PrintTemplate from '../components/PrintTemplate';
+import { useReactToPrint } from 'react-to-print';
+import { useNavigate } from 'react-router-dom';
 import PrintTemplate from '../components/PrintTemplate';
 import { useReactToPrint } from 'react-to-print';
 
 export default function QuoteList() {
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
   const [quotes, setQuotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -19,6 +23,22 @@ export default function QuoteList() {
     contentRef: printRef,
     documentTitle: `견적서_${selectedQuote?.customerInfo?.project || Date.now()}`,
   });
+
+  const handleEdit = () => {
+    navigate('/create', { state: { editQuote: selectedQuote } });
+  };
+
+  const handleDelete = async () => {
+    if (window.confirm("정말로 이 견적서를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.")) {
+      try {
+        await deleteQuote(selectedQuote.id);
+        setQuotes(quotes.filter(q => q.id !== selectedQuote.id));
+        setSelectedQuote(null);
+      } catch (err) {
+        alert("삭제 중 오류가 발생했습니다.");
+      }
+    }
+  };
 
   useEffect(() => {
     const fetchQuotes = async () => {
@@ -99,6 +119,12 @@ export default function QuoteList() {
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
               <button className="btn btn-primary" onClick={handlePrint}>
                 <Printer size={18} /> PDF/인쇄
+              </button>
+              <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }} onClick={handleEdit}>
+                <Edit size={18} /> 수정
+              </button>
+              <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--danger-color)', borderColor: 'var(--danger-color)' }} onClick={handleDelete}>
+                <Trash2 size={18} /> 삭제
               </button>
             </div>
 

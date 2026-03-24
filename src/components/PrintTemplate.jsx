@@ -2,7 +2,7 @@ import React, { forwardRef } from 'react';
 
 const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, vat, grandTotal, providerInfo }, ref) => {
   return (
-    <div ref={ref} style={{ padding: '15mm', width: '210mm', minHeight: '260mm', margin: '0 auto', backgroundColor: 'white', color: 'black', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column' }}>
+    <div ref={ref} style={{ padding: '10mm 15mm', width: '210mm', boxSizing: 'border-box', margin: '0 auto', backgroundColor: 'white', color: 'black', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column' }}>
         <div style={{ textAlign: 'center', marginBottom: '8mm', borderBottom: '2px solid #00083a', paddingBottom: '4mm' }}>
           <h1 style={{ color: '#00083a', fontSize: '28pt', margin: '0 0 4mm 0', letterSpacing: '4px' }}>견 적 서</h1>
           <div style={{ display: 'flex', justifyContent: 'space-between', textAlign: 'left', fontSize: '11pt' }}>
@@ -104,7 +104,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, vat, grandTot
           </table>
         </div>
         
-        <div style={{ marginTop: 'auto', textAlign: 'center', fontSize: '10pt', color: '#666', borderTop: '1px solid #ccc', paddingTop: '10mm' }}>
+        <div style={{ marginTop: '15mm', textAlign: 'center', fontSize: '10pt', color: '#666', borderTop: '1px solid #ccc', paddingTop: '10mm', paddingBottom: '5mm' }}>
           상기와 같이 견적합니다.
         </div>
     </div>
