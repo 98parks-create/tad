@@ -42,7 +42,7 @@ button {
   cursor: pointer;
   border: none;
   outline: none;
-  font-family: inherit;
+  font-family: 'Pretendard', 'Inter', -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   transition: all 0.2s ease-in-out;
 }
 
@@ -83,7 +83,7 @@ button {
 }
 
 input, select, textarea {
-  font-family: inherit;
+  font-family: 'Pretendard', 'Inter', -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 0.6rem;
