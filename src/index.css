@@ -204,6 +204,10 @@ label {
 }
 
 @media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+
   .app-container {
     flex-direction: column;
   }
@@ -247,9 +251,9 @@ label {
     padding: 1rem;
   }
   
-  /* Prevent zooming on iOS Safari inputs */
+  /* Prevent zooming on iOS Safari inputs (handled by meta tag), so we can safely use 14px */
   input, select, textarea, .btn {
-    font-size: 16px;
+    font-size: 14px;
   }
   
   /* Fix header overflow on mobile */
