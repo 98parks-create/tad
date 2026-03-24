@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { materialCategories } from '../data/materials';
-import { Plus, Trash2, Save, Printer, Copy } from 'lucide-react';
+import { Plus, Trash2, Save, Printer, Copy, Lock } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 import PrintTemplate from '../components/PrintTemplate';
-import { saveQuote } from '../services/quoteService';
+import { saveQuote, getQuotes } from '../services/quoteService';
 import { getProfile } from '../services/profileService';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -23,6 +23,7 @@ export default function CreateQuote() {
   const [isSaving, setIsSaving] = useState(false);
   const [companyProfile, setCompanyProfile] = useState(null);
   const [editId, setEditId] = useState(editQuote?.id || null);
+  const [showPaywall, setShowPaywall] = useState(false);
 
   React.useEffect(() => {
     if (currentUser) {
@@ -33,6 +34,16 @@ export default function CreateQuote() {
             setRemarks(profile.defaultRemarks);
           }
         }
+        
+        // Freemium Quota Check
+        if (!editQuote) {
+          getQuotes(currentUser.uid).then(quotes => {
+            if (quotes.length >= 5 && profile?.subscriptionPlan !== 'pro') {
+              setShowPaywall(true);
+            }
+          }).catch(console.error);
+        }
+
       }).catch(console.error);
     }
   }, [currentUser, editQuote, remarks]);
@@ -354,6 +365,25 @@ export default function CreateQuote() {
           remarks={remarks}
         />
       </div>
+
+      {showPaywall && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.8)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
+          <div className="card" style={{ maxWidth: '420px', width: '90%', padding: '2.5rem 2rem', textAlign: 'center', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+            <div style={{ width: '64px', height: '64px', backgroundColor: '#fee2e2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
+              <Lock size={32} color="#ef4444" />
+            </div>
+            <h2 style={{ fontSize: '1.4rem', marginBottom: '1rem', color: '#0f172a' }}>무료 작성 한도 초과</h2>
+            <p style={{ color: '#475569', lineHeight: '1.6', marginBottom: '2rem', fontSize: '1rem' }}>
+              무료 버전에서 제공하는 견적서 작성 횟수 <b>(5건)</b>를 모두 사용하셨습니다.<br/><br/>
+              <b>월 19,900원</b>의 PRO 요금제로 파격 업그레이드 하시면 <b>무제한 작성</b>과 함께 맞춤형 단가표, PDF 직인 삽입 등 모든 프리미엄 기능을 마음껏 누리실 수 있습니다!
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+              <button className="btn btn-primary" onClick={() => alert('PG사(결제 연동) 모듈 이식 대기 중입니다.')} style={{ width: '100%', padding: '0.9rem', fontSize: '1.05rem', fontWeight: 'bold' }}>PRO 무제한 기능 개방 (월 19,900원)</button>
+              <button className="btn btn-outline" onClick={() => navigate('/list')} style={{ width: '100%' }}>목록으로 돌아가기</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
