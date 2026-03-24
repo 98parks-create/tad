@@ -1,22 +1,33 @@
 import React, { useState } from 'react';
 import { X, CreditCard, CheckCircle } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { requestUpgrade } from '../services/adminService';
 
 export default function PaymentModal({ onClose, onSuccess }) {
+  const { currentUser } = useAuth();
   const [step, setStep] = useState(1); // 1: input, 2: processing, 3: success
   const [formData, setFormData] = useState({
     depositorName: ''
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.depositorName.trim()) {
+      alert("입금자명을 입력해주세요.");
+      return;
+    }
     setStep(2);
-    // Simulate payment processing
-    setTimeout(() => {
+    try {
+      await requestUpgrade(currentUser.uid, currentUser.email, formData.depositorName);
       setStep(3);
       if (onSuccess) {
-        setTimeout(onSuccess, 2000); // Trigger success callback after showing checkmark
+        setTimeout(onSuccess, 1500); // Trigger success callback after showing checkmark
       }
-    }, 1500);
+    } catch (err) {
+      console.error(err);
+      alert("요청 접수 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      setStep(1);
+    }
   };
 
   return (

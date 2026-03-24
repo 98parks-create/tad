@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, NavLink, Navigate, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, PlusCircle, Menu, X, Settings as SettingsIcon } from 'lucide-react';
+import { LayoutDashboard, FileText, PlusCircle, Menu, X, Settings as SettingsIcon, Shield } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import CreateQuote from './pages/CreateQuote';
 import QuoteList from './pages/QuoteList';
@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Landing from './pages/Landing';
 import AuthCallback from './pages/AuthCallback';
+import Admin from './pages/Admin';
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Terms from './pages/Terms';
@@ -89,6 +90,11 @@ function AppContent() {
           <NavLink to="/settings" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <SettingsIcon size={20} />설정 (회사정보)
           </NavLink>
+          {['inseopark7@naver.com', import.meta.env.VITE_ADMIN_EMAIL].includes(currentUser.email) && (
+            <NavLink to="/admin" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+              <Shield size={20} color="#f59e0b" />관리자 승인 센터
+            </NavLink>
+          )}
         </nav>
         <div style={{ padding: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>
            v1.1.0 (Multi-User)
@@ -116,6 +122,7 @@ function AppContent() {
             <Route path="/create" element={<PrivateRoute><CreateQuote /></PrivateRoute>} />
             <Route path="/list" element={<PrivateRoute><QuoteList /></PrivateRoute>} />
             <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
+            <Route path="/admin" element={<PrivateRoute><Admin /></PrivateRoute>} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="*" element={<Navigate to="/" />} />
