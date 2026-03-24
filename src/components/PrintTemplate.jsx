@@ -41,6 +41,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, vat, grandTot
               <th style={{ padding: '8px', border: '1px solid #94a3b8' }}>품목/자재명</th>
               <th style={{ padding: '8px', border: '1px solid #94a3b8' }}>규격(가로x세로)</th>
               <th style={{ padding: '8px', border: '1px solid #94a3b8' }}>수량</th>
+              <th style={{ padding: '8px', border: '1px solid #94a3b8' }}>단위</th>
               <th style={{ padding: '8px', border: '1px solid #94a3b8' }}>단가</th>
               <th style={{ padding: '8px', border: '1px solid #94a3b8' }}>공급가액</th>
               <th style={{ padding: '8px', border: '1px solid #94a3b8' }}>비고</th>
@@ -55,6 +56,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, vat, grandTot
                   {item.specification || (item.type === 'area' && item.width && item.height ? `${item.width} x ${item.height} mm` : '-')}
                 </td>
                 <td style={{ padding: '8px', border: '1px solid #cbd5e1', textAlign: 'center' }}>{item.quantity}</td>
+                <td style={{ padding: '8px', border: '1px solid #cbd5e1', textAlign: 'center' }}>{item.unit || 'EA'}</td>
                 <td style={{ padding: '8px', border: '1px solid #cbd5e1', textAlign: 'right' }}>{Number(item.unitPrice).toLocaleString()}</td>
                 <td style={{ padding: '8px', border: '1px solid #cbd5e1', textAlign: 'right' }}>{item.total.toLocaleString()}</td>
                 <td style={{ padding: '8px', border: '1px solid #cbd5e1' }}>{item.remarks || ''}</td>
@@ -64,6 +66,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, vat, grandTot
             {Array.from({ length: Math.max(0, 10 - items.length) }).map((_, i) => (
               <tr key={`empty-${i}`}>
                 <td style={{ padding: '8px', border: '1px solid #cbd5e1', color: 'transparent' }}>-</td>
+                <td style={{ padding: '8px', border: '1px solid #cbd5e1' }}></td>
                 <td style={{ padding: '8px', border: '1px solid #cbd5e1' }}></td>
                 <td style={{ padding: '8px', border: '1px solid #cbd5e1' }}></td>
                 <td style={{ padding: '8px', border: '1px solid #cbd5e1' }}></td>

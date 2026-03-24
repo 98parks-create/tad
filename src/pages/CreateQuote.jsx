@@ -14,7 +14,7 @@ export default function CreateQuote() {
   const [isSaving, setIsSaving] = useState(false);
 
   const addItem = () => {
-    setItems([{ id: Date.now(), categoryId: '', itemId: '', specification: '', remarks: '', width: '', height: '', quantity: 1, name: '', unitPrice: '', type: '', total: 0 }, ...items]);
+    setItems([{ id: Date.now(), categoryId: '', itemId: '', specification: '', unit: '', remarks: '', width: '', height: '', quantity: 1, name: '', unitPrice: '', type: '', total: 0 }, ...items]);
   };
 
   const removeItem = (id) => {
@@ -177,8 +177,11 @@ export default function CreateQuote() {
                   )}
 
                   <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label>수량</label>
-                    <input type="number" min="1" value={item.quantity} onChange={e => handleItemChange(item.id, 'quantity', e.target.value)} />
+                    <label>수량 및 단위</label>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <input type="number" min="1" value={item.quantity} onChange={e => handleItemChange(item.id, 'quantity', e.target.value)} style={{ flex: 1, minWidth: '60px' }} />
+                      <input type="text" placeholder="단위(식/SET)" value={item.unit || ''} onChange={e => handleItemChange(item.id, 'unit', e.target.value)} style={{ width: '80px' }} />
+                    </div>
                   </div>
 
                   <div className="form-group" style={{ marginBottom: 0 }}>
