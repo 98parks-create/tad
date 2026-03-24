@@ -76,6 +76,7 @@ export default function CreateQuote() {
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: `견적서_${customerInfo.project || Date.now()}`,
+    pageStyle: "@page { size: A4; margin: 0; } @media print { body { -webkit-print-color-adjust: exact; } }"
   });
 
   const handleSave = async () => {

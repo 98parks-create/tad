@@ -20,6 +20,7 @@ export default function QuoteList() {
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: `견적서_${selectedQuote?.customerInfo?.project || Date.now()}`,
+    pageStyle: "@page { size: A4; margin: 0; } @media print { body { -webkit-print-color-adjust: exact; } }"
   });
 
   const handleEdit = () => {
