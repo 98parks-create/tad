@@ -102,7 +102,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
           </tbody>
         </table>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', marginBottom: '5mm' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', width: '100%', marginBottom: '5mm' }}>
           <table style={{ width: '350px', borderCollapse: 'collapse', fontSize: '11pt' }}>
             <tbody>
               <tr>
@@ -125,6 +125,12 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
               </tr>
             </tbody>
           </table>
+          {providerInfo?.paymentInfo && (
+            <div style={{ width: '350px', marginTop: '8px', padding: '10px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '4px', fontSize: '10pt', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <span style={{ fontWeight: 'bold', color: '#1e3a8a' }}>결제/입금처 안내</span>
+              <span style={{ color: '#1e40af', wordBreak: 'break-all', lineHeight: '1.4' }}>{providerInfo.paymentInfo}</span>
+            </div>
+          )}
         </div>
         
         <div style={{ marginTop: 'auto', paddingTop: '5mm', paddingBottom: '3mm' }}>
