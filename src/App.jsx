@@ -7,6 +7,7 @@ import QuoteList from './pages/QuoteList';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Landing from './pages/Landing';
+import AuthCallback from './pages/AuthCallback';
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import './index.css';
@@ -31,6 +32,7 @@ function AppContent() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/auth/callback/:provider" element={<AuthCallback />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     );
