@@ -37,6 +37,17 @@ export const deleteQuote = async (quoteId) => {
   }
 };
 
+export const updateQuoteStatus = async (quoteId, status) => {
+  try {
+    const docRef = doc(db, QUOTES_COLLECTION, quoteId);
+    await updateDoc(docRef, { status, updatedAt: serverTimestamp() });
+    return true;
+  } catch (error) {
+    console.error("Error updating quote status: ", error);
+    throw error;
+  }
+};
+
 export const getQuotes = async (userId) => {
   try {
     const q = query(collection(db, QUOTES_COLLECTION), where('userId', '==', userId));

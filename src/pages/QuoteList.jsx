@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { getQuotes, deleteQuote } from '../services/quoteService';
+import { getQuotes, deleteQuote, updateQuoteStatus } from '../services/quoteService';
 import { getProfile } from '../services/profileService';
 import { useAuth } from '../contexts/AuthContext';
-import { Printer, X, Edit, Trash2 } from 'lucide-react';
+import { Printer, X, Edit, Trash2, CheckCircle } from 'lucide-react';
 import PrintTemplate from '../components/PrintTemplate';
 import { useReactToPrint } from 'react-to-print';
 import { useNavigate } from 'react-router-dom';
@@ -35,6 +35,18 @@ export default function QuoteList() {
         setSelectedQuote(null);
       } catch (err) {
         alert("삭제 중 오류가 발생했습니다.");
+      }
+    }
+  };
+
+  const handleApprove = async () => {
+    if (window.confirm("입금 및 계약이 확인되었습니까?\n승인 완료 처리 시 대시보드 당월 매출에 합산됩니다.")) {
+      try {
+        await updateQuoteStatus(selectedQuote.id, 'approved');
+        setQuotes(quotes.map(q => q.id === selectedQuote.id ? { ...q, status: 'approved' } : q));
+        setSelectedQuote({ ...selectedQuote, status: 'approved' });
+      } catch (err) {
+        alert("상태 변경 중 오류가 발생했습니다.");
       }
     }
   };
@@ -119,6 +131,11 @@ export default function QuoteList() {
               <button className="btn btn-primary" onClick={handlePrint}>
                 <Printer size={18} /> PDF/인쇄
               </button>
+              {selectedQuote.status === 'pending' && (
+                <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#059669', borderColor: '#059669' }} onClick={handleApprove}>
+                  <CheckCircle size={18} /> 입금/승인 완료
+                </button>
+              )}
               <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }} onClick={handleEdit}>
                 <Edit size={18} /> 수정
               </button>
