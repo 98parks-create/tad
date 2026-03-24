@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { getQuotes } from '../services/quoteService';
+import { getProfile } from '../services/profileService';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Dashboard() {
   const { currentUser } = useAuth();
   const [stats, setStats] = useState({ total: 0, pending: 0, completed: 0, monthlyRevenue: 0 });
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -24,6 +26,12 @@ export default function Dashboard() {
           .reduce((sum, q) => sum + (q.grandTotal || 0), 0);
 
         setStats({ total, pending, completed, monthlyRevenue });
+        
+        try {
+          const profileData = await getProfile(currentUser.uid);
+          setProfile(profileData || { subscriptionPlan: 'free' });
+        } catch(e) { console.error("Profile fetch error in dashboard", e); }
+
       } catch (err) {
         console.error("Failed to load dashboard stats", err);
         setError("Firebase 데이터베이스에 연결할 수 없습니다. 설정을 확인해주세요.");
@@ -71,11 +79,31 @@ export default function Dashboard() {
 
       <div className="card" style={{ marginTop: '2rem' }}>
         <h3 style={{ marginBottom: '1rem' }}>시스템 사용 안내</h3>
-        <ul style={{ color: 'var(--text-light)', lineHeight: '1.8', paddingLeft: '1.5rem' }}>
+        <ul style={{ color: 'var(--text-light)', lineHeight: '1.8', paddingLeft: '1.5rem', marginBottom: '2rem' }}>
           <li>좌측 메뉴의 <strong>[새 견적 작성]</strong>을 통해 고객 정보 및 자재 규격을 입력하면 견적 금액이 자동 산출됩니다.</li>
           <li>입력된 견적은 PDF 파일로 즉시 출력하거나 인쇄할 수 있습니다.</li>
           <li>대기 중인 견적서에서 <strong>[입금/승인 완료]</strong> 버튼을 누르면 매출 통계에 즉시 반영됩니다.</li>
         </ul>
+
+        {profile && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: profile.subscriptionPlan === 'pro' ? '#f0fdf4' : '#f8fafc', border: `1px solid ${profile.subscriptionPlan === 'pro' ? '#bbf7d0' : '#e2e8f0'}`, padding: '1.5rem', borderRadius: '8px' }}>
+            <div>
+              <h3 style={{ margin: '0 0 0.5rem 0', color: profile.subscriptionPlan === 'pro' ? '#166534' : '#334155', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                현재 요금제 : {profile.subscriptionPlan === 'pro' ? 'PRO (무제한)' : 'FREE (무료 체험)'}
+              </h3>
+              <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>
+                {profile.subscriptionPlan === 'pro' 
+                  ? '사장님만의 완벽한 맞춤형 플랫폼을 무제한으로 사용 중입니다.' 
+                  : `현재 작성된 견적서: ${stats.total} / 5 건 (업그레이드 필요 시 전환)`}
+              </p>
+            </div>
+            {profile.subscriptionPlan !== 'pro' && (
+              <button type="button" className="btn btn-primary" onClick={() => alert('PG사 카드 결제창 연동 구축 완료 후 적용됩니다.')} style={{ backgroundColor: '#10b981', border: 'none', padding: '0.6rem 1rem', flexShrink: 0, marginLeft: '1rem' }}>
+                월 19,900원에 무제한 개통
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -28,6 +28,7 @@ export default function Settings() {
       try {
         const profileData = await getProfile(currentUser.uid);
         if (profileData) {
+          // Merging keeping defaults, as suggested by the user's snippet, but in a React-friendly way
           setProfile(prevProfile => ({ ...prevProfile, ...profileData }));
         }
       } catch (error) {
@@ -102,7 +103,25 @@ export default function Settings() {
   return (
     <div className="card" style={{ maxWidth: '800px', margin: '0 auto' }}>
       <h2 style={{ marginBottom: '1.5rem', color: 'var(--primary-color)' }}>공급자 (회사) 정보 설정</h2>
-      
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: profile.subscriptionPlan === 'pro' ? '#f0fdf4' : '#f8fafc', border: `1px solid ${profile.subscriptionPlan === 'pro' ? '#bbf7d0' : '#e2e8f0'}`, padding: '1.5rem', borderRadius: '8px', marginBottom: '2rem' }}>
+        <div>
+          <h3 style={{ margin: '0 0 0.5rem 0', color: profile.subscriptionPlan === 'pro' ? '#166534' : '#334155', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            현재 요금제 : {profile.subscriptionPlan === 'pro' ? 'PRO (무제한)' : 'FREE (무료 체험)'}
+          </h3>
+          <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>
+            {profile.subscriptionPlan === 'pro'
+              ? '사장님만의 완벽한 맞춤형 플랫폼을 무제한으로 사용 중입니다.'
+              : `현재 작성된 견적서: ${quotesCount} / 5 건 (무제한 혜택 필요 시 전환)`}
+          </p>
+        </div>
+        {profile.subscriptionPlan !== 'pro' && (
+          <button type="button" className="btn btn-primary" onClick={() => alert('PG사 카드 결제창 연동 구축 완료 후 적용됩니다.')} style={{ backgroundColor: '#10b981', border: 'none', padding: '0.6rem 1rem' }}>
+            월 19,900원에 무제한 개통
+          </button>
+        )}
+      </div>
+
       <p style={{ color: 'var(--text-light)', marginBottom: '2rem' }}>이곳에 등록된 정보는 견적서를 발행(PDF 인쇄)할 때 우측 상단 공급자란에 자동으로 출력됩니다.</p>
 
       {message && (
@@ -136,11 +155,11 @@ export default function Settings() {
         <div className="form-group" style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
           <h3 style={{ marginBottom: '0.8rem', fontSize: '1.1rem' }}>기본 특약사항 / 안내문 (선택)</h3>
           <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', marginBottom: '1rem' }}>새 견적서를 작성할 때마다 아래 내용이 견적서 하단에 자동으로 채워집니다.</p>
-          <textarea 
-            name="defaultRemarks" 
-            value={profile.defaultRemarks || ''} 
-            onChange={handleChange} 
-            placeholder="예시)&#10;- 장비대(크레인/스카이) 비용은 현장 상황에 따라 별도 청구될 수 있습니다.&#10;- 결제조건: 계약금 50%, 시공 완료 후 50%" 
+          <textarea
+            name="defaultRemarks"
+            value={profile.defaultRemarks || ''}
+            onChange={handleChange}
+            placeholder="예시)&#10;- 장비대(크레인/스카이) 비용은 현장 상황에 따라 별도 청구될 수 있습니다.&#10;- 결제조건: 계약금 50%, 시공 완료 후 50%"
             style={{ width: '100%', height: '100px', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '4px', resize: 'vertical' }}
           />
         </div>
@@ -174,7 +193,7 @@ export default function Settings() {
             </button>
           </div>
           <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', marginBottom: '1rem' }}>이곳에 등록해둔 단골 품목들은 새 견적 작성 시 드롭다운 1순위로 즉시 소환됩니다.</p>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
             {(profile.customMaterials || []).length === 0 ? (
               <div style={{ padding: '1rem', textAlign: 'center', backgroundColor: '#f8fafc', borderRadius: '4px', color: '#64748b', fontSize: '0.9rem' }}>
