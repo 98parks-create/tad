@@ -2,8 +2,7 @@ import React, { forwardRef } from 'react';
 
 const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, vat, grandTotal }, ref) => {
   return (
-    <div style={{ display: 'none' }}>
-      <div ref={ref} style={{ padding: '20mm', width: '210mm', minHeight: '297mm', margin: '0 auto', backgroundColor: 'white', color: 'black', fontFamily: 'Inter, sans-serif' }}>
+    <div ref={ref} style={{ padding: '20mm', width: '210mm', minHeight: '297mm', margin: '0 auto', backgroundColor: 'white', color: 'black', fontFamily: 'Inter, sans-serif' }}>
         <div style={{ textAlign: 'center', marginBottom: '8mm', borderBottom: '2px solid #00083a', paddingBottom: '4mm' }}>
           <h1 style={{ color: '#00083a', fontSize: '28pt', margin: '0 0 4mm 0', letterSpacing: '4px' }}>견 적 서</h1>
           <div style={{ display: 'flex', justifyContent: 'space-between', textAlign: 'left', fontSize: '11pt' }}>
@@ -101,7 +100,6 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, vat, grandTot
           상기와 같이 견적합니다.<br/>
           본 견적서는 작성일로부터 30일간 유효합니다.
         </div>
-      </div>
     </div>
   );
 });

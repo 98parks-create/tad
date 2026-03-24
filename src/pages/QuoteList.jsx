@@ -1,12 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { getQuotes } from '../services/quoteService';
 import { useAuth } from '../contexts/AuthContext';
+import { Printer, X } from 'lucide-react';
+import PrintTemplate from '../components/PrintTemplate';
+import { useReactToPrint } from 'react-to-print';
 
 export default function QuoteList() {
   const { currentUser } = useAuth();
   const [quotes, setQuotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedQuote, setSelectedQuote] = useState(null);
+  const printRef = useRef(null);
+
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: `견적서_${selectedQuote?.customerInfo?.project || Date.now()}`,
+  });
 
   useEffect(() => {
     const fetchQuotes = async () => {
@@ -56,7 +66,7 @@ export default function QuoteList() {
               </tr>
             ) : (
               quotes.map(quote => (
-                <tr key={quote.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                <tr key={quote.id} onClick={() => setSelectedQuote(quote)} style={{ borderBottom: '1px solid var(--border-color)', cursor: 'pointer' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f8fafc'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                   <td style={{ padding: '1rem 0.5rem' }}>{quote.customerInfo?.date}</td>
                   <td style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>{quote.customerInfo?.name}</td>
                   <td style={{ padding: '1rem 0.5rem' }}>{quote.customerInfo?.project}</td>
@@ -73,6 +83,36 @@ export default function QuoteList() {
           </tbody>
         </table>
       </div>
+
+      {selectedQuote && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '1rem' }}>
+          <div className="card" style={{ width: '100%', maxWidth: '850px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+            <button onClick={() => setSelectedQuote(null)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem' }}>
+              <X size={24} color="#64748b" />
+            </button>
+            <h2 style={{ marginBottom: '1.5rem', paddingRight: '2rem' }}>견적서 상세현황</h2>
+            
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+              <button className="btn btn-primary" onClick={handlePrint}>
+                <Printer size={18} /> PDF/인쇄
+              </button>
+            </div>
+
+            <div style={{ border: '1px solid var(--border-color)', padding: '1rem', borderRadius: '4px', background: '#e2e8f0', display: 'flex', justifyContent: 'center', overflow: 'hidden' }}>
+              <div style={{ transform: 'scale(0.85)', transformOrigin: 'top center', marginBottom: '-50mm' }}>
+                <PrintTemplate 
+                  ref={printRef}
+                  customerInfo={selectedQuote.customerInfo}
+                  items={selectedQuote.items}
+                  subTotal={selectedQuote.subTotal}
+                  vat={selectedQuote.vat}
+                  grandTotal={selectedQuote.grandTotal}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

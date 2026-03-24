@@ -58,7 +58,8 @@ export default function CreateQuote() {
 
   const printRef = useRef();
   const handlePrint = useReactToPrint({
-    content: () => printRef.current,
+    contentRef: printRef,
+    documentTitle: `견적서_${customerInfo.project || Date.now()}`,
   });
 
   const handleSave = async () => {
@@ -230,9 +231,17 @@ export default function CreateQuote() {
           <span style={{ fontWeight: 700, color: 'var(--primary-color)' }}>{grandTotal.toLocaleString()} 원</span>
         </div>
       </div>
-      
-      {/* Hidden layout for PDF Print */}
-      <PrintTemplate ref={printRef} customerInfo={customerInfo} items={items} subTotal={subTotal} vat={vat} grandTotal={grandTotal} />
+            {/* Hidden Print Template */}
+        <div style={{ display: 'none' }}>
+          <PrintTemplate 
+            ref={printRef}
+            customerInfo={customerInfo}
+            items={items}
+            subTotal={subTotal}
+            vat={vat}
+            grandTotal={grandTotal}
+          />
+        </div>
     </div>
   );
 }
