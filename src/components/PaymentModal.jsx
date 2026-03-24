@@ -41,8 +41,8 @@ export default function PaymentModal({ onClose, onSuccess }) {
             <div style={{ backgroundColor: '#f8fafc', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', border: '1px solid #e2e8f0', fontSize: '0.9rem', lineHeight: '1.5' }}>
               <strong style={{ color: '#1e293b', display: 'block', marginBottom: '0.5rem' }}>입금 안내</strong>
               <div style={{ marginBottom: '0.8rem', paddingBottom: '0.8rem', borderBottom: '1px solid #e2e8f0' }}>
-                <span style={{ color: '#64748b', display: 'inline-block', width: '60px' }}>은행: </span> <span style={{ color: '#0f172a', fontWeight: 500 }}>국민은행 123456-78-901234</span><br/>
-                <span style={{ color: '#64748b', display: 'inline-block', width: '60px' }}>예금주: </span> <span style={{ color: '#0f172a', fontWeight: 500 }}>홍길동</span>
+                <span style={{ color: '#64748b', display: 'inline-block', width: '60px' }}>은행: </span> <span style={{ color: '#0f172a', fontWeight: 500 }}>우리은행 1002-056-783054</span><br/>
+                <span style={{ color: '#64748b', display: 'inline-block', width: '60px' }}>예금주: </span> <span style={{ color: '#0f172a', fontWeight: 500 }}>박XX</span>
               </div>
               <div>
                 <span style={{ display: 'block', color: '#64748b', marginBottom: '0.3rem' }}>빠른 간편송금 (링크 복사):</span>
