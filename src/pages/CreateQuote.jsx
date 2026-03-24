@@ -376,7 +376,7 @@ export default function CreateQuote() {
             </div>
             <h2 style={{ fontSize: '1.4rem', marginBottom: '1rem', color: '#0f172a' }}>무료 작성 한도 초과</h2>
             <p style={{ color: '#475569', lineHeight: '1.6', marginBottom: '2rem', fontSize: '1rem' }}>
-              무료 버전에서 제공하는 견적서 작성 횟수 <b>(3건)</b>를 모두 사용하셨습니다.<br/><br/>
+              무료 버전에서 제공하는 누적 견적서 발급 횟수 <b>(삭제 내역 포함 총 3건)</b>를 모두 소진하셨습니다.<br/><br/>
               <b>월 19,900원</b>의 PRO 요금제로 파격 업그레이드 하시면 <b>무제한 작성</b>과 함께 맞춤형 단가표, PDF 직인 삽입 등 모든 프리미엄 기능을 마음껏 누리실 수 있습니다!
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
