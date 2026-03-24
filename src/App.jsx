@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, NavLink, Navigate, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, PlusCircle, Menu, X } from 'lucide-react';
+import { LayoutDashboard, FileText, PlusCircle, Menu, X, Settings as SettingsIcon } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import CreateQuote from './pages/CreateQuote';
 import QuoteList from './pages/QuoteList';
+import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Landing from './pages/Landing';
@@ -72,6 +73,9 @@ function AppContent() {
           <NavLink to="/list" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <FileText size={20} />견적 내역
           </NavLink>
+          <NavLink to="/settings" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+            <SettingsIcon size={20} />설정 (회사정보)
+          </NavLink>
         </nav>
         <div style={{ padding: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>
            v1.1.0 (Multi-User)
@@ -98,6 +102,7 @@ function AppContent() {
             <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
             <Route path="/create" element={<PrivateRoute><CreateQuote /></PrivateRoute>} />
             <Route path="/list" element={<PrivateRoute><QuoteList /></PrivateRoute>} />
+            <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>

@@ -4,6 +4,7 @@ import { Plus, Trash2, Save, Printer } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 import PrintTemplate from '../components/PrintTemplate';
 import { saveQuote } from '../services/quoteService';
+import { getProfile } from '../services/profileService';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function CreateQuote() {
@@ -12,6 +13,15 @@ export default function CreateQuote() {
   const [items, setItems] = useState([]);
   const [includeVat, setIncludeVat] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [companyProfile, setCompanyProfile] = useState(null);
+
+  React.useEffect(() => {
+    if (currentUser) {
+      getProfile(currentUser.uid).then(profile => {
+        if (profile) setCompanyProfile(profile);
+      }).catch(console.error);
+    }
+  }, [currentUser]);
 
   const addItem = () => {
     setItems([{ id: Date.now(), categoryId: '', itemId: '', specification: '', unit: '', remarks: '', width: '', height: '', quantity: 1, name: '', unitPrice: '', type: '', total: 0 }, ...items]);
@@ -240,6 +250,7 @@ export default function CreateQuote() {
             subTotal={subTotal}
             vat={vat}
             grandTotal={grandTotal}
+            providerInfo={companyProfile}
           />
         </div>
     </div>

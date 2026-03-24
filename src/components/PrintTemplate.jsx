@@ -1,8 +1,8 @@
 import React, { forwardRef } from 'react';
 
-const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, vat, grandTotal }, ref) => {
+const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, vat, grandTotal, providerInfo }, ref) => {
   return (
-    <div ref={ref} style={{ padding: '20mm', width: '210mm', minHeight: '297mm', margin: '0 auto', backgroundColor: 'white', color: 'black', fontFamily: 'Inter, sans-serif' }}>
+    <div ref={ref} style={{ padding: '20mm', width: '210mm', minHeight: '297mm', margin: '0 auto', backgroundColor: 'white', color: 'black', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column' }}>
         <div style={{ textAlign: 'center', marginBottom: '8mm', borderBottom: '2px solid #00083a', paddingBottom: '4mm' }}>
           <h1 style={{ color: '#00083a', fontSize: '28pt', margin: '0 0 4mm 0', letterSpacing: '4px' }}>견 적 서</h1>
           <div style={{ display: 'flex', justifyContent: 'space-between', textAlign: 'left', fontSize: '11pt' }}>
@@ -17,11 +17,11 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, vat, grandTot
                 <span style={{ fontWeight: 'bold' }}>공급자</span>
                 <span style={{ color: '#00083a', fontWeight: 'bold' }}>(인)</span>
               </div>
-              <p style={{ margin: '5px 0 0 0' }}>상호: <b>TAD B2B</b></p>
-              <p style={{ margin: '2px 0 0 0' }}>대표자: O O O</p>
-              <p style={{ margin: '2px 0 0 0' }}>등록번호: 123-45-67890</p>
-              <p style={{ margin: '2px 0 0 0' }}>주소: 서울특별시 강남구 테헤란로 123</p>
-              <p style={{ margin: '2px 0 0 0' }}>연락처: 02-1234-5678</p>
+              <p style={{ margin: '5px 0 0 0' }}>상호: <b>{providerInfo?.companyName || '__________________'}</b></p>
+              <p style={{ margin: '2px 0 0 0' }}>대표자: {providerInfo?.ceoName || '__________________'}</p>
+              <p style={{ margin: '2px 0 0 0' }}>등록번호: {providerInfo?.businessNumber || '__________________'}</p>
+              <p style={{ margin: '2px 0 0 0' }}>주소: {providerInfo?.address || '__________________'}</p>
+              <p style={{ margin: '2px 0 0 0' }}>연락처: {providerInfo?.phone || '__________________'}</p>
             </div>
           </div>
         </div>
@@ -77,7 +77,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, vat, grandTot
           </tbody>
         </table>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', marginBottom: '20mm' }}>
           <table style={{ width: '350px', borderCollapse: 'collapse', fontSize: '11pt' }}>
             <tbody>
               <tr>
@@ -96,7 +96,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, vat, grandTot
           </table>
         </div>
         
-        <div style={{ position: 'absolute', bottom: '20mm', width: 'calc(100% - 40mm)', textAlign: 'center', fontSize: '10pt', color: '#666', borderTop: '1px solid #ccc', paddingTop: '4mm' }}>
+        <div style={{ marginTop: 'auto', textAlign: 'center', fontSize: '10pt', color: '#666', borderTop: '1px solid #ccc', paddingTop: '10mm' }}>
           상기와 같이 견적합니다.<br/>
           본 견적서는 작성일로부터 30일간 유효합니다.
         </div>

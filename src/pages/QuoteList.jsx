@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { getQuotes } from '../services/quoteService';
+import { getProfile } from '../services/profileService';
 import { useAuth } from '../contexts/AuthContext';
 import { Printer, X } from 'lucide-react';
 import PrintTemplate from '../components/PrintTemplate';
@@ -11,6 +12,7 @@ export default function QuoteList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedQuote, setSelectedQuote] = useState(null);
+  const [companyProfile, setCompanyProfile] = useState(null);
   const printRef = useRef(null);
 
   const handlePrint = useReactToPrint({
@@ -23,6 +25,8 @@ export default function QuoteList() {
       try {
         const data = await getQuotes(currentUser.uid);
         setQuotes(data);
+        const profile = await getProfile(currentUser.uid);
+        if (profile) setCompanyProfile(profile);
       } catch (err) {
         setError("데이터를 불러올 수 없습니다. Firebase 설정을 확인해주세요.");
       } finally {
@@ -107,6 +111,7 @@ export default function QuoteList() {
                   subTotal={selectedQuote.subTotal}
                   vat={selectedQuote.vat}
                   grandTotal={selectedQuote.grandTotal}
+                  providerInfo={companyProfile}
                 />
               </div>
             </div>
