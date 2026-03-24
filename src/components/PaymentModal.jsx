@@ -44,12 +44,12 @@ export default function PaymentModal({ onClose, onSuccess }) {
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label style={{ fontSize: '0.85rem' }}>카드 번호</label>
-                <input 
-                  type="text" 
-                  placeholder="0000 0000 0000 0000" 
-                  required 
+                <input
+                  type="text"
+                  placeholder="0000 0000 0000 0000"
+                  required
                   value={formData.cardNumber}
-                  onChange={(e) => setFormData({...formData, cardNumber: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, cardNumber: e.target.value })}
                   maxLength="19"
                   style={{ letterSpacing: '1px' }}
                 />
@@ -57,34 +57,34 @@ export default function PaymentModal({ onClose, onSuccess }) {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label style={{ fontSize: '0.85rem' }}>유효기간</label>
-                  <input 
-                    type="text" 
-                    placeholder="MM/YY" 
-                    required 
+                  <input
+                    type="text"
+                    placeholder="MM/YY"
+                    required
                     value={formData.expiry}
-                    onChange={(e) => setFormData({...formData, expiry: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, expiry: e.target.value })}
                     maxLength="5"
                   />
                 </div>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label style={{ fontSize: '0.85rem' }}>CVC</label>
-                  <input 
-                    type="text" 
-                    placeholder="123" 
-                    required 
+                  <input
+                    type="text"
+                    placeholder="123"
+                    required
                     value={formData.cvc}
-                    onChange={(e) => setFormData({...formData, cvc: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, cvc: e.target.value })}
                     maxLength="4"
                   />
                 </div>
               </div>
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label style={{ fontSize: '0.85rem' }}>카드 소유자 이름 (선택)</label>
-                <input 
-                  type="text" 
-                  placeholder="홍길동" 
+                <input
+                  type="text"
+                  placeholder="홍길동"
                   value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
               </div>
 
@@ -111,7 +111,7 @@ export default function PaymentModal({ onClose, onSuccess }) {
             </div>
             <h2 style={{ fontSize: '1.4rem', color: '#166534', margin: '0 0 1rem 0' }}>결제 완료!</h2>
             <p style={{ color: '#475569', lineHeight: '1.5', margin: 0 }}>
-              성공적으로 PRO 요금제로 <br/>업그레이드 되었습니다.
+              성공적으로 PRO 요금제로 <br />업그레이드 되었습니다.
             </p>
           </div>
         )}
