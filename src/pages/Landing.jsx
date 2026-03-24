@@ -31,9 +31,9 @@ export default function Landing() {
           비즈니스 성장의 시작, <br />
           <span style={{ color: 'var(--primary-color)' }}>스마트한 통합 견적 관리</span>
         </h1>
-        <p style={{ fontSize: '1.25rem', color: '#64748b', maxWidth: '700px', margin: '0 auto 3rem auto', lineHeight: 1.6 }}>
-          복잡한 실사출력 및 간판/자재 견적 계산부터 발주서 다운로드까지. <br />
-          TAD B2B 플랫폼에서 언제 어디서나 정확하고 빠른 견적을 고객에게 제시하세요.
+        <p style={{ fontSize: '1.15rem', color: '#64748b', maxWidth: '750px', margin: '0 auto 3rem auto', lineHeight: 1.6 }}>
+          광고/인테리어 맞춤형 계산뿐만 아니라, <strong>자유로운 항목 직접 입력 및 수정</strong>을 통해<br />
+          <b>어떤 업종이든 종류에 무관하게</b> 완벽하고 전문적인 견적서를 발행할 수 있습니다.
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
           <button onClick={() => navigate('/login')} className="btn btn-primary" style={{ padding: '1rem 2rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -56,8 +56,8 @@ export default function Landing() {
             <div style={{ width: 48, height: 48, backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
               <Calculator size={24} />
             </div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.75rem', color: '#0f172a' }}>초정밀 자동 계산</h3>
-            <p style={{ color: '#64748b', lineHeight: 1.6, margin: 0 }}>가로/세로 길이만 입력하면 자체 단가표에 기반하여 즉시 최소 수량과 헤베(제곱미터) 단위로 완벽하게 계산합니다.</p>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.75rem', color: '#0f172a' }}>초정밀 계산 & 모든 업종 호환</h3>
+            <p style={{ color: '#64748b', lineHeight: 1.6, margin: 0 }}>루틴한 자재비 자동 산출은 물론, 견적 항목과 단가를 <b>자유롭게 직접 수기 입력</b>할 수 있어 B2B, B2C 등 어떠한 업종에서도 제약 없이 100% 호환됩니다.</p>
           </div>
 
           <div style={{ padding: '2rem', backgroundColor: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
@@ -91,7 +91,7 @@ export default function Landing() {
       <footer style={{ backgroundColor: '#0f172a', padding: '3rem 2rem', textAlign: 'center', color: '#94a3b8' }}>
         <h4 style={{ color: 'white', fontSize: '1.5rem', margin: '0 0 0.5rem 0', fontWeight: 700 }}>TAD B2B</h4>
         <p style={{ color: '#cbd5e1', fontSize: '1rem', marginTop: 0, marginBottom: '1.5rem' }}>맞춤형 자동 견적 솔루션</p>
-        <p style={{ marginBottom: '2rem' }}>광고 제작 비즈니스의 미래 모델. 더 빠르고 편리한 업무 인프라를 경험하세요.</p>
+        <p style={{ marginBottom: '2rem' }}>업종의 경계를 허무는 범용 스마트 견적 솔루션. 더 확실하고 빠른 비즈니스를 경험하세요.</p>
         <p style={{ fontSize: '0.85rem' }}>&copy; {new Date().getFullYear()} TAD B2B Inc. All rights reserved.</p>
       </footer>
 
