@@ -78,7 +78,7 @@ export default function Signup() {
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', marginTop: '0.5rem', fontSize: '0.9rem', color: '#475569' }}>
             <input type="checkbox" id="terms" ref={termsRef} style={{ width: 'auto', marginTop: '0.2rem' }} />
             <label htmlFor="terms" style={{ margin: 0, fontWeight: 'normal', cursor: 'pointer', lineHeight: '1.4' }}>
-              [필수] 서비스 이용약관 및 개인정보 처리방침에 동의합니다.
+              [필수] <Link to="/terms" target="_blank" style={{ color: 'var(--primary-color)', textDecoration: 'underline' }}>서비스 이용약관</Link> 및 <Link to="/privacy" target="_blank" style={{ color: 'var(--primary-color)', textDecoration: 'underline' }}>개인정보 처리방침</Link>에 동의합니다.
             </label>
           </div>
 

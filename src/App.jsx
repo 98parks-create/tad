@@ -11,6 +11,9 @@ import Landing from './pages/Landing';
 import AuthCallback from './pages/AuthCallback';
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
+import Footer from './components/Footer';
 import './index.css';
 
 function AppContent() {
@@ -29,13 +32,20 @@ function AppContent() {
 
   if (!currentUser) {
     return (
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/auth/callback/:provider" element={<AuthCallback />} />
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <div style={{ flex: 1 }}>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/auth/callback/:provider" element={<AuthCallback />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </div>
+        <Footer />
+      </div>
     );
   }
 
@@ -103,9 +113,12 @@ function AppContent() {
             <Route path="/create" element={<PrivateRoute><CreateQuote /></PrivateRoute>} />
             <Route path="/list" element={<PrivateRoute><QuoteList /></PrivateRoute>} />
             <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
+        <Footer />
       </main>
     </div>
   );
