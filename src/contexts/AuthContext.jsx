@@ -35,16 +35,18 @@ export function AuthProvider({ children }) {
   }
 
   // --- 소셜 연동 API ---
-  async function loginWithKakao() {
-    // TODO: 카카오 SDK (window.Kakao.Auth.login) 또는 REST API, Firebase Custom Token 연동 코드 작성 영역
-    console.log("카카오 로그인 연동 필요");
-    alert("카카오 로그인 연동 준비 중 (실제 API 연결 시 이 함수에서 처리합니다)");
+  // --- 소셜 연동 API ---
+  function loginWithKakao() {
+    const KAKAO_CLIENT_ID = 'a943703dfa539a566422a258392aa3e9';
+    const redirectUri = `${window.location.origin}/auth/callback/kakao`;
+    window.location.href = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code`;
   }
 
-  async function loginWithNaver() {
-    // TODO: 네이버 로그인 SDK 또는 REST API, Firebase Custom Token 연동 코드 작성 영역
-    console.log("네이버 로그인 연동 필요");
-    alert("네이버 로그인 연동 준비 중 (실제 API 연결 시 이 함수에서 처리합니다)");
+  function loginWithNaver() {
+    const NAVER_CLIENT_ID = 'Hfz9nrxiGx4JoQrsxBMo';
+    const redirectUri = `${window.location.origin}/auth/callback/naver`;
+    const state = Math.random().toString(36).substring(7);
+    window.location.href = `https://nid.naver.com/oauth2.0/authorize?client_id=${NAVER_CLIENT_ID}&response_type=code&redirect_uri=${redirectUri}&state=${state}`;
   }
   // -----------------------
 
