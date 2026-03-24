@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { getQuotes, deleteQuote, updateQuoteStatus } from '../services/quoteService';
 import { getProfile } from '../services/profileService';
 import { useAuth } from '../contexts/AuthContext';
-import { Printer, X, Edit, Trash2, CheckCircle } from 'lucide-react';
+import { Printer, X, Edit, Trash2, CheckCircle, Search } from 'lucide-react';
 import PrintTemplate from '../components/PrintTemplate';
 import { useReactToPrint } from 'react-to-print';
 import { useNavigate } from 'react-router-dom';
@@ -16,6 +16,35 @@ export default function QuoteList() {
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [companyProfile, setCompanyProfile] = useState(null);
   const printRef = useRef(null);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
+  const filteredQuotes = useMemo(() => {
+    if (!searchTerm) return quotes;
+    const lowerSearch = searchTerm.toLowerCase();
+    return quotes.filter(quote => {
+      const matchName = quote.customerInfo?.name?.toLowerCase().includes(lowerSearch);
+      const matchProject = quote.customerInfo?.project?.toLowerCase().includes(lowerSearch);
+      const matchDate = quote.customerInfo?.date?.includes(lowerSearch);
+      const matchItems = quote.items?.some(item => 
+        item.name?.toLowerCase().includes(lowerSearch) ||
+        item.specs?.toLowerCase().includes(lowerSearch)
+      );
+      return matchName || matchProject || matchDate || matchItems;
+    });
+  }, [quotes, searchTerm]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, quotes]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredQuotes.length / ITEMS_PER_PAGE));
+  const paginatedQuotes = filteredQuotes.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
@@ -71,8 +100,19 @@ export default function QuoteList() {
     <div className="card">
       <h2 style={{ marginBottom: '1rem' }}>전체 견적 내역</h2>
       <p style={{ color: 'var(--text-light)', marginBottom: '1.5rem' }}>저장된 모든 견적서를 확인하고 관리할 수 있습니다.</p>
-      
+
       {error && <div style={{ color: 'var(--danger-color)', marginBottom: '1rem', padding: '1rem', backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: '6px' }}>{error}</div>}
+
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem', background: '#fff', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.6rem 1rem', width: '100%', maxWidth: '400px' }}>
+        <Search size={18} color="#94a3b8" style={{ marginRight: '0.5rem' }} />
+        <input 
+          type="text" 
+          placeholder="고객명, 현장명, 날짜 또는 항목 검색..." 
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ border: 'none', outline: 'none', width: '100%', fontSize: '1rem', background: 'transparent' }}
+        />
+      </div>
 
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
@@ -99,8 +139,14 @@ export default function QuoteList() {
                   등록된 견적서가 없습니다.
                 </td>
               </tr>
+            ) : paginatedQuotes.length === 0 ? (
+              <tr>
+                <td colSpan="6" style={{ padding: '2rem 0', textAlign: 'center', color: 'var(--text-light)' }}>
+                  검색 결과가 없습니다.
+                </td>
+              </tr>
             ) : (
-              quotes.map(quote => (
+              paginatedQuotes.map(quote => (
                 <tr key={quote.id} onClick={() => setSelectedQuote(quote)} style={{ borderBottom: '1px solid var(--border-color)', cursor: 'pointer' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f8fafc'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                   <td style={{ padding: '1rem 0.5rem' }}>{quote.customerInfo?.date}</td>
                   <td style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>{quote.customerInfo?.name}</td>
@@ -119,6 +165,30 @@ export default function QuoteList() {
         </table>
       </div>
 
+      {!loading && totalPages > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginTop: '1.5rem' }}>
+          <button 
+            className="btn btn-outline"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            style={{ padding: '0.4rem 0.8rem' }}
+          >
+            이전
+          </button>
+          <span style={{ fontWeight: 500, color: 'var(--text-main)', fontSize: '0.95rem' }}>
+            {currentPage} / {totalPages}
+          </span>
+          <button 
+            className="btn btn-outline"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            style={{ padding: '0.4rem 0.8rem' }}
+          >
+            다음
+          </button>
+        </div>
+      )}
+
       {selectedQuote && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '1rem' }}>
           <div className="card" style={{ width: '100%', maxWidth: '850px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
@@ -126,7 +196,7 @@ export default function QuoteList() {
               <X size={24} color="#64748b" />
             </button>
             <h2 style={{ marginBottom: '1.5rem', paddingRight: '2rem' }}>견적서 상세현황</h2>
-            
+
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
               <button className="btn btn-primary" onClick={handlePrint}>
                 <Printer size={18} /> PDF/인쇄
@@ -148,7 +218,7 @@ export default function QuoteList() {
 
             <div style={{ border: '1px solid var(--border-color)', padding: '1rem', borderRadius: '4px', background: '#e2e8f0', display: 'flex', justifyContent: 'center', overflow: 'hidden' }}>
               <div style={{ transform: 'scale(0.85)', transformOrigin: 'top center', marginBottom: '-50mm' }}>
-                <PrintTemplate 
+                <PrintTemplate
                   ref={printRef}
                   customerInfo={selectedQuote.customerInfo}
                   items={selectedQuote.items}
