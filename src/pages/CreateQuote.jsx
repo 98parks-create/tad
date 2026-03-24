@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { materialCategories } from '../data/materials';
-import { Plus, Trash2, Save, Printer } from 'lucide-react';
+import { Plus, Trash2, Save, Printer, Copy } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 import PrintTemplate from '../components/PrintTemplate';
 import { saveQuote } from '../services/quoteService';
@@ -13,14 +13,13 @@ export default function CreateQuote() {
   const location = useLocation();
   const navigate = useNavigate();
   const editQuote = location.state?.editQuote;
-  const duplicateQuote = location.state?.duplicateQuote;
-  const sourceQuote = editQuote || duplicateQuote;
 
-  const [customerInfo, setCustomerInfo] = useState(sourceQuote?.customerInfo || { name: '', company: '', phone: '', project: '', date: new Date().toISOString().split('T')[0] });
-  const [items, setItems] = useState(sourceQuote?.items || []);
-  const [includeVat, setIncludeVat] = useState(sourceQuote ? sourceQuote.includeVat : true);
-  const [discount, setDiscount] = useState(sourceQuote?.discount || 0);
-  const [remarks, setRemarks] = useState(sourceQuote?.remarks || '');
+  const [customerInfo, setCustomerInfo] = useState(editQuote?.customerInfo || { name: '', company: '', phone: '', project: '', date: new Date().toISOString().split('T')[0] });
+  const [items, setItems] = useState(editQuote?.items || []);
+  const [includeVat, setIncludeVat] = useState(editQuote ? editQuote.includeVat : true);
+  const [discount, setDiscount] = useState(editQuote?.discount || 0);
+  const [discountReason, setDiscountReason] = useState(editQuote?.discountReason || '');
+  const [remarks, setRemarks] = useState(editQuote?.remarks || '');
   const [isSaving, setIsSaving] = useState(false);
   const [companyProfile, setCompanyProfile] = useState(null);
   const [editId, setEditId] = useState(editQuote?.id || null);
@@ -30,13 +29,13 @@ export default function CreateQuote() {
       getProfile(currentUser.uid).then(profile => {
         if (profile) {
           setCompanyProfile(profile);
-          if (profile.defaultRemarks && !sourceQuote?.remarks && !remarks) {
+          if (profile.defaultRemarks && !editQuote?.remarks && !remarks) {
             setRemarks(profile.defaultRemarks);
           }
         }
       }).catch(console.error);
     }
-  }, [currentUser, sourceQuote, remarks]);
+  }, [currentUser, editQuote, remarks]);
 
   const addItem = () => {
     setItems([{ id: Date.now(), categoryId: '', itemId: '', specification: '', unit: '', remarks: '', width: '', height: '', quantity: 1, name: '', unitPrice: '', type: '', total: 0 }, ...items]);
@@ -44,6 +43,13 @@ export default function CreateQuote() {
 
   const removeItem = (id) => {
     setItems(items.filter(item => item.id !== id));
+  };
+
+  const duplicateItem = (itemToCopy, index) => {
+    const newItem = { ...itemToCopy, id: Date.now() };
+    const newItems = [...items];
+    newItems.splice(index + 1, 0, newItem);
+    setItems(newItems);
   };
 
   const handleItemChange = (id, field, value) => {
@@ -106,7 +112,7 @@ export default function CreateQuote() {
     
     setIsSaving(true);
     try {
-      await saveQuote(currentUser.uid, { customerInfo, items, subTotal, discount, vat, grandTotal, includeVat, remarks, status: 'pending' }, editId);
+      await saveQuote(currentUser.uid, { customerInfo, items, subTotal, discount, discountReason, vat, grandTotal, includeVat, remarks, status: 'pending' }, editId);
       alert(editId ? "견적서가 성공적으로 수정되었습니다." : "견적 데이터가 성공적으로 저장되었습니다.");
       navigate('/list');
     } catch (err) {
@@ -237,9 +243,14 @@ export default function CreateQuote() {
                   </div>
 
                 </div>
-                <button className="btn-icon" style={{ color: 'var(--danger-color)', backgroundColor: 'rgba(239, 68, 68, 0.1)', cursor: 'pointer', border: 'none' }} onClick={() => removeItem(item.id)}>
-                  <Trash2 size={20} />
-                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <button className="btn-icon" style={{ color: 'var(--primary-color)', backgroundColor: 'var(--bg-color)', cursor: 'pointer', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '0.4rem' }} onClick={() => duplicateItem(item, index)} title="이 항목 그대로 복사하여 바로 아래에 줄 추가">
+                    <Copy size={20} />
+                  </button>
+                  <button className="btn-icon" style={{ color: 'var(--danger-color)', backgroundColor: 'rgba(239, 68, 68, 0.1)', cursor: 'pointer', border: 'none', borderRadius: '4px', padding: '0.4rem' }} onClick={() => removeItem(item.id)} title="이 항목 삭제">
+                    <Trash2 size={20} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -263,14 +274,23 @@ export default function CreateQuote() {
               <span>{subTotal.toLocaleString()} 원</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem', alignItems: 'center' }}>
-              <span style={{ color: 'var(--text-light)' }}>할인 (Nego)</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span style={{ color: 'var(--text-light)' }}>할인</span>
+                <input 
+                  type="text" 
+                  value={discountReason}
+                  onChange={(e) => setDiscountReason(e.target.value)}
+                  style={{ width: '100px', padding: '0.2rem 0.4rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.85rem' }}
+                  placeholder="사유(선택)"
+                />
+              </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <span style={{ color: 'var(--danger-color)' }}>-</span>
                 <input 
                   type="number" 
                   value={discount || ''}
                   onChange={(e) => setDiscount(Number(e.target.value))}
-                  style={{ width: '100px', padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '4px', textAlign: 'right' }}
+                  style={{ width: '90px', padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '4px', textAlign: 'right' }}
                   placeholder="0"
                 />
                 <span>원</span>
@@ -305,6 +325,7 @@ export default function CreateQuote() {
           items={items}
           subTotal={subTotal}
           discount={discount}
+          discountReason={discountReason}
           vat={vat}
           grandTotal={grandTotal}
           providerInfo={companyProfile}

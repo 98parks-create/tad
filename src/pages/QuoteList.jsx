@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { getQuotes, deleteQuote, updateQuoteStatus } from '../services/quoteService';
 import { getProfile } from '../services/profileService';
 import { useAuth } from '../contexts/AuthContext';
-import { Printer, X, Edit, Trash2, CheckCircle, Copy } from 'lucide-react';
+import { Printer, X, Edit, Trash2, CheckCircle } from 'lucide-react';
 import PrintTemplate from '../components/PrintTemplate';
 import { useReactToPrint } from 'react-to-print';
 import { useNavigate } from 'react-router-dom';
@@ -25,10 +25,6 @@ export default function QuoteList() {
 
   const handleEdit = () => {
     navigate('/create', { state: { editQuote: selectedQuote } });
-  };
-
-  const handleDuplicate = () => {
-    navigate('/create', { state: { duplicateQuote: selectedQuote } });
   };
 
   const handleDelete = async () => {
@@ -140,9 +136,6 @@ export default function QuoteList() {
                   <CheckCircle size={18} /> 입금/승인 완료
                 </button>
               )}
-              <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--accent-color)', borderColor: 'var(--accent-color)' }} onClick={handleDuplicate}>
-                <Copy size={18} /> 복사(새 견적)
-              </button>
               <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }} onClick={handleEdit}>
                 <Edit size={18} /> 수정
               </button>

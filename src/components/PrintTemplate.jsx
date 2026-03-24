@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 
-const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, vat, grandTotal, providerInfo, remarks }, ref) => {
+const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, discountReason, vat, grandTotal, providerInfo, remarks }, ref) => {
   const dynamicScale = items.length > 8 ? 8 / items.length : 1;
 
   return (
@@ -94,7 +94,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, vat
               </tr>
               {discount > 0 && (
                 <tr>
-                  <td style={{ border: '1px solid #cbd5e1', padding: '6px', backgroundColor: '#fcd34d', fontWeight: 'bold' }}>할인액 (에누리)</td>
+                  <td style={{ border: '1px solid #cbd5e1', padding: '6px', backgroundColor: '#fcd34d', fontWeight: 'bold' }}>할인액 {discountReason ? `(${discountReason})` : ''}</td>
                   <td style={{ border: '1px solid #cbd5e1', padding: '6px', textAlign: 'right', color: '#b45309', fontWeight: 'bold' }}>- {Number(discount).toLocaleString()} 원</td>
                 </tr>
               )}
