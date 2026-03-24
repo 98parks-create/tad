@@ -11,7 +11,6 @@ export default function Settings() {
     businessNumber: '',
     address: '',
     phone: '',
-    paymentInfo: '',
     defaultRemarks: '',
     customMaterials: [],
     stampImage: ''
@@ -135,10 +134,6 @@ export default function Settings() {
         <div className="form-group">
           <label>연락처 (전화번호)</label>
           <input type="text" name="phone" value={profile.phone || ''} onChange={handleChange} placeholder="예) 02-1234-5678" />
-        </div>
-        <div className="form-group">
-          <label>결제/송금 안내 (계좌번호 또는 카카오페이/토스 송금 링크)</label>
-          <input type="text" name="paymentInfo" value={profile.paymentInfo || ''} onChange={handleChange} placeholder="예) 국민은행 123-456-7890 또는 https://toss.me/내아이디" />
         </div>
 
         <div className="form-group" style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
