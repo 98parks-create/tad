@@ -1,0 +1,78 @@
+import React, { useEffect, useState } from 'react';
+import { getQuotes } from '../services/quoteService';
+import { useAuth } from '../contexts/AuthContext';
+
+export default function QuoteList() {
+  const { currentUser } = useAuth();
+  const [quotes, setQuotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchQuotes = async () => {
+      try {
+        const data = await getQuotes(currentUser.uid);
+        setQuotes(data);
+      } catch (err) {
+        setError("데이터를 불러올 수 없습니다. Firebase 설정을 확인해주세요.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchQuotes();
+  }, []);
+
+  return (
+    <div className="card">
+      <h2 style={{ marginBottom: '1rem' }}>전체 견적 내역</h2>
+      <p style={{ color: 'var(--text-light)', marginBottom: '1.5rem' }}>저장된 모든 견적서를 확인하고 관리할 수 있습니다.</p>
+      
+      {error && <div style={{ color: 'var(--danger-color)', marginBottom: '1rem', padding: '1rem', backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: '6px' }}>{error}</div>}
+
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
+          <thead>
+            <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-light)' }}>
+              <th style={{ padding: '1rem 0.5rem' }}>견적일자</th>
+              <th style={{ padding: '1rem 0.5rem' }}>고객명</th>
+              <th style={{ padding: '1rem 0.5rem' }}>현장명</th>
+              <th style={{ padding: '1rem 0.5rem' }}>항목 수</th>
+              <th style={{ padding: '1rem 0.5rem' }}>총 금액</th>
+              <th style={{ padding: '1rem 0.5rem' }}>상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan="6" style={{ padding: '2rem 0', textAlign: 'center', color: 'var(--text-light)' }}>
+                  불러오는 중...
+                </td>
+              </tr>
+            ) : quotes.length === 0 ? (
+              <tr>
+                <td colSpan="6" style={{ padding: '2rem 0', textAlign: 'center', color: 'var(--text-light)' }}>
+                  등록된 견적서가 없습니다.
+                </td>
+              </tr>
+            ) : (
+              quotes.map(quote => (
+                <tr key={quote.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                  <td style={{ padding: '1rem 0.5rem' }}>{quote.customerInfo?.date}</td>
+                  <td style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>{quote.customerInfo?.name}</td>
+                  <td style={{ padding: '1rem 0.5rem' }}>{quote.customerInfo?.project}</td>
+                  <td style={{ padding: '1rem 0.5rem' }}>{quote.items?.length || 0} 개</td>
+                  <td style={{ padding: '1rem 0.5rem', fontWeight: 'bold' }}>{quote.grandTotal?.toLocaleString()} 원</td>
+                  <td style={{ padding: '1rem 0.5rem' }}>
+                    <span style={{ padding: '0.2rem 0.6rem', borderRadius: '20px', fontSize: '0.8rem', backgroundColor: '#e2e8f0', color: '#475569' }}>
+                      {quote.status === 'pending' ? '대기/보류' : quote.status}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
