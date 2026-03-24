@@ -255,4 +255,30 @@ label {
   input, select, textarea, .btn {
     font-size: 16px;
   }
+  
+  /* Fix header overflow on mobile */
+  .top-header {
+    gap: 0.5rem;
+  }
+  
+  .header-title {
+    font-size: 1.05rem !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 130px;
+  }
+  
+  .header-email {
+    display: none;
+  }
+  
+  /* Mobile padding fixes */
+  .card {
+    padding: 1rem;
+  }
+  
+  .btn {
+    padding: 0.5rem 1rem;
+  }
 }

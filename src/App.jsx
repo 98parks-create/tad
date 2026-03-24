@@ -104,15 +104,15 @@ function AppContent() {
       {/* Main Content */}
       <main className="main-content">
         <header className="top-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
             <button className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(true)}>
               <Menu size={24} />
             </button>
-            <h2 style={{ fontSize: '1.25rem', color: 'var(--text-dark)', margin: 0 }}>맞춤형 자동 견적 솔루션</h2>
+            <h2 className="header-title" style={{ fontSize: '1.25rem', color: 'var(--text-dark)', margin: 0 }}>맞춤형 자동 견적 솔루션</h2>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <span style={{ fontSize: '0.9rem', color: 'var(--text-light)', fontWeight: 500 }}>{currentUser.email}</span>
-            <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem' }} onClick={handleLogout}>로그아웃</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+            <span className="header-email" style={{ fontSize: '0.9rem', color: 'var(--text-light)', fontWeight: 500 }}>{currentUser.email}</span>
+            <button className="btn btn-outline" style={{ padding: '0.35rem 0.7rem', fontSize: '0.85rem' }} onClick={handleLogout}>로그아웃</button>
           </div>
         </header>
         
