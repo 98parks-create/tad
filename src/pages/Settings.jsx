@@ -104,23 +104,7 @@ export default function Settings() {
     <div className="card" style={{ maxWidth: '800px', margin: '0 auto' }}>
       <h2 style={{ marginBottom: '1.5rem', color: 'var(--primary-color)' }}>공급자 (회사) 정보 설정</h2>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: profile.subscriptionPlan === 'pro' ? '#f0fdf4' : '#f8fafc', border: `1px solid ${profile.subscriptionPlan === 'pro' ? '#bbf7d0' : '#e2e8f0'}`, padding: '1.5rem', borderRadius: '8px', marginBottom: '2rem' }}>
-        <div>
-          <h3 style={{ margin: '0 0 0.5rem 0', color: profile.subscriptionPlan === 'pro' ? '#166534' : '#334155', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            현재 요금제 : {profile.subscriptionPlan === 'pro' ? 'PRO (무제한)' : 'FREE (무료 체험)'}
-          </h3>
-          <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>
-            {profile.subscriptionPlan === 'pro'
-              ? '사장님만의 완벽한 맞춤형 플랫폼을 무제한으로 사용 중입니다.'
-              : `현재 작성된 견적서: ${quotesCount} / 5 건 (무제한 혜택 필요 시 전환)`}
-          </p>
-        </div>
-        {profile.subscriptionPlan !== 'pro' && (
-          <button type="button" className="btn btn-primary" onClick={() => alert('PG사 카드 결제창 연동 구축 완료 후 적용됩니다.')} style={{ backgroundColor: '#10b981', border: 'none', padding: '0.6rem 1rem' }}>
-            월 19,900원에 무제한 개통
-          </button>
-        )}
-      </div>
+
 
       <p style={{ color: 'var(--text-light)', marginBottom: '2rem' }}>이곳에 등록된 정보는 견적서를 발행(PDF 인쇄)할 때 우측 상단 공급자란에 자동으로 출력됩니다.</p>
 

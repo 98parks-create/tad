@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 
-const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, discountReason, vat, grandTotal, providerInfo, remarks }, ref) => {
+const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, discountReason, vat, grandTotal, providerInfo, remarks, includeVat = true }, ref) => {
   const dynamicScale = items.length > 8 ? 8 / items.length : 1;
 
   return (
@@ -54,7 +54,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
         </div>
 
         <div style={{ margin: '4mm 0', padding: '8px', backgroundColor: '#f8fafc', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <span style={{ fontWeight: 'bold', fontSize: '11pt' }}>총 견적 금액 (VAT 포함):</span>
+          <span style={{ fontWeight: 'bold', fontSize: '11pt' }}>총 견적 금액 (VAT {includeVat ? '포함' : '별도'}):</span>
           <span style={{ fontSize: '14pt', fontWeight: 'bold', color: '#0f172a' }}>
             {grandTotal > 0 ? `일금 ${grandTotal.toLocaleString()} 원 정 (₩ ${grandTotal.toLocaleString()})` : '- 원'}
           </span>

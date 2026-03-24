@@ -3,6 +3,7 @@ import { materialCategories } from '../data/materials';
 import { Plus, Trash2, Save, Printer, Copy, Lock } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 import PrintTemplate from '../components/PrintTemplate';
+import PaymentModal from '../components/PaymentModal';
 import { saveQuote, getQuotes } from '../services/quoteService';
 import { getProfile } from '../services/profileService';
 import { useAuth } from '../contexts/AuthContext';
@@ -24,6 +25,7 @@ export default function CreateQuote() {
   const [companyProfile, setCompanyProfile] = useState(null);
   const [editId, setEditId] = useState(editQuote?.id || null);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   React.useEffect(() => {
     if (currentUser) {
@@ -363,6 +365,7 @@ export default function CreateQuote() {
           grandTotal={grandTotal}
           providerInfo={companyProfile}
           remarks={remarks}
+          includeVat={includeVat}
         />
       </div>
 
@@ -378,11 +381,23 @@ export default function CreateQuote() {
               <b>월 19,900원</b>의 PRO 요금제로 파격 업그레이드 하시면 <b>무제한 작성</b>과 함께 맞춤형 단가표, PDF 직인 삽입 등 모든 프리미엄 기능을 마음껏 누리실 수 있습니다!
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-              <button className="btn btn-primary" onClick={() => alert('PG사(결제 연동) 모듈 이식 대기 중입니다.')} style={{ width: '100%', padding: '0.9rem', fontSize: '1.05rem', fontWeight: 'bold' }}>PRO 무제한 기능 개방 (월 19,900원)</button>
+              <button className="btn btn-primary" onClick={() => setShowPaymentModal(true)} style={{ width: '100%', padding: '0.9rem', fontSize: '1.05rem', fontWeight: 'bold' }}>PRO 무제한 기능 개방 (월 19,900원)</button>
               <button className="btn btn-outline" onClick={() => navigate('/list')} style={{ width: '100%' }}>목록으로 돌아가기</button>
             </div>
           </div>
         </div>
+      )}
+
+      {showPaymentModal && (
+        <PaymentModal 
+          onClose={() => setShowPaymentModal(false)}
+          onSuccess={() => {
+            setShowPaymentModal(false);
+            setShowPaywall(false);
+            alert("결제가 완료되었습니다! 이제 PRO 요금제의 혜택을 모두 누리실 수 있습니다. (테스트 환경)");
+            window.location.reload();
+          }}
+        />
       )}
     </div>
   );

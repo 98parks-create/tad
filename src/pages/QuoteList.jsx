@@ -154,6 +154,7 @@ export default function QuoteList() {
                   vat={selectedQuote.vat}
                   grandTotal={selectedQuote.grandTotal}
                   providerInfo={companyProfile}
+                  includeVat={selectedQuote.includeVat !== false}
                 />
               </div>
             </div>
