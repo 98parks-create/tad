@@ -1,11 +1,18 @@
 import admin from 'firebase-admin';
 
 if (!admin.apps.length) {
+  const projectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID || 'tad-portfolio1';
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL || process.env.VITE_FIREBASE_CLIENT_EMAIL || 'firebase-adminsdk-fbsvc@tad-portfolio1.iam.gserviceaccount.com';
+  const rawKey = process.env.FIREBASE_PRIVATE_KEY || process.env.VITE_FIREBASE_PRIVATE_KEY || process.env.PRIVATE_KEY || '';
+  const privateKey = rawKey.replace(/\\n/g, '\n');
+
+  if (!rawKey) console.error("CRITICAL: FIREBASE_PRIVATE_KEY is missing in Vercel!");
+
   admin.initializeApp({
     credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+      projectId,
+      clientEmail,
+      privateKey,
     }),
   });
 }
