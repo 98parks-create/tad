@@ -204,10 +204,6 @@ label {
 }
 
 @media (max-width: 768px) {
-  body {
-    font-size: 14px;
-  }
-  
   .app-container {
     flex-direction: column;
   }
