@@ -14,7 +14,7 @@ export default function CreateQuote() {
   const [isSaving, setIsSaving] = useState(false);
 
   const addItem = () => {
-    setItems([...items, { id: Date.now(), categoryId: '', itemId: '', specification: '', remarks: '', width: '', height: '', quantity: 1, name: '', unitPrice: 0, type: '', total: 0 }]);
+    setItems([{ id: Date.now(), categoryId: '', itemId: '', specification: '', remarks: '', width: '', height: '', quantity: 1, name: '', unitPrice: '', type: '', total: 0 }, ...items]);
   };
 
   const removeItem = (id) => {
@@ -37,22 +37,7 @@ export default function CreateQuote() {
           const selectedMat = category?.items.find(i => i.id === value);
           if (selectedMat) {
             newItem.name = selectedMat.name;
-            newItem.basePrice = selectedMat.unitPrice; // Store internal base price per sqm/ea
             newItem.type = selectedMat.type;
-          }
-        }
-
-        // When item or dimensions change, recalculate the default unit price per piece
-        if (['itemId', 'width', 'height'].includes(field)) {
-          if (newItem.type === 'area') {
-            const w = parseFloat(newItem.width) || 0;
-            const h = parseFloat(newItem.height) || 0;
-            const sqm = (w * h) / 1000000; // mm to sqm
-            
-            // Generate the price per 1 piece based on area calculation
-            newItem.unitPrice = Math.round(sqm * (newItem.basePrice || 0));
-          } else {
-            newItem.unitPrice = newItem.basePrice || 0;
           }
         }
 
@@ -163,7 +148,7 @@ export default function CreateQuote() {
                     <select value={item.itemId} onChange={e => handleItemChange(item.id, 'itemId', e.target.value)} disabled={!item.categoryId}>
                       <option value="">-- 자재/종류 선택 --</option>
                       {materialCategories.find(c => c.id === item.categoryId)?.items.map(mat => (
-                        <option key={mat.id} value={mat.id}>{mat.name} (기준단가: {mat.unitPrice.toLocaleString()}원)</option>
+                        <option key={mat.id} value={mat.id}>{mat.name}</option>
                       ))}
                     </select>
                   </div>
@@ -221,7 +206,11 @@ export default function CreateQuote() {
         )}
       </div>
 
-      <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+      <div className="card" style={{ 
+        display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem',
+        position: 'sticky', bottom: '1rem', zIndex: 10,
+        boxShadow: '0 -4px 20px rgba(0,0,0,0.15)', border: '1px solid var(--border-color)'
+      }}>
         <div style={{ width: '100%', maxWidth: '400px', display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0' }}>
           <span>공급가액 (소계):</span>
           <span style={{ fontWeight: 600 }}>{subTotal.toLocaleString()} 원</span>
