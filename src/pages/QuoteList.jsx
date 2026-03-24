@@ -6,8 +6,6 @@ import { Printer, X, Edit, Trash2 } from 'lucide-react';
 import PrintTemplate from '../components/PrintTemplate';
 import { useReactToPrint } from 'react-to-print';
 import { useNavigate } from 'react-router-dom';
-import PrintTemplate from '../components/PrintTemplate';
-import { useReactToPrint } from 'react-to-print';
 
 export default function QuoteList() {
   const { currentUser } = useAuth();
