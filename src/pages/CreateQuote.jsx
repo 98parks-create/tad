@@ -9,7 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function CreateQuote() {
   const { currentUser } = useAuth();
-  const [customerInfo, setCustomerInfo] = useState({ name: '', phone: '', project: '', date: new Date().toISOString().split('T')[0] });
+  const [customerInfo, setCustomerInfo] = useState({ name: '', company: '', phone: '', project: '', date: new Date().toISOString().split('T')[0] });
   const [items, setItems] = useState([]);
   const [includeVat, setIncludeVat] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -110,8 +110,12 @@ export default function CreateQuote() {
         <h3 style={{ marginBottom: '1rem' }}>고객 및 현장 정보</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
           <div className="form-group">
-            <label>고객명/상호</label>
-            <input type="text" placeholder="예: 홍길동 / 미래상사" value={customerInfo.name} onChange={e => setCustomerInfo({...customerInfo, name: e.target.value})} />
+            <label>고객 회사명(상호)</label>
+            <input type="text" placeholder="예: (주)미래상사" value={customerInfo.company || ''} onChange={e => setCustomerInfo({...customerInfo, company: e.target.value})} />
+          </div>
+          <div className="form-group">
+            <label>고객명 (담당자)</label>
+            <input type="text" placeholder="예: 홍길동" value={customerInfo.name} onChange={e => setCustomerInfo({...customerInfo, name: e.target.value})} />
           </div>
           <div className="form-group">
             <label>연락처</label>

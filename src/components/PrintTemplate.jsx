@@ -2,15 +2,23 @@ import React, { forwardRef } from 'react';
 
 const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, vat, grandTotal, providerInfo }, ref) => {
   return (
-    <div ref={ref} style={{ padding: '20mm', width: '210mm', minHeight: '297mm', margin: '0 auto', backgroundColor: 'white', color: 'black', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column' }}>
+    <div ref={ref} style={{ padding: '15mm', width: '210mm', minHeight: '260mm', margin: '0 auto', backgroundColor: 'white', color: 'black', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column' }}>
         <div style={{ textAlign: 'center', marginBottom: '8mm', borderBottom: '2px solid #00083a', paddingBottom: '4mm' }}>
           <h1 style={{ color: '#00083a', fontSize: '28pt', margin: '0 0 4mm 0', letterSpacing: '4px' }}>견 적 서</h1>
           <div style={{ display: 'flex', justifyContent: 'space-between', textAlign: 'left', fontSize: '11pt' }}>
-            <div style={{ lineHeight: '1.6' }}>
-              <p style={{ margin: 0 }}><strong>견적일자:</strong> {customerInfo.date}</p>
-              <p style={{ margin: 0 }}><strong>수신:</strong> <span style={{ fontSize: '14pt', fontWeight: 'bold' }}>{customerInfo.name || '___________'}</span> 귀하</p>
-              <p style={{ margin: 0 }}><strong>연락처:</strong> {customerInfo.phone || '___________'}</p>
-              <p style={{ margin: 0 }}><strong>현장명(건명):</strong> {customerInfo.project || '___________'}</p>
+            <div style={{ lineHeight: '1.6', marginTop: '10px' }}>
+              <p style={{ margin: 0, fontSize: '11pt' }}><strong>견적일자:</strong> {customerInfo.date}</p>
+              <p style={{ margin: '8px 0' }}>
+                <span style={{ fontSize: '15pt', fontWeight: 'bold', borderBottom: '2px solid #000', paddingBottom: '2px' }}>
+                  {customerInfo.company ? `${customerInfo.company} ` : ''}
+                  {customerInfo.name ? `${customerInfo.name}` : '___________'}
+                </span>
+                <span style={{ fontSize: '13pt', fontWeight: 'bold' }}> 귀하</span>
+              </p>
+              <p style={{ margin: 0, fontSize: '11pt' }}><strong>연락처:</strong> {customerInfo.phone || '___________'}</p>
+              <p style={{ margin: 0, fontSize: '11pt' }}><strong>현장명:</strong> {customerInfo.project || '___________'}</p>
+
+              <p style={{ margin: '20px 0 0 0', fontSize: '12pt', fontWeight: 'bold' }}>아래와 같이 견적합니다.</p>
             </div>
             <div style={{ border: '1px solid #ccc', padding: '15px', borderRadius: '4px', lineHeight: '1.6', width: '250px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -77,7 +85,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, vat, grandTot
           </tbody>
         </table>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', marginBottom: '20mm' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', marginBottom: '10mm' }}>
           <table style={{ width: '350px', borderCollapse: 'collapse', fontSize: '11pt' }}>
             <tbody>
               <tr>
@@ -97,8 +105,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, vat, grandTot
         </div>
         
         <div style={{ marginTop: 'auto', textAlign: 'center', fontSize: '10pt', color: '#666', borderTop: '1px solid #ccc', paddingTop: '10mm' }}>
-          상기와 같이 견적합니다.<br/>
-          본 견적서는 작성일로부터 30일간 유효합니다.
+          상기와 같이 견적합니다.
         </div>
     </div>
   );
