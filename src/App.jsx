@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, NavLink, Navigate, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, PlusCircle } from 'lucide-react';
+import { LayoutDashboard, FileText, PlusCircle, Menu, X } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import CreateQuote from './pages/CreateQuote';
 import QuoteList from './pages/QuoteList';
@@ -14,6 +14,7 @@ import './index.css';
 function AppContent() {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   async function handleLogout() {
     try {
@@ -37,22 +38,36 @@ function AppContent() {
 
   return (
     <div className="app-container">
+      {/* Mobile Sidebar Overlay */}
+      <div 
+        className={`sidebar-overlay ${isMobileMenuOpen ? 'active' : ''}`} 
+        onClick={() => setIsMobileMenuOpen(false)}
+      ></div>
+
       {/* Sidebar */}
-      <aside className="sidebar">
+      <aside className={`sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-header">
           <div style={{ width: 32, height: 32, backgroundColor: 'white', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>T</span>
           </div>
           TAD B2B
+          {/* Close button for mobile inside sidebar */}
+          <button 
+            className="mobile-menu-btn" 
+            style={{ marginLeft: 'auto', color: 'white' }}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            <X size={24} />
+          </button>
         </div>
         <nav className="sidebar-nav">
-          <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+          <NavLink to="/" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <LayoutDashboard size={20} />대시보드
           </NavLink>
-          <NavLink to="/create" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+          <NavLink to="/create" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <PlusCircle size={20} />새 견적 작성
           </NavLink>
-          <NavLink to="/list" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+          <NavLink to="/list" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <FileText size={20} />견적 내역
           </NavLink>
         </nav>
@@ -64,7 +79,12 @@ function AppContent() {
       {/* Main Content */}
       <main className="main-content">
         <header className="top-header">
-          <h2 style={{ fontSize: '1.25rem', color: 'var(--text-dark)', margin: 0 }}>통합 견적 솔루션</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <button className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(true)}>
+              <Menu size={24} />
+            </button>
+            <h2 style={{ fontSize: '1.25rem', color: 'var(--text-dark)', margin: 0 }}>통합 견적 솔루션</h2>
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <span style={{ fontSize: '0.9rem', color: 'var(--text-light)', fontWeight: 500 }}>{currentUser.email}</span>
             <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem' }} onClick={handleLogout}>로그아웃</button>
