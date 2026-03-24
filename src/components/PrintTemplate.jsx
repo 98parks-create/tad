@@ -22,16 +22,33 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
 
               <p style={{ margin: '15px 0 0 0', fontSize: '11pt', fontWeight: 'bold' }}>아래와 같이 견적합니다.</p>
             </div>
-            <div style={{ border: '1px solid #ccc', padding: '10px', borderRadius: '4px', lineHeight: '1.4', width: '250px', fontSize: '10pt' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ border: '1px solid #ccc', padding: '10px', borderRadius: '4px', lineHeight: '1.4', width: '250px', fontSize: '10pt', position: 'relative' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', zIndex: 2 }}>
                 <span style={{ fontWeight: 'bold' }}>공급자</span>
                 <span style={{ color: '#00083a', fontWeight: 'bold' }}>(인)</span>
               </div>
-              <p style={{ margin: '5px 0 0 0' }}>상호: <b>{providerInfo?.companyName || '__________________'}</b></p>
-              <p style={{ margin: '2px 0 0 0' }}>대표자: {providerInfo?.ceoName || '__________________'}</p>
-              <p style={{ margin: '2px 0 0 0' }}>등록번호: {providerInfo?.businessNumber || '__________________'}</p>
-              <p style={{ margin: '2px 0 0 0' }}>주소: {providerInfo?.address || '__________________'}</p>
-              <p style={{ margin: '2px 0 0 0' }}>연락처: {providerInfo?.phone || '__________________'}</p>
+              {providerInfo?.stampImage && (
+                <img 
+                  src={providerInfo.stampImage} 
+                  alt="직인" 
+                  style={{ 
+                    position: 'absolute', 
+                    right: '8px', 
+                    top: '8px', 
+                    width: '45px', 
+                    height: '45px',
+                    mixBlendMode: 'multiply',
+                    zIndex: 1
+                  }} 
+                />
+              )}
+              <div style={{ position: 'relative', zIndex: 2 }}>
+                <p style={{ margin: '5px 0 0 0' }}>상호: <b>{providerInfo?.companyName || '__________________'}</b></p>
+                <p style={{ margin: '2px 0 0 0' }}>대표자: {providerInfo?.ceoName || '__________________'}</p>
+                <p style={{ margin: '2px 0 0 0' }}>등록번호: {providerInfo?.businessNumber || '__________________'}</p>
+                <p style={{ margin: '2px 0 0 0' }}>주소: {providerInfo?.address || '__________________'}</p>
+                <p style={{ margin: '2px 0 0 0' }}>연락처: {providerInfo?.phone || '__________________'}</p>
+              </div>
             </div>
           </div>
         </div>

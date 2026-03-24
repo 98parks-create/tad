@@ -37,6 +37,25 @@ export default function CreateQuote() {
     }
   }, [currentUser, editQuote, remarks]);
 
+  const allCategories = useMemo(() => {
+    if (companyProfile?.customMaterials && companyProfile.customMaterials.length > 0) {
+      const customCategory = {
+        id: 'custom_mats',
+        name: '⭐ 나만의 자재 (단골목록)',
+        items: companyProfile.customMaterials.map(m => ({
+          id: m.id,
+          name: m.name,
+          specification: m.specification,
+          unit: m.unit,
+          unitPrice: m.unitPrice,
+          type: 'general'
+        }))
+      };
+      return [customCategory, ...materialCategories];
+    }
+    return materialCategories;
+  }, [companyProfile]);
+
   const addItem = () => {
     setItems([{ id: Date.now(), categoryId: '', itemId: '', specification: '', unit: '', remarks: '', width: '', height: '', quantity: 1, name: '', unitPrice: '', type: '', total: 0 }, ...items]);
   };
@@ -64,11 +83,14 @@ export default function CreateQuote() {
           newItem.basePrice = 0;
           newItem.type = '';
         } else if (field === 'itemId') {
-          const category = materialCategories.find(c => c.id === newItem.categoryId);
+          const category = allCategories.find(c => c.id === newItem.categoryId);
           const selectedMat = category?.items.find(i => i.id === value);
           if (selectedMat) {
             newItem.name = selectedMat.name;
-            newItem.type = selectedMat.type;
+            newItem.type = selectedMat.type || 'general';
+            if (selectedMat.specification) newItem.specification = selectedMat.specification;
+            if (selectedMat.unit) newItem.unit = selectedMat.unit;
+            if (selectedMat.unitPrice) newItem.unitPrice = selectedMat.unitPrice;
           }
         }
 
@@ -180,7 +202,7 @@ export default function CreateQuote() {
                     <label>카테고리</label>
                     <select value={item.categoryId} onChange={e => handleItemChange(item.id, 'categoryId', e.target.value)}>
                       <option value="">-- 선택 --</option>
-                      {materialCategories.map(cat => (
+                      {allCategories.map(cat => (
                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                       ))}
                     </select>
@@ -190,7 +212,7 @@ export default function CreateQuote() {
                     <label>기본 구분 (선택)</label>
                     <select value={item.itemId} onChange={e => handleItemChange(item.id, 'itemId', e.target.value)} disabled={!item.categoryId}>
                       <option value="">-- 자재/종류 선택 --</option>
-                      {materialCategories.find(c => c.id === item.categoryId)?.items.map(mat => (
+                      {allCategories.find(c => c.id === item.categoryId)?.items.map(mat => (
                         <option key={mat.id} value={mat.id}>{mat.name}</option>
                       ))}
                     </select>
