@@ -85,25 +85,7 @@ export default function Dashboard() {
           <li>대기 중인 견적서에서 <strong>[입금/승인 완료]</strong> 버튼을 누르면 매출 통계에 즉시 반영됩니다.</li>
         </ul>
 
-        {profile && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: profile.subscriptionPlan === 'pro' ? '#f0fdf4' : '#f8fafc', border: `1px solid ${profile.subscriptionPlan === 'pro' ? '#bbf7d0' : '#e2e8f0'}`, padding: '1.5rem', borderRadius: '8px' }}>
-            <div>
-              <h3 style={{ margin: '0 0 0.5rem 0', color: profile.subscriptionPlan === 'pro' ? '#166534' : '#334155', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                현재 요금제 : {profile.subscriptionPlan === 'pro' ? 'PRO (무제한)' : 'FREE (무료 체험)'}
-              </h3>
-              <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>
-                {profile.subscriptionPlan === 'pro' 
-                  ? '사장님만의 완벽한 맞춤형 플랫폼을 무제한으로 사용 중입니다.' 
-                  : `현재 작성된 견적서: ${stats.total} / 5 건 (업그레이드 필요 시 전환)`}
-              </p>
-            </div>
-            {profile.subscriptionPlan !== 'pro' && (
-              <button type="button" className="btn btn-primary" onClick={() => alert('PG사 카드 결제창 연동 구축 완료 후 적용됩니다.')} style={{ backgroundColor: '#10b981', border: 'none', padding: '0.6rem 1rem', flexShrink: 0, marginLeft: '1rem' }}>
-                월 19,900원에 무제한 개통
-              </button>
-            )}
-          </div>
-        )}
+
       </div>
     </div>
   );
