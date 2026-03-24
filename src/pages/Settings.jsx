@@ -10,7 +10,8 @@ export default function Settings() {
     ceoName: '',
     businessNumber: '',
     address: '',
-    phone: ''
+    phone: '',
+    defaultRemarks: ''
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -89,7 +90,19 @@ export default function Settings() {
           <input type="text" name="phone" value={profile.phone || ''} onChange={handleChange} placeholder="예) 02-1234-5678" />
         </div>
 
-        <button type="submit" className="btn btn-primary" disabled={saving} style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem' }}>
+        <div className="form-group" style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
+          <h3 style={{ marginBottom: '0.8rem', fontSize: '1.1rem' }}>기본 특약사항 / 안내문 (선택)</h3>
+          <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', marginBottom: '1rem' }}>새 견적서를 작성할 때마다 아래 내용이 견적서 하단에 자동으로 채워집니다.</p>
+          <textarea 
+            name="defaultRemarks" 
+            value={profile.defaultRemarks || ''} 
+            onChange={handleChange} 
+            placeholder="예시)&#10;- 장비대(크레인/스카이) 비용은 현장 상황에 따라 별도 청구될 수 있습니다.&#10;- 결제조건: 계약금 50%, 시공 완료 후 50%" 
+            style={{ width: '100%', height: '100px', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '4px', resize: 'vertical' }}
+          />
+        </div>
+
+        <button type="submit" className="btn btn-primary" disabled={saving} style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '1.5rem' }}>
           <Save size={20} />
           {saving ? '저장 중...' : '회사 정보 저장하기'}
         </button>

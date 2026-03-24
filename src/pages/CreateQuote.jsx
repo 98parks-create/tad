@@ -13,10 +13,14 @@ export default function CreateQuote() {
   const location = useLocation();
   const navigate = useNavigate();
   const editQuote = location.state?.editQuote;
+  const duplicateQuote = location.state?.duplicateQuote;
+  const sourceQuote = editQuote || duplicateQuote;
 
-  const [customerInfo, setCustomerInfo] = useState(editQuote?.customerInfo || { name: '', company: '', phone: '', project: '', date: new Date().toISOString().split('T')[0] });
-  const [items, setItems] = useState(editQuote?.items || []);
-  const [includeVat, setIncludeVat] = useState(editQuote ? editQuote.includeVat : true);
+  const [customerInfo, setCustomerInfo] = useState(sourceQuote?.customerInfo || { name: '', company: '', phone: '', project: '', date: new Date().toISOString().split('T')[0] });
+  const [items, setItems] = useState(sourceQuote?.items || []);
+  const [includeVat, setIncludeVat] = useState(sourceQuote ? sourceQuote.includeVat : true);
+  const [discount, setDiscount] = useState(sourceQuote?.discount || 0);
+  const [remarks, setRemarks] = useState(sourceQuote?.remarks || '');
   const [isSaving, setIsSaving] = useState(false);
   const [companyProfile, setCompanyProfile] = useState(null);
   const [editId, setEditId] = useState(editQuote?.id || null);
@@ -24,10 +28,15 @@ export default function CreateQuote() {
   React.useEffect(() => {
     if (currentUser) {
       getProfile(currentUser.uid).then(profile => {
-        if (profile) setCompanyProfile(profile);
+        if (profile) {
+          setCompanyProfile(profile);
+          if (profile.defaultRemarks && !sourceQuote?.remarks && !remarks) {
+            setRemarks(profile.defaultRemarks);
+          }
+        }
       }).catch(console.error);
     }
-  }, [currentUser]);
+  }, [currentUser, sourceQuote, remarks]);
 
   const addItem = () => {
     setItems([{ id: Date.now(), categoryId: '', itemId: '', specification: '', unit: '', remarks: '', width: '', height: '', quantity: 1, name: '', unitPrice: '', type: '', total: 0 }, ...items]);
@@ -68,9 +77,15 @@ export default function CreateQuote() {
     }));
   };
 
-  const subTotal = useMemo(() => items.reduce((sum, item) => sum + item.total, 0), [items]);
-  const vat = includeVat ? Math.round(subTotal * 0.1) : 0;
-  const grandTotal = subTotal + vat;
+  const calculateTotals = () => {
+    const subTotal = items.reduce((sum, item) => sum + item.total, 0);
+    const finalSubTotal = Math.max(0, subTotal - discount);
+    const vat = includeVat ? Math.floor(finalSubTotal * 0.1) : 0;
+    const grandTotal = finalSubTotal + vat;
+    return { subTotal, vat, grandTotal };
+  };
+
+  const { subTotal, vat, grandTotal } = useMemo(calculateTotals, [items, discount, includeVat]);
 
   const printRef = useRef();
   const handlePrint = useReactToPrint({
@@ -91,7 +106,7 @@ export default function CreateQuote() {
     
     setIsSaving(true);
     try {
-      await saveQuote(currentUser.uid, { customerInfo, items, subTotal, vat, grandTotal, includeVat, status: 'pending' }, editId);
+      await saveQuote(currentUser.uid, { customerInfo, items, subTotal, discount, vat, grandTotal, includeVat, remarks, status: 'pending' }, editId);
       alert(editId ? "견적서가 성공적으로 수정되었습니다." : "견적 데이터가 성공적으로 저장되었습니다.");
       navigate('/list');
     } catch (err) {
@@ -230,40 +245,72 @@ export default function CreateQuote() {
           </div>
         )}
       </div>
+      <div className="card" style={{ marginTop: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2rem' }}>
+          <div style={{ flex: '1 1 300px' }}>
+            <h3 style={{ marginBottom: '0.8rem', fontSize: '1.1rem', color: 'var(--text-dark)' }}>특약사항 및 결제조건 (선택)</h3>
+            <textarea
+              value={remarks}
+              onChange={(e) => setRemarks(e.target.value)}
+              style={{ width: '100%', height: '100px', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', resize: 'vertical' }}
+              placeholder="예: 결제조건 - 계약시 50%, 완료시 50% / 장비대 현장 별도"
+            />
+          </div>
+          
+          <div style={{ flex: '0 0 320px', backgroundColor: '#f8fafc', padding: '1.5rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
+              <span style={{ color: 'var(--text-light)' }}>공급가액 소계</span>
+              <span>{subTotal.toLocaleString()} 원</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem', alignItems: 'center' }}>
+              <span style={{ color: 'var(--text-light)' }}>할인 (Nego)</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span style={{ color: 'var(--danger-color)' }}>-</span>
+                <input 
+                  type="number" 
+                  value={discount || ''}
+                  onChange={(e) => setDiscount(Number(e.target.value))}
+                  style={{ width: '100px', padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '4px', textAlign: 'right' }}
+                  placeholder="0"
+                />
+                <span>원</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid #e2e8f0', alignItems: 'center' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0, cursor: 'pointer', color: 'var(--text-light)' }}>
+                <input type="checkbox" checked={includeVat} onChange={e => setIncludeVat(e.target.checked)} style={{ width: 'auto' }} />
+                부가세 (10%)
+              </label>
+              <span>{vat.toLocaleString()} 원</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontWeight: 600, fontSize: '1.1rem' }}>최종 합계</span>
+              <span style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--primary-color)' }}>{grandTotal.toLocaleString()} 원</span>
+            </div>
+          </div>
+        </div>
 
-      <div className="card" style={{ 
-        display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem',
-        position: 'sticky', bottom: '1rem', zIndex: 10,
-        boxShadow: '0 -4px 20px rgba(0,0,0,0.15)', border: '1px solid var(--border-color)'
-      }}>
-        <div style={{ width: '100%', maxWidth: '400px', display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0' }}>
-          <span>공급가액 (소계):</span>
-          <span style={{ fontWeight: 600 }}>{subTotal.toLocaleString()} 원</span>
-        </div>
-        <div style={{ width: '100%', maxWidth: '400px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', borderBottom: '1px solid var(--border-color)' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0, cursor: 'pointer' }}>
-            <input type="checkbox" checked={includeVat} onChange={e => setIncludeVat(e.target.checked)} style={{ width: 'auto' }} />
-            부가세 (10%) 적용
-          </label>
-          <span style={{ fontWeight: 600 }}>{vat.toLocaleString()} 원</span>
-        </div>
-        <div style={{ width: '100%', maxWidth: '400px', display: 'flex', justifyContent: 'space-between', padding: '1rem 0', fontSize: '1.25rem' }}>
-          <span style={{ fontWeight: 700, color: 'var(--primary-color)' }}>총 견적 금액:</span>
-          <span style={{ fontWeight: 700, color: 'var(--primary-color)' }}>{grandTotal.toLocaleString()} 원</span>
+        <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center' }}>
+          <button className="btn btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={handleSave} disabled={isSaving}>
+            <Save size={20} />
+            {isSaving ? '저장 중...' : (editId ? '견적서 수정 완료' : '견적서 최종 저장')}
+          </button>
         </div>
       </div>
-            {/* Hidden Print Template */}
-        <div style={{ display: 'none' }}>
-          <PrintTemplate 
-            ref={printRef}
-            customerInfo={customerInfo}
-            items={items}
-            subTotal={subTotal}
-            vat={vat}
-            grandTotal={grandTotal}
-            providerInfo={companyProfile}
-          />
-        </div>
+
+      <div style={{ display: 'none' }}>
+        <PrintTemplate 
+          ref={printRef}
+          customerInfo={customerInfo}
+          items={items}
+          subTotal={subTotal}
+          discount={discount}
+          vat={vat}
+          grandTotal={grandTotal}
+          providerInfo={companyProfile}
+          remarks={remarks}
+        />
+      </div>
     </div>
   );
 }

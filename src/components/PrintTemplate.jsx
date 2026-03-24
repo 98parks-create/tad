@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 
-const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, vat, grandTotal, providerInfo }, ref) => {
+const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, vat, grandTotal, providerInfo, remarks }, ref) => {
   const dynamicScale = items.length > 8 ? 8 / items.length : 1;
 
   return (
@@ -90,8 +90,14 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, vat, grandTot
             <tbody>
               <tr>
                 <td style={{ border: '1px solid #cbd5e1', padding: '6px', backgroundColor: '#f1f5f9', fontWeight: 'bold', width: '120px' }}>공급가액</td>
-                <td style={{ border: '1px solid #cbd5e1', padding: '6px', textAlign: 'right' }}>{subTotal.toLocaleString()} 원</td>
+                <td style={{ border: '1px solid #cbd5e1', padding: '6px', textAlign: 'right' }}>{Number(subTotal).toLocaleString()} 원</td>
               </tr>
+              {discount > 0 && (
+                <tr>
+                  <td style={{ border: '1px solid #cbd5e1', padding: '6px', backgroundColor: '#fcd34d', fontWeight: 'bold' }}>할인액 (에누리)</td>
+                  <td style={{ border: '1px solid #cbd5e1', padding: '6px', textAlign: 'right', color: '#b45309', fontWeight: 'bold' }}>- {Number(discount).toLocaleString()} 원</td>
+                </tr>
+              )}
               <tr>
                 <td style={{ border: '1px solid #cbd5e1', padding: '6px', backgroundColor: '#f1f5f9', fontWeight: 'bold' }}>부가세 (VAT)</td>
                 <td style={{ border: '1px solid #cbd5e1', padding: '6px', textAlign: 'right' }}>{vat.toLocaleString()} 원</td>
@@ -104,8 +110,16 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, vat, grandTot
           </table>
         </div>
         
-        <div style={{ marginTop: 'auto', textAlign: 'center', fontSize: '10pt', color: '#666', borderTop: '1px solid #ccc', paddingTop: '5mm', paddingBottom: '5mm' }}>
-          상기와 같이 견적합니다.
+        <div style={{ marginTop: 'auto', paddingTop: '5mm', paddingBottom: '3mm' }}>
+          {remarks && (
+            <div style={{ marginBottom: '5mm', textAlign: 'left', fontSize: '9pt', color: '#334155', backgroundColor: '#f8fafc', padding: '8px 12px', borderRadius: '4px', border: '1px solid #e2e8f0', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
+              <strong>[ 특약사항 및 공지 ]</strong><br/>
+              {remarks}
+            </div>
+          )}
+          <div style={{ textAlign: 'center', fontSize: '10pt', color: '#666', borderTop: '1px solid #ccc', paddingTop: '5mm' }}>
+            상기와 같이 견적합니다.
+          </div>
         </div>
     </div>
   );
