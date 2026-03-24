@@ -63,7 +63,10 @@ function AppContent() {
           <div style={{ width: 32, height: 32, backgroundColor: 'white', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>T</span>
           </div>
-          TAD B2B
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontWeight: 'bold', fontSize: '1.1rem', lineHeight: '1' }}>TAD B2B</span>
+            <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.7)', marginTop: '4px', fontWeight: 'normal', letterSpacing: '-0.5px' }}>맞춤형 자동 견적 솔루션</span>
+          </div>
           {/* Close button for mobile inside sidebar */}
           <button 
             className="mobile-menu-btn" 
@@ -99,7 +102,7 @@ function AppContent() {
             <button className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(true)}>
               <Menu size={24} />
             </button>
-            <h2 style={{ fontSize: '1.25rem', color: 'var(--text-dark)', margin: 0 }}>통합 견적 솔루션</h2>
+            <h2 style={{ fontSize: '1.25rem', color: 'var(--text-dark)', margin: 0 }}>맞춤형 자동 견적 솔루션</h2>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <span style={{ fontSize: '0.9rem', color: 'var(--text-light)', fontWeight: 500 }}>{currentUser.email}</span>

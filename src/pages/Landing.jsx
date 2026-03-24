@@ -14,7 +14,10 @@ export default function Landing() {
           <div style={{ width: 36, height: 36, backgroundColor: 'var(--primary-color)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ color: 'white', fontWeight: 'bold', fontSize: '1.2rem' }}>T</span>
           </div>
-          <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-dark)' }}>TAD B2B</span>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-dark)', lineHeight: '1' }}>TAD B2B</span>
+            <span style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px', fontWeight: 500, letterSpacing: '-0.5px' }}>맞춤형 자동 견적 솔루션</span>
+          </div>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <Link to="/login" className="btn btn-outline" style={{ textDecoration: 'none' }}>로그인</Link>
@@ -86,7 +89,8 @@ export default function Landing() {
 
       {/* Footer */}
       <footer style={{ backgroundColor: '#0f172a', padding: '3rem 2rem', textAlign: 'center', color: '#94a3b8' }}>
-        <h4 style={{ color: 'white', fontSize: '1.5rem', marginBottom: '1rem', fontWeight: 700 }}>TAD B2B 솔루션</h4>
+        <h4 style={{ color: 'white', fontSize: '1.5rem', margin: '0 0 0.5rem 0', fontWeight: 700 }}>TAD B2B</h4>
+        <p style={{ color: '#cbd5e1', fontSize: '1rem', marginTop: 0, marginBottom: '1.5rem' }}>맞춤형 자동 견적 솔루션</p>
         <p style={{ marginBottom: '2rem' }}>광고 제작 비즈니스의 미래 모델. 더 빠르고 편리한 업무 인프라를 경험하세요.</p>
         <p style={{ fontSize: '0.85rem' }}>&copy; {new Date().getFullYear()} TAD B2B Inc. All rights reserved.</p>
       </footer>

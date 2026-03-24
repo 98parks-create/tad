@@ -45,7 +45,10 @@ export default function Signup() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f4f6f8', padding: '2rem 0' }}>
       <div className="card" style={{ maxWidth: '400px', width: '100%', padding: '2rem' }}>
-        <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: 'var(--primary-color)' }}>TAD B2B 회원가입</h2>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <h2 style={{ margin: '0 0 0.5rem 0', color: 'var(--primary-color)' }}>TAD B2B 회원가입</h2>
+          <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>맞춤형 자동 견적 솔루션</p>
+        </div>
         
         {error && <div style={{ color: 'var(--danger-color)', marginBottom: '1rem', padding: '1rem', backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: '6px', textAlign: 'center', fontSize: '0.9rem' }}>{error}</div>}
         
