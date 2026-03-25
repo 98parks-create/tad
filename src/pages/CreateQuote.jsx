@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef } from 'react';
-import { materialCategories } from '../data/materials';
+import { industries, materialCategoriesByIndustry } from '../data/materials';
 import { Plus, Trash2, Save, Printer, Copy, Lock } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 import PrintTemplate from '../components/PrintTemplate';
@@ -49,7 +49,8 @@ export default function CreateQuote() {
     }
   }, [currentUser, editQuote, remarks]);
 
-  const allCategories = useMemo(() => {
+  const getCategoriesForIndustry = (industryId) => {
+    let cats = materialCategoriesByIndustry[industryId] || [];
     if (companyProfile?.customMaterials && companyProfile.customMaterials.length > 0) {
       const customCategory = {
         id: 'custom_mats',
@@ -63,13 +64,13 @@ export default function CreateQuote() {
           type: 'general'
         }))
       };
-      return [customCategory, ...materialCategories];
+      return [customCategory, ...cats];
     }
-    return materialCategories;
-  }, [companyProfile]);
+    return cats;
+  };
 
   const addItem = () => {
-    setItems([{ id: Date.now(), categoryId: '', itemId: '', specification: '', unit: '', remarks: '', width: '', height: '', quantity: 1, name: '', unitPrice: '', type: '', total: 0 }, ...items]);
+    setItems([{ id: Date.now(), industry: 'sign', categoryId: '', itemId: '', specification: '', unit: '', remarks: '', width: '', height: '', quantity: 1, name: '', unitPrice: '', type: '', total: 0 }, ...items]);
   };
 
   const removeItem = (id) => {
@@ -88,14 +89,21 @@ export default function CreateQuote() {
       if (item.id === id) {
         let newItem = { ...item, [field]: value };
         
-        if (field === 'categoryId') {
+        if (field === 'industry') {
+          newItem.categoryId = '';
+          newItem.itemId = '';
+          newItem.name = '';
+          newItem.unitPrice = 0;
+          newItem.basePrice = 0;
+          newItem.type = '';
+        } else if (field === 'categoryId') {
           newItem.itemId = '';
           newItem.name = '';
           newItem.unitPrice = 0;
           newItem.basePrice = 0;
           newItem.type = '';
         } else if (field === 'itemId') {
-          const category = allCategories.find(c => c.id === newItem.categoryId);
+          const category = getCategoriesForIndustry(newItem.industry || 'sign').find(c => c.id === newItem.categoryId);
           const selectedMat = category?.items.find(i => i.id === value);
           if (selectedMat) {
             newItem.name = selectedMat.name;
@@ -211,10 +219,19 @@ export default function CreateQuote() {
                 <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
                   
                   <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label>업종</label>
+                    <select value={item.industry || 'sign'} onChange={e => handleItemChange(item.id, 'industry', e.target.value)}>
+                      {industries.map(ind => (
+                        <option key={ind.id} value={ind.id}>{ind.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: 0 }}>
                     <label>카테고리</label>
-                    <select value={item.categoryId} onChange={e => handleItemChange(item.id, 'categoryId', e.target.value)}>
+                    <select value={item.categoryId} onChange={e => handleItemChange(item.id, 'categoryId', e.target.value)} disabled={item.industry === 'other' && !(companyProfile?.customMaterials && companyProfile.customMaterials.length > 0)}>
                       <option value="">-- 선택 --</option>
-                      {allCategories.map(cat => (
+                      {getCategoriesForIndustry(item.industry || 'sign').map(cat => (
                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                       ))}
                     </select>
@@ -224,7 +241,7 @@ export default function CreateQuote() {
                     <label>기본 구분 (선택)</label>
                     <select value={item.itemId} onChange={e => handleItemChange(item.id, 'itemId', e.target.value)} disabled={!item.categoryId}>
                       <option value="">-- 자재/종류 선택 --</option>
-                      {allCategories.find(c => c.id === item.categoryId)?.items.map(mat => (
+                      {getCategoriesForIndustry(item.industry || 'sign').find(c => c.id === item.categoryId)?.items.map(mat => (
                         <option key={mat.id} value={mat.id}>{mat.name}</option>
                       ))}
                     </select>

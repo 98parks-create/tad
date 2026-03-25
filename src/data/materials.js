@@ -1,3 +1,10 @@
+export const industries = [
+  { id: 'sign', name: '간판/광고물' },
+  { id: 'interior', name: '인테리어' },
+  { id: 'facility', name: '설비' },
+  { id: 'other', name: '기타 (직접입력)' }
+];
+
 export const materialCategories = [
   {
     id: "print",
@@ -66,3 +73,107 @@ export const materialCategories = [
     ]
   }
 ];
+
+export const materialCategoriesByIndustry = {
+  sign: materialCategories,
+  interior: [
+    {
+      id: "woodwork",
+      name: "목공사",
+      items: [
+        { id: "w1", name: "가벽 설치", unitPrice: 150000, unit: "sqm", type: "area" },
+        { id: "w2", name: "천장 덴조", unitPrice: 180000, unit: "sqm", type: "area" },
+        { id: "w3", name: "몰딩/걸레받이", unitPrice: 20000, unit: "m", type: "quantity" },
+        { id: "w4", name: "문/문틀 교체", unitPrice: 450000, unit: "ea", type: "quantity" },
+        { id: "w5", name: "가구 제작(붙박이장)", unitPrice: 250000, unit: "m", type: "quantity" }
+      ]
+    },
+    {
+      id: "finish",
+      name: "마감사 (도배/장판/도장)",
+      items: [
+        { id: "f1", name: "실크도배", unitPrice: 35000, unit: "sqm", type: "area" },
+        { id: "f2", name: "합지도배", unitPrice: 20000, unit: "sqm", type: "area" },
+        { id: "f3", name: "강마루", unitPrice: 120000, unit: "sqm", type: "area" },
+        { id: "f4", name: "데코타일", unitPrice: 45000, unit: "sqm", type: "area" },
+        { id: "f5", name: "내부 수성페인트", unitPrice: 30000, unit: "sqm", type: "area" },
+        { id: "f6", name: "우레탄 방수", unitPrice: 45000, unit: "sqm", type: "area" }
+      ]
+    },
+    {
+      id: "elec",
+      name: "전기/조명",
+      items: [
+        { id: "el1", name: "배선/증설", unitPrice: 80000, unit: "ea", type: "quantity" },
+        { id: "el2", name: "다운라이트 3인치", unitPrice: 25000, unit: "ea", type: "quantity" },
+        { id: "el3", name: "콘센트/스위치 교체", unitPrice: 15000, unit: "ea", type: "quantity" },
+        { id: "el4", name: "분전함 교체", unitPrice: 350000, unit: "ea", type: "quantity" },
+        { id: "el5", name: "전열선 설치", unitPrice: 65000, unit: "ea", type: "quantity" }
+      ]
+    },
+    {
+      id: "int_equipment",
+      name: "장비대/가설/철거",
+      items: [
+        { id: "eq1", name: "실내 철거비", unitPrice: 150000, unit: "sqm", type: "area" },
+        { id: "eq2", name: "사다리차 이용료", unitPrice: 150000, unit: "ea", type: "quantity" }
+      ]
+    },
+    {
+      id: "int_labor",
+      name: "시공 인건비/기타",
+      items: [
+        { id: "il1", name: "전문 기초/목수 (1인)", unitPrice: 300000, unit: "ea", type: "quantity" },
+        { id: "il2", name: "타일 전문기공 (1인)", unitPrice: 350000, unit: "ea", type: "quantity" },
+        { id: "il3", name: "일반 조공 (1인)", unitPrice: 180000, unit: "ea", type: "quantity" },
+        { id: "il4", name: "폐기물 1톤 처리", unitPrice: 250000, unit: "ea", type: "quantity" },
+        { id: "il5", name: "현장 보양작업", unitPrice: 150000, unit: "ea", type: "quantity" }
+      ]
+    }
+  ],
+  facility: [
+    {
+      id: "plumb",
+      name: "배관/위생설비",
+      items: [
+        { id: "pl1", name: "수도배관 신설(PB/엑셀)", unitPrice: 150000, unit: "m", type: "quantity" },
+        { id: "pl2", name: "하수배관 신설(PVC)", unitPrice: 120000, unit: "m", type: "quantity" },
+        { id: "pl3", name: "양변기 교체세팅", unitPrice: 250000, unit: "ea", type: "quantity" },
+        { id: "pl4", name: "세면대 교체세팅", unitPrice: 200000, unit: "ea", type: "quantity" },
+        { id: "pl5", name: "싱크/샤워 수전 교체", unitPrice: 80000, unit: "ea", type: "quantity" }
+      ]
+    },
+    {
+      id: "hvac",
+      name: "공조/소방설비",
+      items: [
+        { id: "hv1", name: "에어컨 냉매배관 신설", unitPrice: 50000, unit: "m", type: "quantity" },
+        { id: "hv2", name: "환기 디퓨저/닥트", unitPrice: 45000, unit: "ea", type: "quantity" },
+        { id: "hv3", name: "스프링클러 헤드 증설/이설", unitPrice: 150000, unit: "ea", type: "quantity" },
+        { id: "hv4", name: "화재 감지기 설치", unitPrice: 30000, unit: "ea", type: "quantity" },
+        { id: "hv5", name: "가스배관 수정작업", unitPrice: 250000, unit: "ea", type: "quantity" }
+      ]
+    },
+    {
+      id: "fac_equipment",
+      name: "유지보수/점검/장비",
+      items: [
+        { id: "fe1", name: "코어작업 (건식/습식)", unitPrice: 150000, unit: "hole", type: "quantity" },
+        { id: "fe2", name: "누수 탐지/점검", unitPrice: 300000, unit: "ea", type: "quantity" },
+        { id: "fe3", name: "배관 내시경/세척", unitPrice: 200000, unit: "ea", type: "quantity" }
+      ]
+    },
+    {
+      id: "fac_labor",
+      name: "시공 인건비/기타",
+      items: [
+        { id: "fl1", name: "설비 전문기공", unitPrice: 350000, unit: "ea", type: "quantity" },
+        { id: "fl2", name: "용접 전문기공", unitPrice: 400000, unit: "ea", type: "quantity" },
+        { id: "fl3", name: "설비 보조조공", unitPrice: 200000, unit: "ea", type: "quantity" },
+        { id: "fl4", name: "특수장비대여료", unitPrice: 150000, unit: "ea", type: "quantity" },
+        { id: "fl5", name: "설비 폐기물 처리", unitPrice: 150000, unit: "ea", type: "quantity" }
+      ]
+    }
+  ],
+  other: []
+};
