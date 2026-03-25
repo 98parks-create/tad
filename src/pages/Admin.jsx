@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { getUpgradeRequests, approveUpgrade, cancelUpgrade } from '../services/adminService';
+import { getUpgradeRequests, approveUpgrade, cancelUpgrade, migrateLegacyProUsers } from '../services/adminService';
 import { getProfile } from '../services/profileService';
 import { CheckCircle } from 'lucide-react';
 
@@ -77,6 +77,19 @@ export default function Admin() {
     }
   };
 
+  const handleMigrate = async () => {
+    if (window.confirm('기존의 무제한 승인 회원들에게 모두 일괄적으로 [오늘부터 30일 뒤]를 만료 기한으로 적용하시겠습니까?')) {
+      try {
+        const count = await migrateLegacyProUsers();
+        alert(`성공! 총 ${count}명의 기존 회원에게 30일 만료 기한이 적용되었습니다.`);
+        window.location.reload();
+      } catch (err) {
+        console.error(err);
+        alert('데이터 일괄 적용 중 오류가 발생했습니다.');
+      }
+    }
+  };
+
   if (loading) return <div className="card">불러오는 중...</div>;
 
   if (!isAdmin) {
@@ -90,7 +103,12 @@ export default function Admin() {
 
   return (
     <div className="card">
-      <h2 style={{ marginBottom: '1.5rem', color: 'var(--primary-color)' }}>[관리자] 멤버십 업그레이드 요청 관리</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <h2 style={{ margin: 0, color: 'var(--primary-color)' }}>[관리자] 멤버십 업그레이드 요청 관리</h2>
+        <button className="btn btn-outline" style={{ fontSize: '0.85rem', color: '#64748b', borderColor: '#cbd5e1' }} onClick={handleMigrate}>
+          기존 승인회원 30일 만료 일괄 적용
+        </button>
+      </div>
       
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
