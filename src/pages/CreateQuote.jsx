@@ -417,7 +417,7 @@ export default function CreateQuote() {
           onSuccess={() => {
             setShowPaymentModal(false);
             setShowPaywall(false);
-            alert("결제가 완료되었습니다! 이제 PRO 요금제의 혜택을 모두 누리실 수 있습니다. (테스트 환경)");
+            alert("PRO 승인 요청이 접수되었습니다! 관리자가 입금 내역을 확인한 후 빠르게 승인 처리해 드릴 예정입니다.");
             window.location.reload();
           }}
         />
