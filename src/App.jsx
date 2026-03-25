@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, NavLink, Navigate, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, PlusCircle, Menu, X, Settings as SettingsIcon, Shield } from 'lucide-react';
+import { LayoutDashboard, FileText, PlusCircle, Menu, X, Settings as SettingsIcon, Shield, Download } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import CreateQuote from './pages/CreateQuote';
 import QuoteList from './pages/QuoteList';
@@ -21,6 +21,23 @@ function AppContent() {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') setDeferredPrompt(null);
+  };
 
   async function handleLogout() {
     try {
@@ -45,6 +62,15 @@ function AppContent() {
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
+        {deferredPrompt && (
+          <button
+            onClick={handleInstallClick}
+            style={{ position: 'fixed', bottom: '20px', right: '20px', backgroundColor: 'var(--primary-color)', color: 'white', padding: '12px 20px', borderRadius: '50px', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', zIndex: 9999, fontWeight: 'bold', border: 'none', cursor: 'pointer' }}
+          >
+            <Download size={20} />
+            앱 설치하기
+          </button>
+        )}
         <Footer />
       </div>
     );
@@ -128,6 +154,15 @@ function AppContent() {
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
+        {deferredPrompt && (
+          <button
+            onClick={handleInstallClick}
+            style={{ position: 'fixed', bottom: '20px', right: '20px', backgroundColor: 'var(--primary-color)', color: 'white', padding: '12px 20px', borderRadius: '50px', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', zIndex: 9999, fontWeight: 'bold', border: 'none', cursor: 'pointer' }}
+          >
+            <Download size={20} />
+            앱 설치하기
+          </button>
+        )}
         <Footer />
       </main>
     </div>
