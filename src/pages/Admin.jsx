@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { getUpgradeRequests, approveUpgrade } from '../services/adminService';
+import { getProfile } from '../services/profileService';
 import { CheckCircle } from 'lucide-react';
 
 const ADMIN_EMAILS = ['inseopark7@naver.com', import.meta.env.VITE_ADMIN_EMAIL];
@@ -9,6 +10,8 @@ export default function Admin() {
   const { currentUser } = useAuth();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
 
   const isAdmin = ADMIN_EMAILS.includes(currentUser?.email);
 
@@ -41,6 +44,21 @@ export default function Admin() {
         console.error("Approval failed", err);
         alert("승인 중 오류가 발생했습니다.");
       }
+    }
+  };
+
+  const handleViewDetails = async (uid, email, depositorName) => {
+    setLoadingProfile(true);
+    setSelectedUser({ uid, email, depositorName, loading: true });
+    try {
+      const profile = await getProfile(uid);
+      setSelectedUser({ uid, email, depositorName, profile, loading: false });
+    } catch (err) {
+      console.error(err);
+      alert("프로필 정보를 불러오지 못했습니다.");
+      setSelectedUser(null);
+    } finally {
+      setLoadingProfile(false);
     }
   };
 
@@ -103,11 +121,16 @@ export default function Admin() {
                       )}
                     </td>
                     <td style={{ padding: '1rem 0.5rem', textAlign: 'center' }}>
-                      {req.status === 'pending' && (
-                        <button className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#059669', borderColor: '#059669', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }} onClick={() => handleApprove(req)}>
-                          <CheckCircle size={16} /> 승인하기
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
+                        {req.status === 'pending' && (
+                          <button className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#059669', borderColor: '#059669', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }} onClick={() => handleApprove(req)}>
+                            <CheckCircle size={16} /> 승인하기
+                          </button>
+                        )}
+                        <button className="btn btn-outline" style={{ padding: '0.3rem 0.6rem', fontSize: '0.85rem' }} onClick={() => handleViewDetails(req.uid, req.email, req.depositorName)}>
+                          회원 정보
                         </button>
-                      )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -116,6 +139,67 @@ export default function Admin() {
           </tbody>
         </table>
       </div>
+
+      {selectedUser && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.8)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }} onClick={() => setSelectedUser(null)}>
+          <div className="card" style={{ maxWidth: '500px', width: '90%', maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
+              <h3 style={{ margin: 0, color: 'var(--primary-color)' }}>회원 상세 정보</h3>
+              <button className="btn-icon" onClick={() => setSelectedUser(null)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.2rem', color: 'var(--text-light)' }}>✕</button>
+            </div>
+            
+            {selectedUser.loading ? (
+              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-light)' }}>
+                {loadingProfile ? '정보를 불러오는 중...' : ''}
+              </div>
+            ) : selectedUser.profile ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ backgroundColor: '#f8fafc', padding: '1.2rem', borderRadius: '8px' }}>
+                  <h4 style={{ margin: '0 0 1rem 0', fontSize: '1.05rem', color: '#0f172a' }}>기본 가입 정보</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '0.5rem', fontSize: '0.95rem' }}>
+                    <span style={{ color: 'var(--text-light)' }}>가입 이메일:</span>
+                    <span style={{ fontWeight: 500 }}>{selectedUser.email || '-'}</span>
+                    <span style={{ color: 'var(--text-light)' }}>입금자명:</span>
+                    <span style={{ fontWeight: 500 }}>{selectedUser.depositorName || '-'}</span>
+                    <span style={{ color: 'var(--text-light)' }}>현재 권한:</span>
+                    <span style={{ fontWeight: 600, color: selectedUser.profile.subscriptionPlan === 'pro' ? '#059669' : '#475569' }}>
+                      {selectedUser.profile.subscriptionPlan === 'pro' ? 'PRO 요금제' : '무료 요금제'}
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{ border: '1px solid #e2e8f0', padding: '1.2rem', borderRadius: '8px' }}>
+                  <h4 style={{ margin: '0 0 1rem 0', fontSize: '1.05rem', color: '#0f172a' }}>회사(사업자) 프로필 정보</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '0.8rem', fontSize: '0.95rem' }}>
+                    <span style={{ color: 'var(--text-light)' }}>회사명(상호):</span>
+                    <span style={{ fontWeight: 500 }}>{selectedUser.profile.companyName || '-'}</span>
+                    <span style={{ color: 'var(--text-light)' }}>대표자 성명:</span>
+                    <span>{selectedUser.profile.ceoName || '-'}</span>
+                    <span style={{ color: 'var(--text-light)' }}>사업자등록번호:</span>
+                    <span>{selectedUser.profile.businessNumber || '-'}</span>
+                    <span style={{ color: 'var(--text-light)' }}>연락처:</span>
+                    <span>{selectedUser.profile.phone || '-'}</span>
+                    <span style={{ color: 'var(--text-light)' }}>팩스번호:</span>
+                    <span>{selectedUser.profile.fax || '-'}</span>
+                    <span style={{ color: 'var(--text-light)' }}>이메일(세금):</span>
+                    <span>{selectedUser.profile.email || '-'}</span>
+                    <span style={{ color: 'var(--text-light)' }}>사업장 주소:</span>
+                    <span style={{ lineHeight: '1.4' }}>{selectedUser.profile.address || '-'}</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div style={{ padding: '2rem', textAlign: 'center', color: '#ef4444' }}>
+                해당 회원의 프로필 정보가 아직 등록되지 않았거나 찾을 수 없습니다.
+              </div>
+            )}
+            
+            <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center' }}>
+              <button className="btn btn-primary" onClick={() => setSelectedUser(null)} style={{ padding: '0.8rem 3rem' }}>확인 (닫기)</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
