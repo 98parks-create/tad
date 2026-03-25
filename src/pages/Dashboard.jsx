@@ -42,8 +42,42 @@ export default function Dashboard() {
     fetchStats();
   }, []);
 
+  const getRemainingDays = (dateString) => {
+    if (!dateString) return null;
+    const diff = new Date(dateString) - new Date();
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    return days > 0 ? days : 0;
+  };
+
   return (
     <div>
+      {profile && (
+        <div className="card" style={{ 
+          marginBottom: '2rem', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between', 
+          backgroundColor: profile.subscriptionPlan === 'pro' ? '#f0fdf4' : '#f8fafc', 
+          borderLeft: profile.subscriptionPlan === 'pro' ? '4px solid #16a34a' : '4px solid #94a3b8' 
+        }}>
+          <div>
+            <h3 style={{ margin: '0 0 0.5rem 0', color: '#0f172a', fontSize: '1.2rem' }}>
+              현재 이용 중인 멤버십: <span style={{ color: profile.subscriptionPlan === 'pro' ? '#16a34a' : '#64748b' }}>{profile.subscriptionPlan === 'pro' ? '👑 PRO 요금제 (무제한)' : '무료 요금제 (월 3건 제한)'}</span>
+            </h3>
+            {profile.subscriptionPlan === 'pro' && profile.proExpiresAt ? (
+              <p style={{ margin: 0, color: '#475569', fontSize: '1rem' }}>
+                만료/재결제 예정일: <strong style={{ color: '#ef4444' }}>{new Date(profile.proExpiresAt).toLocaleDateString()}</strong> 
+                <span style={{ marginLeft: '0.5rem', fontWeight: 600, color: '#ef4444' }}>(D-{getRemainingDays(profile.proExpiresAt)})</span>
+              </p>
+            ) : profile.subscriptionPlan === 'pro' ? (
+              <p style={{ margin: 0, color: '#475569', fontSize: '1rem' }}>기존 베타 혜택으로 <strong style={{color: '#16a34a'}}>영구 무제한</strong> 이용 중입니다.</p>
+            ) : (
+              <p style={{ margin: 0, color: '#475569', fontSize: '0.95rem' }}>월 19,900원으로 무제한 발급 기능을 맘껏 이용해 보세요!</p>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="card">
         <h2 style={{ marginBottom: '1rem' }}>대시보드</h2>
         <p style={{ color: 'var(--text-light)', marginBottom: '2rem' }}>시스템 전체 견적 현황입니다.</p>
