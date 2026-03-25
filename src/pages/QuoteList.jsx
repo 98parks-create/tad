@@ -63,6 +63,7 @@ export default function QuoteList() {
         setQuotes(quotes.filter(q => q.id !== selectedQuote.id));
         setSelectedQuote(null);
       } catch (err) {
+        console.error("Delete error", err);
         alert("삭제 중 오류가 발생했습니다.");
       }
     }
@@ -75,6 +76,7 @@ export default function QuoteList() {
         setQuotes(quotes.map(q => q.id === selectedQuote.id ? { ...q, status: 'approved' } : q));
         setSelectedQuote({ ...selectedQuote, status: 'approved' });
       } catch (err) {
+        console.error("Status update error", err);
         alert("상태 변경 중 오류가 발생했습니다.");
       }
     }
@@ -88,13 +90,16 @@ export default function QuoteList() {
         const profile = await getProfile(currentUser.uid);
         if (profile) setCompanyProfile(profile);
       } catch (err) {
+        console.error("Fetch quotes error", err);
         setError("데이터를 불러올 수 없습니다. Firebase 설정을 확인해주세요.");
       } finally {
         setLoading(false);
       }
     };
-    fetchQuotes();
-  }, []);
+    if (currentUser?.uid) {
+      fetchQuotes();
+    }
+  }, [currentUser?.uid]);
 
   return (
     <div className="card">

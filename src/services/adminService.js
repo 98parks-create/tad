@@ -75,7 +75,7 @@ export async function migrateLegacyProUsers() {
       const profileRef = doc(db, 'userProfiles', data.uid);
       try {
         await updateDoc(profileRef, { proExpiresAt: expiresAt, subscriptionPlan: 'pro' });
-      } catch(e) { console.warn("No profile for", data.uid); }
+      } catch { console.warn("No profile for", data.uid); }
       count++;
     }
   }

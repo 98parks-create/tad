@@ -39,8 +39,10 @@ export default function Dashboard() {
         setLoading(false);
       }
     };
-    fetchStats();
-  }, []);
+    if (currentUser?.uid) {
+      fetchStats();
+    }
+  }, [currentUser?.uid]);
 
   const getRemainingDays = (dateString) => {
     if (!dateString) return null;

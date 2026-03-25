@@ -1,3 +1,4 @@
+/* global process */
 import admin from 'firebase-admin';
 
 // Initialize Firebase Admin lazily in serverless function

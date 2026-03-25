@@ -36,6 +36,7 @@ export default function Signup() {
       await signup(emailRef.current.value, passwordRef.current.value, nameRef.current.value);
       navigate('/');
     } catch (err) {
+      console.error(err);
       setError('회원가입에 실패했습니다. 이미 존재하는 이메일이거나 형식이 잘못되었습니다.');
     } finally {
       setLoading(false);
