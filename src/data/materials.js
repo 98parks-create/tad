@@ -2,6 +2,7 @@ export const industries = [
   { id: 'sign', name: '간판/광고물' },
   { id: 'interior', name: '인테리어' },
   { id: 'facility', name: '설비' },
+  { id: 'clean_move', name: '청소대행/이사' },
   { id: 'other', name: '기타 (직접입력)' }
 ];
 
@@ -172,6 +173,50 @@ export const materialCategoriesByIndustry = {
         { id: "fl3", name: "설비 보조조공", unitPrice: 200000, unit: "ea", type: "quantity" },
         { id: "fl4", name: "특수장비대여료", unitPrice: 150000, unit: "ea", type: "quantity" },
         { id: "fl5", name: "설비 폐기물 처리", unitPrice: 150000, unit: "ea", type: "quantity" }
+      ]
+    }
+  ],
+  clean_move: [
+    {
+      id: "moving",
+      name: "이사 서비스",
+      items: [
+        { id: "m1", name: "포장이사 (기본결제)", unitPrice: 1000000, unit: "ea", type: "quantity" },
+        { id: "m2", name: "반포장이사", unitPrice: 700000, unit: "ea", type: "quantity" },
+        { id: "m3", name: "일반이사", unitPrice: 500000, unit: "ea", type: "quantity" },
+        { id: "m4", name: "보관이사 (월)", unitPrice: 300000, unit: "ea", type: "quantity" },
+        { id: "m5", name: "원룸/용달이사", unitPrice: 200000, unit: "ea", type: "quantity" }
+      ]
+    },
+    {
+      id: "special_ops",
+      name: "특수작업/추가옵션",
+      items: [
+        { id: "sp1", name: "사다리차 1회 이용", unitPrice: 150000, unit: "ea", type: "quantity" },
+        { id: "sp2", name: "에어컨 이전/설치비", unitPrice: 150000, unit: "ea", type: "quantity" },
+        { id: "sp3", name: "벽걸이 TV 설치", unitPrice: 50000, unit: "ea", type: "quantity" },
+        { id: "sp4", name: "피아노/돌침대 등 특수운송", unitPrice: 100000, unit: "ea", type: "quantity" }
+      ]
+    },
+    {
+      id: "cleaning",
+      name: "청소대행",
+      items: [
+        { id: "cl1", name: "입주/이사청소 (평당)", unitPrice: 15000, unit: "py", type: "quantity" },
+        { id: "cl2", name: "거주청소 (평당)", unitPrice: 18000, unit: "py", type: "quantity" },
+        { id: "cl3", name: "상가/사무실 청소 (평당)", unitPrice: 12000, unit: "py", type: "quantity" },
+        { id: "cl4", name: "쓰레기집/특수청소", unitPrice: 500000, unit: "ea", type: "quantity" },
+        { id: "cl5", name: "새집증후군/피톤치드 시공", unitPrice: 100000, unit: "ea", type: "quantity" }
+      ]
+    },
+    {
+      id: "cm_labor",
+      name: "인건비/기타",
+      items: [
+        { id: "cml1", name: "남성 전문인력 추가", unitPrice: 150000, unit: "ea", type: "quantity" },
+        { id: "cml2", name: "여성 도우미 추가", unitPrice: 130000, unit: "ea", type: "quantity" },
+        { id: "cml3", name: "계단/수작업 할증비", unitPrice: 50000, unit: "ea", type: "quantity" },
+        { id: "cml4", name: "대형 폐기물 처리 대행", unitPrice: 30000, unit: "ea", type: "quantity" }
       ]
     }
   ],
