@@ -23,7 +23,7 @@ export default function CreateQuote() {
   const [remarks, setRemarks] = useState(editQuote?.remarks || '');
   const [isSaving, setIsSaving] = useState(false);
   const [companyProfile, setCompanyProfile] = useState(null);
-  const [editId, setEditId] = useState(editQuote?.id || null);
+  const [editId] = useState(editQuote?.id || null);
   const [showPaywall, setShowPaywall] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
@@ -94,23 +94,29 @@ export default function CreateQuote() {
           newItem.itemId = '';
           newItem.name = '';
           newItem.unitPrice = 0;
-          newItem.basePrice = 0;
           newItem.type = '';
+          newItem.specification = '';
+          newItem.unit = '';
+          newItem.width = '';
+          newItem.height = '';
         } else if (field === 'categoryId') {
           newItem.itemId = '';
           newItem.name = '';
           newItem.unitPrice = 0;
-          newItem.basePrice = 0;
           newItem.type = '';
+          newItem.specification = '';
+          newItem.unit = '';
+          newItem.width = '';
+          newItem.height = '';
         } else if (field === 'itemId') {
           const category = getCategoriesForIndustry(newItem.industry || 'sign').find(c => c.id === newItem.categoryId);
           const selectedMat = category?.items.find(i => i.id === value);
           if (selectedMat) {
             newItem.name = selectedMat.name;
             newItem.type = selectedMat.type || 'general';
-            if (selectedMat.specification) newItem.specification = selectedMat.specification;
-            if (selectedMat.unit) newItem.unit = selectedMat.unit;
-            if (selectedMat.unitPrice) newItem.unitPrice = selectedMat.unitPrice;
+            newItem.specification = selectedMat.specification || '';
+            newItem.unit = selectedMat.unit || '';
+            newItem.unitPrice = selectedMat.unitPrice || 0;
           }
         }
 
@@ -157,7 +163,8 @@ export default function CreateQuote() {
       await saveQuote(currentUser.uid, { customerInfo, items, subTotal, discount, discountReason, vat, grandTotal, includeVat, remarks, status: 'pending' }, editId);
       alert(editId ? "견적서가 성공적으로 수정되었습니다." : "견적 데이터가 성공적으로 저장되었습니다.");
       navigate('/list');
-    } catch (err) {
+    } catch (error) {
+      console.error(error);
       alert("저장에 실패했습니다. Firebase 설정을 확인해주세요.");
     } finally {
       setIsSaving(false);
