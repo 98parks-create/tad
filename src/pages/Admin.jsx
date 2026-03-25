@@ -66,7 +66,7 @@ export default function Admin() {
               <th style={{ padding: '1rem 0.5rem' }}>신청일시</th>
               <th style={{ padding: '1rem 0.5rem' }}>계정 이메일</th>
               <th style={{ padding: '1rem 0.5rem' }}>입금자명</th>
-              <th style={{ padding: '1rem 0.5rem' }}>상태</th>
+              <th style={{ padding: '1rem 0.5rem' }}>상태 및 기간</th>
               <th style={{ padding: '1rem 0.5rem', textAlign: 'center' }}>관리</th>
             </tr>
           </thead>
@@ -80,17 +80,27 @@ export default function Admin() {
                 const reqDate = req.timestamp ? new Date(req.timestamp.seconds * 1000).toLocaleString() : '최근 신청됨';
                 return (
                   <tr key={req.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                    <td style={{ padding: '1rem 0.5rem', fontSize: '0.9rem' }}>{reqDate}</td>
+                    <td style={{ padding: '1rem 0.5rem', fontSize: '0.9rem' }}>
+                      {reqDate}<br/>
+                      {req.approvedAt && <span style={{fontSize: '0.8rem', color: '#059669'}}>(승인: {new Date(req.approvedAt).toLocaleDateString()})</span>}
+                    </td>
                     <td style={{ padding: '1rem 0.5rem' }}>{req.email || '-'}</td>
                     <td style={{ padding: '1rem 0.5rem', fontWeight: 'bold' }}>{req.depositorName}</td>
                     <td style={{ padding: '1rem 0.5rem' }}>
-                      <span style={{ 
-                        padding: '0.2rem 0.6rem', borderRadius: '20px', fontSize: '0.8rem', 
-                        backgroundColor: req.status === 'approved' ? '#dcfce3' : '#fef3c7', 
-                        color: req.status === 'approved' ? '#166534' : '#92400e' 
-                      }}>
-                        {req.status === 'approved' ? '승인완료' : '대기중'}
-                      </span>
+                      <div style={{ marginBottom: req.expiresAt ? '4px' : '0' }}>
+                        <span style={{ 
+                          padding: '0.2rem 0.6rem', borderRadius: '20px', fontSize: '0.8rem', 
+                          backgroundColor: req.status === 'approved' ? '#dcfce3' : '#fef3c7', 
+                          color: req.status === 'approved' ? '#166534' : '#92400e' 
+                        }}>
+                          {req.status === 'approved' ? '승인완료' : '대기중'}
+                        </span>
+                      </div>
+                      {req.expiresAt && req.status === 'approved' && (
+                        <div style={{ fontSize: '0.8rem', color: '#ef4444', fontWeight: 500 }}>
+                          ~ {new Date(req.expiresAt).toLocaleDateString()} 까지
+                        </div>
+                      )}
                     </td>
                     <td style={{ padding: '1rem 0.5rem', textAlign: 'center' }}>
                       {req.status === 'pending' && (

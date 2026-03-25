@@ -20,11 +20,21 @@ export async function getUpgradeRequests() {
 }
 
 export async function approveUpgrade(requestId, uid) {
+  const approvedAt = new Date();
+  const expiresAt = new Date(approvedAt.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
   // Update request status
   const requestRef = doc(db, 'upgradeRequests', requestId);
-  await updateDoc(requestRef, { status: 'approved' });
+  await updateDoc(requestRef, { 
+    status: 'approved',
+    approvedAt: approvedAt.toISOString(),
+    expiresAt: expiresAt
+  });
   
   // Update user profile plan
   const profileRef = doc(db, 'userProfiles', uid);
-  await updateDoc(profileRef, { subscriptionPlan: 'pro' });
+  await updateDoc(profileRef, { 
+    subscriptionPlan: 'pro',
+    proExpiresAt: expiresAt
+  });
 }
