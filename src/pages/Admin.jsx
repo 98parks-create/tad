@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { getUpgradeRequests, approveUpgrade } from '../services/adminService';
+import { getUpgradeRequests, approveUpgrade, cancelUpgrade } from '../services/adminService';
 import { getProfile } from '../services/profileService';
 import { CheckCircle } from 'lucide-react';
 
@@ -47,18 +47,33 @@ export default function Admin() {
     }
   };
 
-  const handleViewDetails = async (uid, email, depositorName) => {
+  const handleViewDetails = async (uid, email, depositorName, requestId, status) => {
     setLoadingProfile(true);
-    setSelectedUser({ uid, email, depositorName, loading: true });
+    setSelectedUser({ uid, email, depositorName, requestId, status, loading: true });
     try {
       const profile = await getProfile(uid);
-      setSelectedUser({ uid, email, depositorName, profile, loading: false });
+      setSelectedUser({ uid, email, depositorName, requestId, status, profile, loading: false });
     } catch (err) {
       console.error(err);
       alert("프로필 정보를 불러오지 못했습니다.");
       setSelectedUser(null);
     } finally {
       setLoadingProfile(false);
+    }
+  };
+
+  const handleCancelMembership = async () => {
+    if (!selectedUser || selectedUser.status !== 'approved') return;
+    if (window.confirm(`${selectedUser.depositorName} 님의 PRO 멤버십을 즉시 해지하고 무료 요금제로 강등하시겠습니까?\n(환불 처리는 외부 채널을 통해 별도로 진행하셔야 합니다)`)) {
+      try {
+        await cancelUpgrade(selectedUser.requestId, selectedUser.uid);
+        setRequests(requests.map(r => r.id === selectedUser.requestId ? { ...r, status: 'cancelled' } : r));
+        alert("멤버십 해지가 완료되었습니다.");
+        setSelectedUser(null);
+      } catch (err) {
+        console.error(err);
+        alert("해지 처리 중 오류가 발생했습니다.");
+      }
     }
   };
 
@@ -108,10 +123,10 @@ export default function Admin() {
                       <div style={{ marginBottom: req.expiresAt ? '4px' : '0' }}>
                         <span style={{ 
                           padding: '0.2rem 0.6rem', borderRadius: '20px', fontSize: '0.8rem', 
-                          backgroundColor: req.status === 'approved' ? '#dcfce3' : '#fef3c7', 
-                          color: req.status === 'approved' ? '#166534' : '#92400e' 
+                          backgroundColor: req.status === 'approved' ? '#dcfce3' : (req.status === 'cancelled' ? '#fee2e2' : '#fef3c7'), 
+                          color: req.status === 'approved' ? '#166534' : (req.status === 'cancelled' ? '#991b1b' : '#92400e') 
                         }}>
-                          {req.status === 'approved' ? '승인완료' : '대기중'}
+                          {req.status === 'approved' ? '승인완료' : (req.status === 'cancelled' ? '취소/해지됨' : '대기중')}
                         </span>
                       </div>
                       {req.expiresAt && req.status === 'approved' && (
@@ -127,7 +142,7 @@ export default function Admin() {
                             <CheckCircle size={16} /> 승인하기
                           </button>
                         )}
-                        <button className="btn btn-outline" style={{ padding: '0.3rem 0.6rem', fontSize: '0.85rem' }} onClick={() => handleViewDetails(req.uid, req.email, req.depositorName)}>
+                        <button className="btn btn-outline" style={{ padding: '0.3rem 0.6rem', fontSize: '0.85rem' }} onClick={() => handleViewDetails(req.uid, req.email, req.depositorName, req.id, req.status)}>
                           회원 정보
                         </button>
                       </div>
@@ -194,8 +209,13 @@ export default function Admin() {
               </div>
             )}
             
-            <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center' }}>
-              <button className="btn btn-primary" onClick={() => setSelectedUser(null)} style={{ padding: '0.8rem 3rem' }}>확인 (닫기)</button>
+            <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center', gap: '1rem' }}>
+              <button className="btn btn-outline" onClick={() => setSelectedUser(null)} style={{ padding: '0.8rem 3rem' }}>닫기</button>
+              {selectedUser.profile && selectedUser.profile.subscriptionPlan === 'pro' && selectedUser.status === 'approved' && (
+                <button className="btn btn-primary" style={{ padding: '0.8rem 2rem', backgroundColor: '#ef4444', border: 'none' }} onClick={handleCancelMembership}>
+                  멤버십 즉시 해지
+                </button>
+              )}
             </div>
           </div>
         </div>

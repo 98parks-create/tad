@@ -38,3 +38,19 @@ export async function approveUpgrade(requestId, uid) {
     proExpiresAt: expiresAt
   });
 }
+
+export async function cancelUpgrade(requestId, uid) {
+  // Update request status
+  const requestRef = doc(db, 'upgradeRequests', requestId);
+  await updateDoc(requestRef, { 
+    status: 'cancelled',
+    cancelledAt: new Date().toISOString()
+  });
+  
+  // Downgrade user profile plan
+  const profileRef = doc(db, 'userProfiles', uid);
+  await updateDoc(profileRef, { 
+    subscriptionPlan: 'free',
+    proExpiresAt: null
+  });
+}
