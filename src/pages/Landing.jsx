@@ -52,36 +52,36 @@ export default function Landing() {
         </h2>
         <div className="feature-grid">
 
-          <div style={{ padding: '2rem', backgroundColor: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-            <div style={{ width: 48, height: 48, backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
-              <Calculator size={24} />
+          <div className="feature-card">
+            <div style={{ width: 44, height: 44, backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+              <Calculator size={22} />
             </div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.75rem', color: '#0f172a' }}>초정밀 계산 & 모든 업종 호환</h3>
-            <p style={{ color: '#64748b', lineHeight: 1.6, margin: 0 }}>루틴한 자재비 자동 산출은 물론, 견적 항목과 단가를 <b>자유롭게 직접 수기 입력</b>할 수 있어 B2B, B2C 등 어떠한 업종에서도 제약 없이 100% 호환됩니다.</p>
+            <h3>초정밀 계산 & 모든 업종 호환</h3>
+            <p>루틴한 자재비 자동 산출은 물론, 항목과 단가를 <b>자유롭게 직접 수기 입력</b>할 수 있어 어떤 업종이든 100% 호환됩니다.</p>
+          </div>
+ 
+          <div className="feature-card">
+            <div style={{ width: 44, height: 44, backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#10b981', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+              <FileText size={22} />
+            </div>
+            <h3>원클릭 PDF 견적서</h3>
+            <p>번거로운 워드 작업 없이, 작성한 모든 견적 항목과 규격이 포함된 전문적인 견적서를 단 1초 만에 PDF로 렌더링합니다.</p>
           </div>
 
-          <div style={{ padding: '2rem', backgroundColor: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-            <div style={{ width: 48, height: 48, backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#10b981', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
-              <FileText size={24} />
+          <div className="feature-card">
+            <div style={{ width: 44, height: 44, backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+              <BarChart3 size={22} />
             </div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.75rem', color: '#0f172a' }}>원클릭 PDF 견적서</h3>
-            <p style={{ color: '#64748b', lineHeight: 1.6, margin: 0 }}>번거로운 워드 작업 없이, 작성한 모든 견적 항목과 규격이 포함된 전문적인 견적서를 단 1초 만에 PDF로 렌더링합니다.</p>
+            <h3>견적 히스토리 관리</h3>
+            <p>클라이언트와 협의한 과거의 모든 견적 내역과 대시보드 통계를 중앙 시스템에서 한눈에 조회할 수 있습니다.</p>
           </div>
 
-          <div style={{ padding: '2rem', backgroundColor: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-            <div style={{ width: 48, height: 48, backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
-              <BarChart3 size={24} />
+          <div className="feature-card">
+            <div style={{ width: 44, height: 44, backgroundColor: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+              <ShieldCheck size={22} />
             </div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.75rem', color: '#0f172a' }}>견적 히스토리 관리</h3>
-            <p style={{ color: '#64748b', lineHeight: 1.6, margin: 0 }}>클라이언트와 협의한 과거의 모든 견적 내역과 대시보드 통계를 중앙 시스템에서 한눈에 조회할 수 있습니다.</p>
-          </div>
-
-          <div style={{ padding: '2rem', backgroundColor: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-            <div style={{ width: 48, height: 48, backgroundColor: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
-              <ShieldCheck size={24} />
-            </div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.75rem', color: '#0f172a' }}>안전한 데이터 보안</h3>
-            <p style={{ color: '#64748b', lineHeight: 1.6, margin: 0 }}>Firebase 기반의 최고 수준 클라우드 보안 환경과 독립된 계정 시스템으로 귀사의 소중한 데이터를 보호합니다.</p>
+            <h3>안전한 데이터 보안</h3>
+            <p>Firebase 기반의 최고 수준 클라우드 보안 환경과 독립된 계정 시스템으로 귀사의 소중한 데이터를 보호합니다.</p>
           </div>
 
         </div>
