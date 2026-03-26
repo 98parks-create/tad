@@ -39,10 +39,10 @@ export default async function handler(req, res) {
         code
       })
     });
-    
+
     const tokenData = await tokenRes.json();
     if (tokenData.error) throw new Error(tokenData.error_description || tokenData.error);
-    
+
     const accessToken = tokenData.access_token;
 
     // 2. Get Kakao User Info
@@ -78,7 +78,7 @@ export default async function handler(req, res) {
     // 4. Issue Custom Token
     const customToken = await admin.auth().createCustomToken(uid);
     return res.status(200).json({ customToken });
-    
+
   } catch (error) {
     console.error('Kakao Auth Error:', error);
     return res.status(500).json({ error: error.message });

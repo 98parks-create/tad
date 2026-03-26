@@ -64,25 +64,38 @@ function AppContent() {
   }
 
   // PWA Install Guide Modal for iOS
-  const PwaInstallGuide = () => (
-    <div className={`pwa-guide-overlay ${showIosGuide ? 'active' : ''}`} onClick={() => setShowIosGuide(false)}>
-      <div className="pwa-guide-modal" onClick={e => e.stopPropagation()}>
-        <div className="pwa-guide-header">
-          <h3>아이폰 앱 설치 안내</h3>
-          <button className="close-btn" onClick={() => setShowIosGuide(false)}><X size={20} /></button>
+  const PwaInstallGuide = () => {
+    const isChromeIOS = /crios/.test(window.navigator.userAgent.toLowerCase());
+    
+    return (
+      <div className={`pwa-guide-overlay ${showIosGuide ? 'active' : ''}`} onClick={() => setShowIosGuide(false)}>
+        <div className="pwa-guide-modal" onClick={e => e.stopPropagation()}>
+          <div className="pwa-guide-header">
+            <h3>아이폰 앱 설치 안내</h3>
+            <button className="close-btn" onClick={() => setShowIosGuide(false)}><X size={20} /></button>
+          </div>
+          <div className="pwa-guide-content">
+            <p>이 웹사이트를 앱처럼 편리하게 사용해 보세요!</p>
+            <ol className="pwa-steps">
+              {isChromeIOS ? (
+                <>
+                  <li>우측 상단의 <strong>공유 버튼</strong>(또는 점 3개)을 클릭합니다.</li>
+                  <li>메뉴가 뜨면 <strong>스크롤을 아래로 내려서</strong></li>
+                </>
+              ) : (
+                <>
+                  <li>하단 브라우저 바의 <strong>공유 버튼</strong><span className="ios-icon share-icon"></span>을 클릭합니다.</li>
+                </>
+              )}
+              <li><strong>'홈 화면에 추가'</strong><span className="ios-icon plus-icon"></span>를 찾아 클릭합니다.</li>
+              <li>상단 <strong>'추가'</strong> 버튼을 클릭하면 바탕화면에 설치됩니다.</li>
+            </ol>
+          </div>
+          <button className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} onClick={() => setShowIosGuide(false)}>확인했습니다</button>
         </div>
-        <div className="pwa-guide-content">
-          <p>이 웹사이트를 앱처럼 편리하게 사용해 보세요!</p>
-          <ol className="pwa-steps">
-            <li>하단 브라우저 바의 <strong>공유 버튼</strong><span className="ios-icon share-icon"></span>을 클릭합니다.</li>
-            <li>메뉴에서 <strong>'홈 화면에 추가'</strong><span className="ios-icon plus-icon"></span>를 찾아 클릭합니다.</li>
-            <li>상단 <strong>'추가'</strong> 버튼을 클릭하면 바탕화면에 설치됩니다.</li>
-          </ol>
-        </div>
-        <button className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} onClick={() => setShowIosGuide(false)}>확인했습니다</button>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Install Button Visibility Logic
   const showInstallButton = !isStandalone && (deferredPrompt || isIOS);
