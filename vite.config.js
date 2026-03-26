@@ -9,7 +9,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png', '192x192.png', '512x512.png'],
+      devOptions: {
+        enabled: true
+      },
       manifest: {
         name: 'TAD B2B 견적관리',
         short_name: 'B2B 견적서',
@@ -20,14 +23,16 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: '/192x192.png',
+            src: '192x192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any maskable'
           },
           {
-            src: '/512x512.png',
+            src: '512x512.png',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any maskable'
           }
         ]
       }
