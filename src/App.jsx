@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, NavLink, Navigate, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, FileText, PlusCircle, Menu, X, Settings as SettingsIcon, Shield, Download } from 'lucide-react';
+import { Analytics } from '@vercel/analytics/react';
 import Dashboard from './pages/Dashboard';
 import CreateQuote from './pages/CreateQuote';
 import QuoteList from './pages/QuoteList';
@@ -174,6 +175,7 @@ function App() {
     <Router>
       <AuthProvider>
         <AppContent />
+        <Analytics />
       </AuthProvider>
     </Router>
   );
