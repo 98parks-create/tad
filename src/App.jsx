@@ -22,10 +22,6 @@ function AppContent() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
-<<<<<<< HEAD
-
-  useEffect(() => {
-=======
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [showIosGuide, setShowIosGuide] = useState(false);
@@ -40,7 +36,6 @@ function AppContent() {
     const standalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator.standalone);
     setIsStandalone(standalone);
 
->>>>>>> 15d10f9dbb22b2e122f72b1e9183b43c0cda7815
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -50,12 +45,6 @@ function AppContent() {
   }, []);
 
   const handleInstallClick = async () => {
-<<<<<<< HEAD
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') setDeferredPrompt(null);
-=======
     if (isIOS) {
       setShowIosGuide(true);
     } else if (deferredPrompt) {
@@ -63,7 +52,6 @@ function AppContent() {
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') setDeferredPrompt(null);
     }
->>>>>>> 15d10f9dbb22b2e122f72b1e9183b43c0cda7815
   };
 
   async function handleLogout() {
@@ -75,8 +63,6 @@ function AppContent() {
     }
   }
 
-<<<<<<< HEAD
-=======
   // PWA Install Guide Modal for iOS
   const PwaInstallGuide = () => {
     const isChromeIOS = /crios/.test(window.navigator.userAgent.toLowerCase());
@@ -114,7 +100,6 @@ function AppContent() {
   // Install Button Visibility Logic
   const showInstallButton = !isStandalone && (deferredPrompt || isIOS);
 
->>>>>>> 15d10f9dbb22b2e122f72b1e9183b43c0cda7815
   if (!currentUser) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -129,26 +114,16 @@ function AppContent() {
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
-<<<<<<< HEAD
-        {deferredPrompt && (
-          <button
-            onClick={handleInstallClick}
-            style={{ position: 'fixed', bottom: '20px', right: '20px', backgroundColor: 'var(--primary-color)', color: 'white', padding: '12px 20px', borderRadius: '50px', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', zIndex: 9999, fontWeight: 'bold', border: 'none', cursor: 'pointer' }}
-=======
         {showInstallButton && (
           <button
             onClick={handleInstallClick}
             className="pwa-install-btn-floating"
->>>>>>> 15d10f9dbb22b2e122f72b1e9183b43c0cda7815
           >
             <Download size={20} />
             앱 설치하기
           </button>
         )}
-<<<<<<< HEAD
-=======
         <PwaInstallGuide />
->>>>>>> 15d10f9dbb22b2e122f72b1e9183b43c0cda7815
         <Footer />
       </div>
     );
@@ -194,11 +169,7 @@ function AppContent() {
           <NavLink to="/settings" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <SettingsIcon size={20} />설정 (회사정보)
           </NavLink>
-<<<<<<< HEAD
-          {['inseopark7@naver.com', import.meta.env.VITE_ADMIN_EMAIL].includes(currentUser.email) && (
-=======
           {['inseopark7@naver.com', import.meta.env.VITE_ADMIN_EMAIL || 'admin@example.com'].includes(currentUser.email) && (
->>>>>>> 15d10f9dbb22b2e122f72b1e9183b43c0cda7815
             <NavLink to="/admin" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
               <Shield size={20} color="#f59e0b" />관리자 승인 센터
             </NavLink>
@@ -236,26 +207,16 @@ function AppContent() {
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
-<<<<<<< HEAD
-        {deferredPrompt && (
-          <button
-            onClick={handleInstallClick}
-            style={{ position: 'fixed', bottom: '20px', right: '20px', backgroundColor: 'var(--primary-color)', color: 'white', padding: '12px 20px', borderRadius: '50px', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', zIndex: 9999, fontWeight: 'bold', border: 'none', cursor: 'pointer' }}
-=======
         {showInstallButton && (
           <button
             onClick={handleInstallClick}
             className="pwa-install-btn-floating"
->>>>>>> 15d10f9dbb22b2e122f72b1e9183b43c0cda7815
           >
             <Download size={20} />
             앱 설치하기
           </button>
         )}
-<<<<<<< HEAD
-=======
         <PwaInstallGuide />
->>>>>>> 15d10f9dbb22b2e122f72b1e9183b43c0cda7815
         <Footer />
       </main>
     </div>
