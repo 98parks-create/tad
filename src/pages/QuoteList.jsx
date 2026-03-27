@@ -199,7 +199,6 @@ export default function QuoteList() {
       setIsPreparing(false);
     }
   };
- Riverside
 
   useEffect(() => {
     const fetchQuotes = async () => {
