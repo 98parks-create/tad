@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { industries, materialCategoriesByIndustry } from '../data/materials';
-import { Plus, Trash2, Save, Printer, Copy, Lock, Image, MessageCircle } from 'lucide-react';
+import { Save, Printer, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 import html2canvas from 'html2canvas';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -26,6 +26,7 @@ export default function CreateQuote() {
   const [remarks, setRemarks] = useState(editQuote?.remarks || '');
   const [isSaving, setIsSaving] = useState(false);
   const [companyProfile, setCompanyProfile] = useState(null);
+  const printRef = useRef(null);
   const [editId] = useState(editQuote?.id || null);
   const [showPaywall, setShowPaywall] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -145,7 +146,6 @@ export default function CreateQuote() {
 
   const { subTotal, vat, grandTotal } = useMemo(calculateTotals, [items, discount, includeVat]);
 
-  const printRef = useRef();
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: `견적서_${customerInfo.project || Date.now()}`,
@@ -266,20 +266,8 @@ export default function CreateQuote() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem' }}>
         <h2 style={{ margin: 0 }}>{editId ? '견적 내역 수정' : '새 견적 작성'}</h2>
-        <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
-          <button className="btn btn-outline" onClick={handlePrint} disabled={isPreparing}><Printer size={18} /> PDF 출력</button>
-          <button className="btn btn-outline" onClick={handleSaveImage} disabled={isPreparing}>
-            <Image size={18} /> {isPreparing ? '처리 중...' : '이미지 저장'}
-          </button>
-          <button className="btn btn-outline" onClick={handleShareKakao} style={{ color: '#3A1D1D', borderColor: '#FEE500', backgroundColor: '#FEE500' }} disabled={isPreparing}>
-            <MessageCircle size={18} /> {isPreparing ? '처리 중...' : '카톡 공유'}
-          </button>
-          <button className="btn btn-primary" onClick={handleSave} disabled={isSaving || isPreparing}>
-            <Save size={18} /> {isSaving ? '저장 중...' : '데이터 저장'}
-          </button>
-        </div>
       </div>
       
       <div className="card">

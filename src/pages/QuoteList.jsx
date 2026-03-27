@@ -2,10 +2,13 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { getQuotes, deleteQuote, updateQuoteStatus } from '../services/quoteService';
 import { getProfile } from '../services/profileService';
 import { useAuth } from '../contexts/AuthContext';
-import { Printer, X, Edit, Trash2, CheckCircle, Search } from 'lucide-react';
+import { Printer, X, Edit, Trash2, CheckCircle, Search, Image as ImageIcon, MessageCircle } from 'lucide-react';
 import PrintTemplate from '../components/PrintTemplate';
 import { useReactToPrint } from 'react-to-print';
 import { useNavigate } from 'react-router-dom';
+import html2canvas from 'html2canvas';
+import { storage } from '../firebase';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export default function QuoteList() {
   const { currentUser } = useAuth();
@@ -15,6 +18,7 @@ export default function QuoteList() {
   const [error, setError] = useState(null);
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [companyProfile, setCompanyProfile] = useState(null);
+  const [isPreparing, setIsPreparing] = useState(false);
   const printRef = useRef(null);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -79,6 +83,91 @@ export default function QuoteList() {
         console.error("Status update error", err);
         alert("상태 변경 중 오류가 발생했습니다.");
       }
+    }
+  };
+
+  const captureImage = async () => {
+    if (!printRef.current) return null;
+    
+    // Temporarily make sure the element is visible for capture if needed
+    const element = printRef.current;
+    
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
+      return canvas;
+    } catch (error) {
+      console.error("Capture failed:", error);
+      return null;
+    }
+  };
+
+  const handleSaveImage = async () => {
+    setIsPreparing(true);
+    try {
+      const canvas = await captureImage();
+      if (!canvas) return;
+      
+      const link = document.createElement('a');
+      link.download = `견적서_${selectedQuote.customerInfo.project || '미정'}_${selectedQuote.customerInfo.name || '고객'}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error("Image saving failed:", error);
+      alert("이미지 저장 중 오류가 발생했습니다.");
+    } finally {
+      setIsPreparing(false);
+    }
+  };
+
+  const handleShareKakao = async () => {
+    if (!window.Kakao) {
+      alert("카카오 SDK를 불러오지 못했습니다.");
+      return;
+    }
+
+    setIsPreparing(true);
+    try {
+      const canvas = await captureImage();
+      if (!canvas) return;
+
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
+      
+      const fileName = `shares/${currentUser?.uid || 'anon'}_${Date.now()}.jpg`;
+      const fileRef = storageRef(storage, fileName);
+      await uploadBytes(fileRef, blob);
+      const imageUrl = await getDownloadURL(fileRef);
+
+      window.Kakao.Share.sendDefault({
+        objectType: 'feed',
+        content: {
+          title: `[견적서] ${selectedQuote.customerInfo.project || '견적 안내'}`,
+          description: `${selectedQuote.customerInfo.company || ''} ${selectedQuote.customerInfo.name || '고객'}님께 드리는 견적서입니다.\n합계금액: ${selectedQuote.grandTotal.toLocaleString()}원`,
+          imageUrl: imageUrl,
+          link: {
+            mobileWebUrl: window.location.href,
+            webUrl: window.location.href,
+          },
+        },
+        buttons: [
+          {
+            title: '견적서 보기',
+            link: {
+              mobileWebUrl: window.location.href,
+              webUrl: window.location.href,
+            },
+          },
+        ],
+      });
+    } catch (error) {
+      console.error("Kakao share failed:", error);
+      alert("카카오톡 공유 중 오류가 발생했습니다.");
+    } finally {
+      setIsPreparing(false);
     }
   };
 
@@ -202,9 +291,15 @@ export default function QuoteList() {
             </button>
             <h2 style={{ marginBottom: '1.5rem', paddingRight: '2rem' }}>견적서 상세현황</h2>
 
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
               <button className="btn btn-primary" onClick={handlePrint}>
                 <Printer size={18} /> PDF/인쇄
+              </button>
+              <button className="btn btn-outline" onClick={handleSaveImage} disabled={isPreparing} style={{ color: '#10b981', borderColor: '#10b981' }}>
+                <ImageIcon size={18} /> 이미지 저장
+              </button>
+              <button className="btn btn-outline" onClick={handleShareKakao} disabled={isPreparing} style={{ color: '#3A1D1D', borderColor: '#FEE500', backgroundColor: '#FEE500' }}>
+                <MessageCircle size={18} /> 카톡 공유
               </button>
               {selectedQuote.status === 'pending' && (
                 <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#059669', borderColor: '#059669' }} onClick={handleApprove}>
