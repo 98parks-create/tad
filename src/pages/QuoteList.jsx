@@ -147,40 +147,73 @@ export default function QuoteList() {
     }
   };
 
+  const [preparedImageUrl, setPreparedImageUrl] = useState(null);
+
+  const captureAndUpload = async () => {
+    if (!printRef.current) return;
+    setIsPreparing(true);
+    try {
+      const canvas = await captureImage();
+      if (!canvas) return;
+
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob(b => b ? resolve(b) : reject(new Error("Blob conversion failed")), 'image/jpeg', 0.8);
+      });
+      
+      const fileName = `shares/${currentUser?.uid || 'anon'}_${Date.now()}.jpg`;
+      const fileRef = storageRef(storage, fileName);
+      await uploadBytes(fileRef, blob);
+      const url = await getDownloadURL(fileRef);
+      setPreparedImageUrl(url);
+    } catch (error) {
+      console.error("Background preparation failed:", error);
+    } finally {
+      setIsPreparing(false);
+    }
+  };
+
   const handleShareKakao = async () => {
     if (!window.Kakao) {
       alert("카카오 SDK를 불러오지 못했습니다. 페이지를 새로고침해 주세요.");
       return;
     }
 
-    // Defensive initialization check
     if (!window.Kakao.isInitialized()) {
       const kakaoKey = import.meta.env.VITE_KAKAO_JS_KEY;
       if (kakaoKey) {
         window.Kakao.init(kakaoKey);
       } else {
-        alert("카카오 앱 키가 설정되지 않았습니다.");
+        alert("카카오 앱 키가 설정되지 않았습니다. 환경 변수를 확인해 주세요.");
         return;
       }
     }
 
-    setIsPreparing(true);
-    try {
-      const canvas = await captureImage();
-      if (!canvas) {
-        alert("이미지 생성에 실패했습니다.");
+    let imageUrl = preparedImageUrl;
+    
+    // If not ready yet, try to prepare it now (though it might be blocked by popup blocker)
+    if (!imageUrl) {
+      setIsPreparing(true);
+      try {
+        const canvas = await captureImage();
+        if (!canvas) throw new Error("이미지 생성 실패");
+        const blob = await new Promise((resolve, reject) => {
+          canvas.toBlob(b => b ? resolve(b) : reject(new Error("Blob conversion failed")), 'image/jpeg', 0.8);
+        });
+        const fileName = `shares/${currentUser?.uid || 'anon'}_${Date.now()}.jpg`;
+        const fileRef = storageRef(storage, fileName);
+        await uploadBytes(fileRef, blob);
+        imageUrl = await getDownloadURL(fileRef);
+        setPreparedImageUrl(imageUrl);
+      } catch (error) {
+        alert("이미지 준비 중 오류가 발생했습니다. 다시 시도해 주세요.");
+        setIsPreparing(false);
         return;
+      } finally {
+        setIsPreparing(false);
       }
+    }
 
-      const blob = await new Promise((resolve, reject) => {
-        canvas.toBlob(b => b ? resolve(b) : reject(new Error("Blob conversion failed")), 'image/jpeg', 0.9);
-      });
-      
-      const fileName = `shares/${currentUser?.uid || 'anon'}_${Date.now()}.jpg`;
-      const fileRef = storageRef(storage, fileName);
-      await uploadBytes(fileRef, blob);
-      const imageUrl = await getDownloadURL(fileRef);
-
+    try {
       if (window.Kakao.Share) {
         window.Kakao.Share.sendDefault({
           objectType: 'feed',
@@ -195,7 +228,7 @@ export default function QuoteList() {
           },
           buttons: [
             {
-              title: '전체 내역 보기',
+              title: '상세내역 확인',
               link: {
                 mobileWebUrl: window.location.origin,
                 webUrl: window.location.origin,
@@ -204,13 +237,11 @@ export default function QuoteList() {
           ],
         });
       } else {
-        throw new Error("Kakao.Share undefined");
+        throw new Error("Kakao.Share 모듈을 찾을 수 없습니다.");
       }
     } catch (error) {
-      console.error("Kakao share failed:", error);
+      console.error("Kakao share error:", error);
       alert(`카카오톡 공유 실패: ${error.message || '알 수 없는 오류'}`);
-    } finally {
-      setIsPreparing(false);
     }
   };
 
@@ -232,6 +263,18 @@ export default function QuoteList() {
       fetchQuotes();
     }
   }, [currentUser?.uid]);
+
+  // Handle background preparation when modal opens
+  useEffect(() => {
+    if (selectedQuote) {
+      setPreparedImageUrl(null);
+      // Small delay to ensure modal is rendered
+      const timer = setTimeout(() => {
+        captureAndUpload();
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedQuote]);
 
   return (
     <div className="card">
