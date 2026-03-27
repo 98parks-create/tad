@@ -129,35 +129,10 @@ export default function QuoteList() {
     }
   };
 
-  const [preparedImageUrl, setPreparedImageUrl] = useState(null);
-
-  const captureAndUpload = async () => {
-    if (!printRef.current) return;
-    setIsPreparing(true);
-    try {
-      const canvas = await captureImage();
-      if (!canvas) return;
-
-      const blob = await new Promise((resolve, reject) => {
-        canvas.toBlob(b => b ? resolve(b) : reject(new Error("Blob conversion failed")), 'image/jpeg', 0.8);
-      });
-      
-      const fileName = `shares/${currentUser?.uid || 'anon'}_${Date.now()}.jpg`;
-      const fileRef = storageRef(storage, fileName);
-      await uploadBytes(fileRef, blob);
-      const url = await getDownloadURL(fileRef);
-      setPreparedImageUrl(url);
-    } catch (error) {
-      console.error("Background preparation failed:", error);
-    } finally {
-      setIsPreparing(false);
-    }
-  };
-
   const handleSaveImage = async () => {
     setIsPreparing(true);
-    // Even if we use manual click, we give it a tiny bit of help
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // Give modal time to settle (solve first-try failure)
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     try {
       const canvas = await captureImage();
@@ -194,32 +169,26 @@ export default function QuoteList() {
       }
     }
 
-    let imageUrl = preparedImageUrl;
-    
-    // If NOT prepared yet (clicked too fast), we HAVE to do it now (might be blocked on PC)
-    if (!imageUrl) {
-      setIsPreparing(true);
-      try {
-        const canvas = await captureImage();
-        if (!canvas) throw new Error("이미지 생성 실패");
-        const blob = await new Promise((resolve, reject) => {
-          canvas.toBlob(b => b ? resolve(b) : reject(new Error("Blob conversion failed")), 'image/jpeg', 0.8);
-        });
-        const fileName = `shares/${currentUser?.uid || 'anon'}_${Date.now()}.jpg`;
-        const fileRef = storageRef(storage, fileName);
-        await uploadBytes(fileRef, blob);
-        imageUrl = await getDownloadURL(fileRef);
-        setPreparedImageUrl(imageUrl);
-      } catch (error) {
-        alert("이미지 준비 중입니다. 잠시 후 다시 공유해 주세요.");
-        setIsPreparing(false);
-        return;
-      } finally {
-        setIsPreparing(false);
-      }
-    }
+    setIsPreparing(true);
+    // Give modal time to settle (solve PC popup blocker and first-try failure)
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     try {
+      const canvas = await captureImage();
+      if (!canvas) {
+        alert("이미지 생성에 실패했습니다.");
+        return;
+      }
+
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob(b => b ? resolve(b) : reject(new Error("Blob conversion failed")), 'image/jpeg', 0.8);
+      });
+      
+      const fileName = `shares/${currentUser?.uid || 'anon'}_${Date.now()}.jpg`;
+      const fileRef = storageRef(storage, fileName);
+      await uploadBytes(fileRef, blob);
+      const imageUrl = await getDownloadURL(fileRef);
+
       if (window.Kakao.Share) {
         window.Kakao.Share.sendDefault({
           objectType: 'feed',
@@ -248,6 +217,8 @@ export default function QuoteList() {
     } catch (error) {
       console.error("Kakao share error:", error);
       alert(`카카오톡 공유 실패: ${error.message || '알 수 없는 오류'}`);
+    } finally {
+      setIsPreparing(false);
     }
   };
 
@@ -270,18 +241,17 @@ export default function QuoteList() {
     }
   }, [currentUser?.uid]);
 
-  // Safely trigger background capture when modal is confirmed OPEN
+  // Handle background preparation when modal opens
   useEffect(() => {
     if (selectedQuote) {
       setPreparedImageUrl(null);
-      // Wait for modal transition/rendering
+      // Small delay to ensure modal is rendered
       const timer = setTimeout(() => {
         captureAndUpload();
-      }, 1000);
+      }, 800);
       return () => clearTimeout(timer);
     }
   }, [selectedQuote]);
-
 
   return (
     <div className="card">
