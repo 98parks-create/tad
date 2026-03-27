@@ -17,6 +17,17 @@ import Privacy from './pages/Privacy';
 import Footer from './components/Footer';
 import './index.css';
 
+// Global variable to capture early beforeinstallprompt events
+let globalDeferredPrompt = null;
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    globalDeferredPrompt = e;
+    // Dispatch a custom event to notify React components
+    window.dispatchEvent(new CustomEvent('pwa-prompt-available'));
+  });
+}
+
 function AppContent() {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
@@ -36,12 +47,17 @@ function AppContent() {
     const standalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator.standalone);
     setIsStandalone(standalone);
 
-    const handleBeforeInstallPrompt = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
+    // Initial check for captured prompt
+    if (globalDeferredPrompt) {
+      setDeferredPrompt(globalDeferredPrompt);
+    }
+
+    const handlePromptEvent = () => {
+      setDeferredPrompt(globalDeferredPrompt);
     };
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    window.addEventListener('pwa-prompt-available', handlePromptEvent);
+    return () => window.removeEventListener('pwa-prompt-available', handlePromptEvent);
   }, []);
 
   const handleInstallClick = async () => {
