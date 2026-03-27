@@ -29,6 +29,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
               </div>
               {providerInfo?.stampImage && (
                 <img 
+                  crossOrigin="anonymous"
                   src={providerInfo.stampImage} 
                   alt="직인" 
                   style={{ 

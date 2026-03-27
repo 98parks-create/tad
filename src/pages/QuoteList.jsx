@@ -89,29 +89,43 @@ export default function QuoteList() {
   const captureImage = async () => {
     if (!printRef.current) return null;
     
-    // Temporarily disable transform for better capture reliability
     const element = printRef.current;
-    const parent = element.parentElement;
-    const originalTransform = parent.style.transform;
-    const originalMargin = parent.style.marginBottom;
     
-    parent.style.transform = 'none';
-    parent.style.marginBottom = '0';
-    
+    // Wait for all images to be loaded
+    const images = Array.from(element.getElementsByTagName('img'));
+    await Promise.all(images.map(img => {
+      if (img.complete) return Promise.resolve();
+      return new Promise(resolve => {
+        img.onload = resolve;
+        img.onerror = resolve; // Continue even if one image fails
+      });
+    }));
+
+    // Add a small delay for any layout settling
+    await new Promise(resolve => setTimeout(resolve, 300));
+
     try {
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        onclone: (clonedDoc) => {
+          // Find the template in the cloned document
+          // We search by style or structure since we don't have a unique ID easily available here
+          // But we can identify it by the fact it's the 210mm wide div
+          const clonedElement = Array.from(clonedDoc.getElementsByTagName('div')).find(div => div.style.width === '210mm');
+          if (clonedElement && clonedElement.parentElement) {
+            clonedElement.parentElement.style.transform = 'none';
+            clonedElement.parentElement.style.marginBottom = '0';
+            clonedElement.parentElement.style.display = 'block';
+          }
+        }
       });
       return canvas;
     } catch (error) {
       console.error("Capture failed:", error);
       return null;
-    } finally {
-      parent.style.transform = originalTransform;
-      parent.style.marginBottom = originalMargin;
     }
   };
 
