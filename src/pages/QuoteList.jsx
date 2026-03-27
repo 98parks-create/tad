@@ -135,50 +135,71 @@ export default function QuoteList() {
 
   const handleShareKakao = async () => {
     if (!window.Kakao) {
-      alert("카카오 SDK를 불러오지 못했습니다.");
+      alert("카카오 SDK를 불러오지 못했습니다. 페이지를 새로고침해 주세요.");
       return;
+    }
+
+    // Defensive initialization check
+    if (!window.Kakao.isInitialized()) {
+      const kakaoKey = import.meta.env.VITE_KAKAO_JS_KEY;
+      if (kakaoKey) {
+        window.Kakao.init(kakaoKey);
+      } else {
+        alert("카카오 앱 키가 설정되지 않았습니다.");
+        return;
+      }
     }
 
     setIsPreparing(true);
     try {
       const canvas = await captureImage();
-      if (!canvas) return;
+      if (!canvas) {
+        alert("이미지 생성에 실패했습니다.");
+        return;
+      }
 
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob(b => b ? resolve(b) : reject(new Error("Blob conversion failed")), 'image/jpeg', 0.9);
+      });
       
       const fileName = `shares/${currentUser?.uid || 'anon'}_${Date.now()}.jpg`;
       const fileRef = storageRef(storage, fileName);
       await uploadBytes(fileRef, blob);
       const imageUrl = await getDownloadURL(fileRef);
 
-      window.Kakao.Share.sendDefault({
-        objectType: 'feed',
-        content: {
-          title: `[견적서] ${selectedQuote.customerInfo.project || '견적 안내'}`,
-          description: `${selectedQuote.customerInfo.company || ''} ${selectedQuote.customerInfo.name || '고객'}님께 드리는 견적서입니다.\n합계금액: ${selectedQuote.grandTotal.toLocaleString()}원`,
-          imageUrl: imageUrl,
-          link: {
-            mobileWebUrl: window.location.href,
-            webUrl: window.location.href,
-          },
-        },
-        buttons: [
-          {
-            title: '견적서 보기',
+      if (window.Kakao.Share) {
+        window.Kakao.Share.sendDefault({
+          objectType: 'feed',
+          content: {
+            title: `[견적서] ${selectedQuote.customerInfo.project || '견적 안내'}`,
+            description: `${selectedQuote.customerInfo.company || ''} ${selectedQuote.customerInfo.name || '고객'}님께 드리는 견적서입니다.\n합계금액: ${selectedQuote.grandTotal.toLocaleString()}원`,
+            imageUrl: imageUrl,
             link: {
-              mobileWebUrl: window.location.href,
-              webUrl: window.location.href,
+              mobileWebUrl: window.location.origin,
+              webUrl: window.location.origin,
             },
           },
-        ],
-      });
+          buttons: [
+            {
+              title: '전체 내역 보기',
+              link: {
+                mobileWebUrl: window.location.origin,
+                webUrl: window.location.origin,
+              },
+            },
+          ],
+        });
+      } else {
+        throw new Error("Kakao.Share undefined");
+      }
     } catch (error) {
       console.error("Kakao share failed:", error);
-      alert("카카오톡 공유 중 오류가 발생했습니다.");
+      alert(`카카오톡 공유 실패: ${error.message || '알 수 없는 오류'}`);
     } finally {
       setIsPreparing(false);
     }
   };
+ Riverside
 
   useEffect(() => {
     const fetchQuotes = async () => {
