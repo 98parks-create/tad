@@ -1,7 +1,10 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { industries, materialCategoriesByIndustry } from '../data/materials';
-import { Plus, Trash2, Save, Printer, Copy, Lock } from 'lucide-react';
+import { Plus, Trash2, Save, Printer, Copy, Lock, Image, MessageCircle } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
+import html2canvas from 'html2canvas';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../firebase';
 import PrintTemplate from '../components/PrintTemplate';
 import PaymentModal from '../components/PaymentModal';
 import { saveQuote, getQuotes } from '../services/quoteService';
@@ -26,6 +29,7 @@ export default function CreateQuote() {
   const [editId] = useState(editQuote?.id || null);
   const [showPaywall, setShowPaywall] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [isPreparing, setIsPreparing] = useState(false);
 
   React.useEffect(() => {
     if (currentUser) {
@@ -148,6 +152,95 @@ export default function CreateQuote() {
     pageStyle: "@page { size: A4; margin: 0; } @media print { body { -webkit-print-color-adjust: exact; } }"
   });
 
+  const captureImage = async () => {
+    if (!printRef.current) return null;
+    
+    // Temporarily show the print template if it's hidden
+    const element = printRef.current;
+    const originalStyle = element.parentElement.style.display;
+    element.parentElement.style.display = 'block';
+    
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2, // Higher quality
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
+      return canvas;
+    } finally {
+      element.parentElement.style.display = originalStyle;
+    }
+  };
+
+  const handleSaveImage = async () => {
+    setIsPreparing(true);
+    try {
+      const canvas = await captureImage();
+      if (!canvas) return;
+      
+      const link = document.createElement('a');
+      link.download = `견적서_${customerInfo.project || '미정'}_${customerInfo.name || '고객'}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error("Image saving failed:", error);
+      alert("이미지 저장 중 오류가 발생했습니다.");
+    } finally {
+      setIsPreparing(false);
+    }
+  };
+
+  const handleShareKakao = async () => {
+    if (!window.Kakao) {
+      alert("카카오 SDK를 불러오지 못했습니다.");
+      return;
+    }
+
+    setIsPreparing(true);
+    try {
+      const canvas = await captureImage();
+      if (!canvas) return;
+
+      // Convert canvas to blob for upload
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
+      
+      // Upload to Firebase Storage
+      const fileName = `shares/${currentUser?.uid || 'anon'}_${Date.now()}.jpg`;
+      const fileRef = storageRef(storage, fileName);
+      await uploadBytes(fileRef, blob);
+      const imageUrl = await getDownloadURL(fileRef);
+
+      // Share via Kakao
+      window.Kakao.Share.sendDefault({
+        objectType: 'feed',
+        content: {
+          title: `[견적서] ${customerInfo.project || '견적 안내'}`,
+          description: `${customerInfo.company || ''} ${customerInfo.name || '고객'}님께 드리는 견적서입니다.\n합계금액: ${grandTotal.toLocaleString()}원`,
+          imageUrl: imageUrl,
+          link: {
+            mobileWebUrl: window.location.href,
+            webUrl: window.location.href,
+          },
+        },
+        buttons: [
+          {
+            title: '견적서 보기',
+            link: {
+              mobileWebUrl: window.location.href,
+              webUrl: window.location.href,
+            },
+          },
+        ],
+      });
+    } catch (error) {
+      console.error("Kakao share failed:", error);
+      alert("카카오톡 공유 중 오류가 발생했습니다.");
+    } finally {
+      setIsPreparing(false);
+    }
+  };
+
   const handleSave = async () => {
     if (items.length === 0) {
       alert("항목을 하나 이상 추가해주세요.");
@@ -175,9 +268,15 @@ export default function CreateQuote() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h2 style={{ margin: 0 }}>{editId ? '견적 내역 수정' : '새 견적 작성'}</h2>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <button className="btn btn-outline" onClick={handlePrint}><Printer size={18} /> 견적서 출력/PDF</button>
-          <button className="btn btn-primary" onClick={handleSave} disabled={isSaving}>
+        <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
+          <button className="btn btn-outline" onClick={handlePrint} disabled={isPreparing}><Printer size={18} /> PDF 출력</button>
+          <button className="btn btn-outline" onClick={handleSaveImage} disabled={isPreparing}>
+            <Image size={18} /> {isPreparing ? '처리 중...' : '이미지 저장'}
+          </button>
+          <button className="btn btn-outline" onClick={handleShareKakao} style={{ color: '#3A1D1D', borderColor: '#FEE500', backgroundColor: '#FEE500' }} disabled={isPreparing}>
+            <MessageCircle size={18} /> {isPreparing ? '처리 중...' : '카톡 공유'}
+          </button>
+          <button className="btn btn-primary" onClick={handleSave} disabled={isSaving || isPreparing}>
             <Save size={18} /> {isSaving ? '저장 중...' : '데이터 저장'}
           </button>
         </div>
