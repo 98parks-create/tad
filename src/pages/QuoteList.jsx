@@ -89,8 +89,14 @@ export default function QuoteList() {
   const captureImage = async () => {
     if (!printRef.current) return null;
     
-    // Temporarily make sure the element is visible for capture if needed
+    // Temporarily disable transform for better capture reliability
     const element = printRef.current;
+    const parent = element.parentElement;
+    const originalTransform = parent.style.transform;
+    const originalMargin = parent.style.marginBottom;
+    
+    parent.style.transform = 'none';
+    parent.style.marginBottom = '0';
     
     try {
       const canvas = await html2canvas(element, {
@@ -103,6 +109,9 @@ export default function QuoteList() {
     } catch (error) {
       console.error("Capture failed:", error);
       return null;
+    } finally {
+      parent.style.transform = originalTransform;
+      parent.style.marginBottom = originalMargin;
     }
   };
 

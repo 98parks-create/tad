@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { industries, materialCategoriesByIndustry } from '../data/materials';
-import { Save, Printer, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Save, Printer, Plus, Trash2, ChevronDown, ChevronUp, Copy, Lock, Check } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 import html2canvas from 'html2canvas';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
