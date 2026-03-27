@@ -27,14 +27,22 @@ export default async function handler(req, res) {
   try {
     const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID || 'Hfz9nrxiGx4JoQrsxBMo';
     const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET || 'UmoEXsOt0l';
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 15d10f9dbb22b2e122f72b1e9183b43c0cda7815
     // 1. Get Naver Access Token
     const tokenUrl = `https://nid.naver.com/oauth2.0/token?grant_type=authorization_code&client_id=${NAVER_CLIENT_ID}&client_secret=${NAVER_CLIENT_SECRET}&code=${code}&state=${state}`;
 
     const tokenRes = await fetch(tokenUrl, { method: 'GET' });
     const tokenData = await tokenRes.json();
     if (tokenData.error) throw new Error(tokenData.error_description || tokenData.error);
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 15d10f9dbb22b2e122f72b1e9183b43c0cda7815
     const accessToken = tokenData.access_token;
 
     // 2. Get User Info
