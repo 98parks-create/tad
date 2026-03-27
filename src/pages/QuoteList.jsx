@@ -241,17 +241,6 @@ export default function QuoteList() {
     }
   }, [currentUser?.uid]);
 
-  // Handle background preparation when modal opens
-  useEffect(() => {
-    if (selectedQuote) {
-      setPreparedImageUrl(null);
-      // Small delay to ensure modal is rendered
-      const timer = setTimeout(() => {
-        captureAndUpload();
-      }, 800);
-      return () => clearTimeout(timer);
-    }
-  }, [selectedQuote]);
 
   return (
     <div className="card">
