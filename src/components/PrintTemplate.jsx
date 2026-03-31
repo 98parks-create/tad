@@ -80,12 +80,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
   return (
     <div style={{ width: '100%', backgroundColor: '#f1f5f9', padding: '20px 0' }}>
       <div className="no-print" style={{ width: '210mm', margin: '0 auto 10px auto', textAlign: 'right' }}>
-        <button
-          onClick={handleShare}
-          style={{ padding: '12px 24px', backgroundColor: '#FEE500', color: '#3C1E1E', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', fontSize: '11pt', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
-        >
-          견적서 이미지로 공유/저장
-        </button>
+
       </div>
 
       <div ref={ref} className="print-template" style={{ padding: styles.topBottomPadding, width: '210mm', minHeight: '290mm', boxSizing: 'border-box', margin: '0 auto', backgroundColor: 'white', color: 'black', fontFamily: "'Noto Sans KR', sans-serif", display: 'flex', flexDirection: 'column', boxShadow: '0 0 20px rgba(0,0,0,0.1)' }}>
