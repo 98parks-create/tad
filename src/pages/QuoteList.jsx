@@ -424,11 +424,9 @@ export default function QuoteList() {
                   <CheckCircle size={18} /> 입금/승인 완료
                 </button>
               )}
-              {selectedQuote.status === 'pending' && (
-                <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }} onClick={handleEdit}>
-                  <Edit size={18} /> 수정
-                </button>
-              )}
+              <button className="btn btn-outline" onClick={handleEdit}>
+                <Edit size={18} /> 수정
+              </button>
               <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#6366f1', borderColor: '#6366f1' }} onClick={handleCopyQuote}>
                 <Copy size={18} /> 견적 복사
               </button>
