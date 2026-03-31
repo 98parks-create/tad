@@ -582,3 +582,56 @@ label {
   color: var(--text-light);
   padding: 4px;
 }
+
+/* Print Preview Responsive Styling */
+.print-preview-container {
+  border: 1px solid var(--border-color);
+  padding: 1rem;
+  border-radius: 8px;
+  background: #e2e8f0;
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.print-preview-scale {
+  /* Default Desktop Scale */
+  zoom: 0.85;
+  /* Compatibility Fallback */
+  -webkit-transform: scale(0.85);
+  -moz-transform: scale(0.85);
+  transform: scale(0.85);
+  -webkit-transform-origin: top center;
+  -moz-transform-origin: top center;
+  transform-origin: top center;
+}
+
+@media (max-width: 768px) {
+  .print-preview-container {
+    padding: 0.5rem;
+  }
+  .print-preview-scale {
+    zoom: 0.45;
+    -webkit-transform: scale(0.45);
+    -moz-transform: scale(0.45);
+    transform: scale(0.45);
+  }
+}
+
+@media (max-width: 480px) {
+  .print-preview-scale {
+    zoom: 0.42;
+    -webkit-transform: scale(0.42);
+    -moz-transform: scale(0.42);
+    transform: scale(0.42);
+  }
+}
+@media (max-width: 380px) {
+  .print-preview-scale {
+    zoom: 0.38;
+    -webkit-transform: scale(0.38);
+    -moz-transform: scale(0.38);
+    transform: scale(0.38);
+  }
+}

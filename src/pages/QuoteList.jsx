@@ -165,9 +165,11 @@ export default function QuoteList() {
           // But we can identify it by the fact it's the 210mm wide div
           const clonedElement = Array.from(clonedDoc.getElementsByTagName('div')).find(div => div.style.width === '210mm');
           if (clonedElement && clonedElement.parentElement) {
+            clonedElement.parentElement.className = '';
             clonedElement.parentElement.style.transform = 'none';
             clonedElement.parentElement.style.marginBottom = '0';
             clonedElement.parentElement.style.display = 'block';
+            clonedElement.parentElement.style.zoom = '1';
           }
         }
       });
@@ -424,8 +426,8 @@ export default function QuoteList() {
               </button>
             </div>
 
-            <div style={{ border: '1px solid var(--border-color)', padding: '1rem', borderRadius: '4px', background: '#e2e8f0', display: 'flex', justifyContent: 'center', overflow: 'hidden' }}>
-              <div style={{ transform: 'scale(0.85)', transformOrigin: 'top center', marginBottom: '-50mm' }}>
+            <div className="print-preview-container">
+              <div className="print-preview-scale">
                 <PrintTemplate
                   ref={printRef}
                   customerInfo={selectedQuote.customerInfo || {}}
