@@ -635,3 +635,44 @@ label {
     transform: scale(0.38);
   }
 }
+
+/* Print Isolation for Mobile Devices */
+@media print {
+  /* iOS Safari 다이얼로그 전채화면 출력 방지: 컨테이너 은폐 및 지정 클래스만 현출 */
+  body * {
+    visibility: hidden;
+  }
+  
+  .print-template, .print-template * {
+    visibility: visible;
+  }
+  
+  .print-template {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    margin: 0 !important;
+    padding: 10mm 15mm !important;
+    zoom: 1 !important;
+    transform: none !important;
+    width: 210mm !important;
+    height: auto !important;
+    box-sizing: border-box !important;
+    background-color: white !important;
+  }
+
+  /* 네비게이션 및 사이드 버튼 강제 숨김 */
+  .pwa-install-btn-floating, .chatbot-wrapper, .bottom-nav, .top-header, .sidebar, .mobile-menu-btn {
+    display: none !important;
+  }
+
+  /* Remove any overlay scaling */
+  .print-preview-scale, .print-preview-container {
+    transform: none !important;
+    zoom: 1 !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}

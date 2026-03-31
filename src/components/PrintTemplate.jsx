@@ -4,7 +4,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
   const dynamicScale = items.length > 8 ? 8 / items.length : 1;
 
   return (
-    <div ref={ref} style={{ padding: '10mm 15mm', width: '210mm', height: '290mm', boxSizing: 'border-box', margin: '0 auto', backgroundColor: 'white', color: 'black', fontFamily: "'Noto Sans KR', sans-serif", display: 'flex', flexDirection: 'column', zoom: dynamicScale }}>
+    <div ref={ref} className="print-template" style={{ padding: '10mm 15mm', width: '210mm', height: '290mm', boxSizing: 'border-box', margin: '0 auto', backgroundColor: 'white', color: 'black', fontFamily: "'Noto Sans KR', sans-serif", display: 'flex', flexDirection: 'column', zoom: dynamicScale }}>
         <div style={{ textAlign: 'center', marginBottom: '4mm', borderBottom: '2px solid #003366', paddingBottom: '2mm', paddingTop: '5mm' }}>
           <h1 style={{ color: '#003366', fontSize: '28pt', margin: '0 0 4mm 0', letterSpacing: '6px', fontWeight: 900 }}>견 적 서</h1>
           <div style={{ display: 'flex', justifyContent: 'space-between', textAlign: 'left', fontSize: '11pt' }}>
