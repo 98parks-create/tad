@@ -24,7 +24,11 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
     headerMarginBottom: compactLevel === 'very-dense' ? '2mm' : '4mm',
   };
 
-  // 작성한 순서대로 (FIFO) 출력하기 위해 별도의 정렬 로직 없이 원본 유지
+  /**
+   * [수정사항] FIFO 방식 적용
+   * 가장 먼저 작성(추가)한 항목이 배열의 0번 인덱스에 있으므로, 
+   * 정렬 없이 그대로 사용하면 작성 순서대로 1, 2, 3... 위에서 아래로 정렬됩니다.
+   */
   const sortedItems = [...items];
 
   return (
