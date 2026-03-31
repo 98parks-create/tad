@@ -433,6 +433,10 @@ export default function QuoteList() {
                   subTotal={selectedQuote.subTotal}
                   vat={selectedQuote.vat}
                   grandTotal={selectedQuote.grandTotal}
+                  discount={selectedQuote.discount}
+                  discountReason={selectedQuote.discountReason}
+                  remarks={selectedQuote.remarks}
+                  attachedImages={selectedQuote.attachedImages}
                   providerInfo={companyProfile}
                   includeVat={selectedQuote.includeVat !== false}
                 />

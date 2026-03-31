@@ -23,7 +23,7 @@ export default function Chatbot() {
   ];
 
   return (
-    <div style={{ position: 'fixed', bottom: '24px', right: '180px', zIndex: 9999 }}>
+    <div className="chatbot-wrapper">
       {isOpen ? (
         <div style={{ 
           position: 'absolute', 

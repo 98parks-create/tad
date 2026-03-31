@@ -444,6 +444,37 @@ label {
   animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+/* Chatbot Wrapper */
+.chatbot-wrapper {
+  position: fixed;
+  bottom: 24px;
+  right: 180px;
+  z-index: 9999;
+}
+
+@media (max-width: 768px) {
+  .pwa-install-btn-floating {
+    bottom: calc(88px + env(safe-area-inset-bottom));
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    animation: bounceInMobile 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    white-space: nowrap;
+  }
+  
+  .chatbot-wrapper {
+    bottom: calc(88px + env(safe-area-inset-bottom));
+    right: 16px;
+  }
+}
+
+@keyframes bounceInMobile {
+  0% { transform: scale(0.3) translateX(-50%); opacity: 0; }
+  50% { transform: scale(1.05) translateX(-50%); opacity: 0.8; }
+  70% { transform: scale(0.9) translateX(-50%); opacity: 0.9; }
+  100% { transform: scale(1) translateX(-50%); opacity: 1; }
+}
+
 @keyframes bounceIn {
   0% { transform: scale(0.3); opacity: 0; }
   50% { transform: scale(1.05); opacity: 0.8; }
