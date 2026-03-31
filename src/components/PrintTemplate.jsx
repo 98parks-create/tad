@@ -31,17 +31,16 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
     if (!ref.current) return;
 
     try {
-      // 폰트가 완전히 로드될 때까지 대기
+      // 폰트 및 첨부 이미지들이 로드될 때까지 대기
       await document.fonts.ready;
 
       const canvas = await html2canvas(ref.current, {
-        scale: 3, // 숫자를 더 높여 선명도 확보 (기존 2 -> 3)
-        useCORS: true,
+        scale: 3,
+        useCORS: true, // 이미지 서버 CORS 허용 필수
         backgroundColor: '#ffffff',
         logging: false,
-        letterRendering: true, // 글자 렌더링 정확도 향상
+        letterRendering: true,
         allowTaint: true,
-        // 아래 옵션은 텍스트 위치가 밀리는 것을 방지합니다.
         onclone: (clonedDoc) => {
           const el = clonedDoc.querySelector('.print-template');
           if (el) {
@@ -64,7 +63,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
         } else {
           downloadFallback(blob, fileName);
         }
-      }, 'image/png', 1.0); // 품질 최고로 설정
+      }, 'image/png', 1.0);
     } catch (err) {
       alert("이미지 생성 중 오류가 발생했습니다.");
     }
@@ -82,7 +81,6 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
 
   return (
     <div style={{ width: '100%', backgroundColor: '#f1f5f9', padding: '20px 0' }}>
-      {/* 캡처를 실행할 실제 컨테이너 */}
       <div
         ref={ref}
         className="print-template"
@@ -94,7 +92,6 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
           margin: '0 auto',
           backgroundColor: 'white',
           color: 'black',
-          // 폰트를 더 명확하게 지정
           fontFamily: "'Noto Sans KR', 'Malgun Gothic', sans-serif",
           display: 'flex',
           flexDirection: 'column',
@@ -149,7 +146,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
           </div>
         </div>
 
-        {/* 테이블 섹션 (글자 겹침 방지를 위해 고정폭/간격 미세 조정) */}
+        {/* 테이블 섹션 */}
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: styles.tableFontSize, marginBottom: '5mm', border: '2px solid #000', tableLayout: 'fixed' }}>
           <colgroup>
             <col style={{ width: '40px' }} />
@@ -224,22 +221,38 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
           </table>
         </div>
 
-        <div style={{ marginTop: 'auto' }}>
+        {/* 특약사항 및 공지 */}
+        <div style={{ marginBottom: '5mm' }}>
           {remarks && (
-            <div style={{ marginBottom: '5mm', textAlign: 'left', fontSize: '9pt', backgroundColor: '#f1f5f9', padding: '10px 14px', borderRadius: '4px', border: '1px solid #cbd5e1', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
+            <div style={{ textAlign: 'left', fontSize: '9pt', backgroundColor: '#f1f5f9', padding: '10px 14px', borderRadius: '4px', border: '1px solid #cbd5e1', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
               <strong>[ 특약사항 및 공지 ]</strong><br />{remarks}
             </div>
           )}
-          <div style={{ textAlign: 'center', fontSize: '11pt', borderTop: '2px dashed #94a3b8', paddingTop: '6mm', fontWeight: 'bold', letterSpacing: '2px' }}>상기와 같이 견적합니다.</div>
+          <div style={{ textAlign: 'center', fontSize: '11pt', borderTop: '2px dashed #94a3b8', paddingTop: '6mm', marginTop: '4mm', fontWeight: 'bold', letterSpacing: '2px' }}>상기와 같이 견적합니다.</div>
         </div>
 
-        {attachedImages?.length > 0 && (
-          <div style={{ marginTop: '10mm' }}>
-            <h3 style={{ fontSize: '10pt', borderBottom: '2px solid #000', paddingBottom: '3px', marginBottom: '10px' }}>현장 증빙 사진</h3>
+        {/* [수정된 증빙 사진 섹션] */}
+        {attachedImages && attachedImages.length > 0 && (
+          <div style={{ marginTop: '10px', pageBreakInside: 'avoid' }}>
+            <h3 style={{ fontSize: '10pt', borderBottom: '2px solid #003366', paddingBottom: '3px', marginBottom: '10px', color: '#003366', fontWeight: 'bold' }}>현장 증빙 사진</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
               {attachedImages.map((img, idx) => (
-                <div key={idx} style={{ aspectRatio: '1', border: '1px solid #cbd5e1', borderRadius: '4px', overflow: 'hidden' }}>
-                  <img src={img} alt="증빙" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <div key={idx} style={{
+                  aspectRatio: '4/3',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '4px',
+                  overflow: 'hidden',
+                  backgroundColor: '#f8fafc',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <img
+                    src={img}
+                    alt={`증빙사진 ${idx + 1}`}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    crossOrigin="anonymous" // 캡처 시 이미지 깨짐 방지
+                  />
                 </div>
               ))}
             </div>
