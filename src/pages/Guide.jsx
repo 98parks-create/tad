@@ -23,8 +23,8 @@ export default function Guide() {
             <h3 style={{ fontSize: '1.4rem', marginBottom: '0.5rem', color: 'var(--text-dark)' }}>Step 1. 내 회사 설정 (내 정보)</h3>
             <p style={{ fontSize: '1.1rem', color: 'var(--text-light)', lineHeight: 1.6 }}>
               원활한 서비스 이용을 위해 가장 먼저 대표님의 <b>회사 정보</b>를 입력해주세요.<br/>
-              <b>상호, 대표자명, 사업자번호 등 기본 정보</b>를 단 한 번만 등록해두시면 <br/>
-              앞으로 작성하시는 모든 견적서 하단에 자동으로 멋지게 들어갑니다!
+              <b>상호, 대표자명, 사업자번호 등 기본 정보와 도장 사진</b>을 단 한 번만 등록해두시면 <br/>
+              앞으로 작성하시는 모든 견적서 하단에 자동으로 멋지게 날인되어 들어갑니다!
             </p>
           </div>
         </div>
