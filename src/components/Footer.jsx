@@ -12,7 +12,7 @@ export default function Footer() {
         </div>
         <div style={{ lineHeight: '1.6' }}>
           상호명: 태드스마트견적(TAD) | 대표자명: 박인서 | 사업자등록번호: 387-14-02824<br />
-          통신판매업 신고번호: (담당자 확인중) | 사업장 소재지: 성남시 수정구 산성대로 305<br />
+          사업장 소재지: 성남시 수정구 산성대로 305<br />
           고객센터: 010-6456-1084 | 이메일: inseopark7@naver.com<br />
           {/* 호스팅 서비스 제공자: Vercel / Firebase */}
         </div>

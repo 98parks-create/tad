@@ -28,8 +28,12 @@ export default function Terms() {
           </ul>
         </section>
 
-        <div style={{ padding: '1rem', backgroundColor: '#f1f5f9', borderRadius: '8px', fontSize: '0.9rem', color: '#64748b', textAlign: 'center' }}>
-          (추후 구체적인 약관 내용은 사업자 등록 후 보강하여 업데이트하시기 바랍니다.)
+        <div style={{ padding: '1rem', backgroundColor: '#f1f5f9', borderRadius: '8px', fontSize: '0.9rem', color: '#64748b', textAlign: 'center', lineHeight: '1.6' }}>
+          <strong>태드스마트견적(TAD) 고객지원</strong><br/>
+          대표자명: 박인서 | 사업자등록번호: 387-14-02824<br/>
+          사업장 소재지: 성남시 수정구 산성대로 305<br/>
+          고객센터: 010-6456-1084 | 이메일: inseopark7@naver.com<br/>
+          <br/>본 약관은 2026년 최신 기준으로 적용됩니다.
         </div>
       </div>
       <div style={{ marginTop: '2rem', textAlign: 'center' }}>

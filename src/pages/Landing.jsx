@@ -89,10 +89,14 @@ export default function Landing() {
 
       {/* Footer */}
       <footer style={{ backgroundColor: '#0f172a', padding: '3rem 2rem', textAlign: 'center', color: '#94a3b8' }}>
-        <h4 style={{ color: 'white', fontSize: '1.5rem', margin: '0 0 0.5rem 0', fontWeight: 700 }}>TAD B2B</h4>
+        <h4 style={{ color: 'white', fontSize: '1.5rem', margin: '0 0 0.5rem 0', fontWeight: 700 }}>태드스마트견적(TAD)</h4>
         <p style={{ color: '#cbd5e1', fontSize: '1rem', marginTop: 0, marginBottom: '1.5rem' }}>맞춤형 자동 견적 솔루션</p>
-        <p style={{ marginBottom: '2rem' }}>업종의 경계를 허무는 범용 스마트 견적 솔루션. 더 확실하고 빠른 비즈니스를 경험하세요.</p>
-        <p style={{ fontSize: '0.85rem' }}>&copy; {new Date().getFullYear()} TAD B2B Inc. All rights reserved.</p>
+        <div style={{ marginBottom: '2rem', fontSize: '0.9rem', lineHeight: '1.6', color: '#64748b' }}>
+          상호명: 태드스마트견적(TAD) | 대표자명: 박인서 | 사업자등록번호: 387-14-02824<br/>
+          사업장 소재지: 성남시 수정구 산성대로 305<br/>
+          고객센터: 010-6456-1084 | 이메일: inseopark7@naver.com
+        </div>
+        <p style={{ fontSize: '0.85rem' }}>&copy; {new Date().getFullYear()} 태드스마트견적(TAD). All rights reserved.</p>
       </footer>
 
     </div>
