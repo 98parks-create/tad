@@ -14,41 +14,38 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
     else if (itemCount > 10) compactLevel = 'dense';
   }
 
-  // A4 해상도에 최적화된 스타일 수치
   const styles = {
     tableFontSize: compactLevel === 'very-dense' ? '8pt' : compactLevel === 'dense' ? '8.5pt' : '9.5pt',
     cellPadding: compactLevel === 'very-dense' ? '3px 2px' : compactLevel === 'dense' ? '5px 4px' : '6px 5px',
     headerPadding: compactLevel === 'very-dense' ? '5px 2px' : compactLevel === 'dense' ? '6px 4px' : '8px 5px',
     rowHeight: compactLevel === 'very-dense' ? '18px' : compactLevel === 'dense' ? '24px' : '30px',
-    topBottomPadding: compactLevel === 'very-dense' ? '10mm 15mm' : '15mm 20mm', // 여백 최적화
+    topBottomPadding: compactLevel === 'very-dense' ? '5mm 15mm' : '10mm 15mm',
     titleMargin: compactLevel === 'very-dense' ? '3mm 0' : '6mm 0 4mm 0',
-    headerMarginBottom: compactLevel === 'very-dense' ? '2mm' : '5mm',
+    headerMarginBottom: compactLevel === 'very-dense' ? '2mm' : '4mm',
   };
 
   const sortedItems = [...items].reverse();
 
-  // [고해상도 캡처 로직]
+  // [글자 깨짐 방지 보정 로직]
   const handleShare = async () => {
     if (!ref.current) return;
 
     try {
+      // 폰트가 완전히 로드될 때까지 대기
       await document.fonts.ready;
 
       const canvas = await html2canvas(ref.current, {
-        scale: 2, // 2배수 스케일로 고해상도 확보 (출력용으로 적합)
+        scale: 3, // 숫자를 더 높여 선명도 확보 (기존 2 -> 3)
         useCORS: true,
         backgroundColor: '#ffffff',
         logging: false,
-        width: 794, // A4 표준 너비 (96 DPI 기준 210mm)
-        height: 1123, // A4 표준 높이 (96 DPI 기준 297mm)
-        windowWidth: 794, // 뷰포트 고정으로 레이아웃 뒤틀림 방지
+        letterRendering: true, // 글자 렌더링 정확도 향상
+        allowTaint: true,
+        // 아래 옵션은 텍스트 위치가 밀리는 것을 방지합니다.
         onclone: (clonedDoc) => {
           const el = clonedDoc.querySelector('.print-template');
           if (el) {
-            el.style.width = '794px';
-            el.style.height = '1123px';
-            el.style.margin = '0';
-            el.style.boxShadow = 'none';
+            el.style.transform = 'none';
           }
         }
       });
@@ -67,7 +64,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
         } else {
           downloadFallback(blob, fileName);
         }
-      }, 'image/png', 1.0);
+      }, 'image/png', 1.0); // 품질 최고로 설정
     } catch (err) {
       alert("이미지 생성 중 오류가 발생했습니다.");
     }
@@ -85,27 +82,28 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
 
   return (
     <div style={{ width: '100%', backgroundColor: '#f1f5f9', padding: '20px 0' }}>
+      {/* 캡처를 실행할 실제 컨테이너 */}
       <div
         ref={ref}
         className="print-template"
         style={{
           padding: styles.topBottomPadding,
-          width: '210mm', // 794px 대응
-          height: '297mm', // 1123px 대응 (고정 해상도 유지)
+          width: '210mm',
+          minHeight: '290mm',
           boxSizing: 'border-box',
           margin: '0 auto',
           backgroundColor: 'white',
           color: 'black',
+          // 폰트를 더 명확하게 지정
           fontFamily: "'Noto Sans KR', 'Malgun Gothic', sans-serif",
           display: 'flex',
           flexDirection: 'column',
           boxShadow: '0 0 20px rgba(0,0,0,0.1)',
-          position: 'relative',
-          overflow: 'hidden' // 해상도 밖으로 나가는 요소 차단
+          position: 'relative'
         }}
       >
-        {/* 견적서 상단 */}
-        <div style={{ textAlign: 'center', marginBottom: styles.headerMarginBottom, borderBottom: '2px solid #003366', paddingBottom: '3mm' }}>
+        {/* 상단 섹션 */}
+        <div style={{ textAlign: 'center', marginBottom: styles.headerMarginBottom, borderBottom: '2px solid #003366', paddingBottom: '2mm', paddingTop: '5mm' }}>
           <h1 style={{ color: '#003366', fontSize: '28pt', margin: '0 0 4mm 0', letterSpacing: '6px', fontWeight: 900 }}>견 적 서</h1>
           <div style={{ display: 'flex', justifyContent: 'space-between', textAlign: 'left', fontSize: '11pt' }}>
             <div style={{ lineHeight: '1.6' }}>
@@ -141,7 +139,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
           </div>
         </div>
 
-        {/* 총액 박스 */}
+        {/* 금액 요약 섹션 */}
         <div style={{ margin: styles.titleMargin, padding: '12px 16px', backgroundColor: '#f8fafc', border: '2px solid #000', borderLeft: '8px solid #003366', borderRadius: '4px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <span style={{ fontWeight: 'bold', fontSize: '13pt' }}>총 견적 금액 (VAT {includeVat ? '포함' : '별도'}):</span>
@@ -151,7 +149,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
           </div>
         </div>
 
-        {/* 품목 테이블 */}
+        {/* 테이블 섹션 (글자 겹침 방지를 위해 고정폭/간격 미세 조정) */}
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: styles.tableFontSize, marginBottom: '5mm', border: '2px solid #000', tableLayout: 'fixed' }}>
           <colgroup>
             <col style={{ width: '40px' }} />
@@ -179,7 +177,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
             {sortedItems.map((item, i) => (
               <tr key={i} style={{ height: styles.rowHeight }}>
                 <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'center' }}>{i + 1}</td>
-                <td style={{ padding: styles.cellPadding, border: '1px solid #000', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</td>
+                <td style={{ padding: styles.cellPadding, border: '1px solid #000', fontWeight: '500', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{item.name}</td>
                 <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'center' }}>{item.specification || (item.type === 'area' ? `${item.width}*${item.height}` : '-')}</td>
                 <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'center' }}>{item.quantity}</td>
                 <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'center' }}>{item.unit || 'EA'}</td>
@@ -188,7 +186,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
                 <td style={{ padding: styles.cellPadding, border: '1px solid #000', fontSize: '8pt', textAlign: 'center' }}>{item.remarks}</td>
               </tr>
             ))}
-            {Array.from({ length: Math.max(0, 10 - sortedItems.length) }).map((_, i) => (
+            {Array.from({ length: Math.max(0, 8 - sortedItems.length) }).map((_, i) => (
               <tr key={`empty-${i}`} style={{ height: styles.rowHeight }}>
                 <td colSpan="8" style={{ border: '1px solid #000' }}></td>
               </tr>
@@ -196,7 +194,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
           </tbody>
         </table>
 
-        {/* 합계 하단 */}
+        {/* 합계 테이블 */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '5mm' }}>
           <table style={{ width: '400px', borderCollapse: 'collapse', fontSize: '11pt', border: '2px solid #000' }}>
             <tbody>
@@ -228,18 +226,18 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
 
         <div style={{ marginTop: 'auto' }}>
           {remarks && (
-            <div style={{ marginBottom: '5mm', textAlign: 'left', fontSize: '9pt', backgroundColor: '#f1f5f9', padding: '10px 14px', borderRadius: '4px', border: '1px solid #cbd5e1', whiteSpace: 'pre-wrap' }}>
+            <div style={{ marginBottom: '5mm', textAlign: 'left', fontSize: '9pt', backgroundColor: '#f1f5f9', padding: '10px 14px', borderRadius: '4px', border: '1px solid #cbd5e1', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
               <strong>[ 특약사항 및 공지 ]</strong><br />{remarks}
             </div>
           )}
-          <div style={{ textAlign: 'center', fontSize: '11pt', borderTop: '2px dashed #94a3b8', paddingTop: '8mm', fontWeight: 'bold', letterSpacing: '2px' }}>상기와 같이 견적합니다.</div>
+          <div style={{ textAlign: 'center', fontSize: '11pt', borderTop: '2px dashed #94a3b8', paddingTop: '6mm', fontWeight: 'bold', letterSpacing: '2px' }}>상기와 같이 견적합니다.</div>
         </div>
 
         {attachedImages?.length > 0 && (
           <div style={{ marginTop: '10mm' }}>
             <h3 style={{ fontSize: '10pt', borderBottom: '2px solid #000', paddingBottom: '3px', marginBottom: '10px' }}>현장 증빙 사진</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-              {attachedImages.slice(0, 3).map((img, idx) => (
+              {attachedImages.map((img, idx) => (
                 <div key={idx} style={{ aspectRatio: '1', border: '1px solid #cbd5e1', borderRadius: '4px', overflow: 'hidden' }}>
                   <img src={img} alt="증빙" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
