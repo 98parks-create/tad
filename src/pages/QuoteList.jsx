@@ -221,26 +221,11 @@ export default function QuoteList() {
       
       const file = new File([blob], `견적서_${selectedQuote.customerInfo.project || '미정'}.jpg`, { type: 'image/jpeg' });
       
-      // 1. 최우선 시도: 네이티브 공유 API (OS 기본 공유 - 스마트폰 카톡/문자 앱 즉시 연결)
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({
-            title: `[견적서] ${selectedQuote.customerInfo.project || '안내'}`,
-            text: `${selectedQuote.customerInfo.company || ''} ${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.\n총 합계: ${selectedQuote.grandTotal.toLocaleString()}원`,
-            files: [file]
-          });
-          return; // 성공 시 여기서 종료
-        } catch (shareError) {
-          if (shareError.name === 'AbortError') {
-             return; // 사용자가 취소한 경우
-          }
-          console.warn('Native share failed, falling back to Kakao API', shareError);
-        }
-      }
-
-      // 2. 폴백: 데스크탑이나 구형 브라우저 등 Web Share 미지원 시 기존 카카오 SDK 연동
+      // [요청 반영] navigator.share 방식은 윈도우 PC에서 카카오톡이 안 뜨는 문제가 있어
+      // 다시 카카오 전용 SDK 우회 방식으로 원복합니다. (domain match: https://tad-one.vercel.app)
       if (!window.Kakao) {
         alert("카카오 SDK를 불러오지 못했습니다.");
+        setIsPreparing(false);
         return;
       }
       if (!window.Kakao.isInitialized()) {
@@ -248,7 +233,8 @@ export default function QuoteList() {
         if (kakaoKey) {
           window.Kakao.init(kakaoKey);
         } else {
-          alert("카카오 키 설정이 누락되어 데스크탑 공유가 불가능합니다.");
+          alert("설정된 카카오 앱 키가 없습니다.");
+          setIsPreparing(false);
           return;
         }
       }
@@ -419,7 +405,7 @@ export default function QuoteList() {
                 <ImageIcon size={18} /> 이미지 저장
               </button>
               <button className="btn btn-outline" onClick={handleShareKakao} disabled={isPreparing} style={{ color: '#3A1D1D', borderColor: '#FEE500', backgroundColor: '#FEE500' }}>
-                <MessageCircle size={18} /> 공유하기 (카톡/문자)
+                <MessageCircle size={18} /> 카톡 공유
               </button>
               {selectedQuote.status === 'pending' && (
                 <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#059669', borderColor: '#059669' }} onClick={handleApprove}>
