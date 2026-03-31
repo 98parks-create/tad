@@ -19,7 +19,6 @@ export default function QuoteList() {
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [companyProfile, setCompanyProfile] = useState(null);
   const [isPreparing, setIsPreparing] = useState(false);
-  const [preparedImageUrl, setPreparedImageUrl] = useState(null);
   const printRef = useRef(null);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -179,34 +178,6 @@ export default function QuoteList() {
     }
   };
 
-  useEffect(() => {
-    if (selectedQuote) {
-      setPreparedImageUrl(null);
-      // 모달 렌더링 완료 후 안정적으로 캡처하기 위한 딜레이
-      const timer = setTimeout(async () => {
-        try {
-          const canvas = await captureImage();
-          if (!canvas) return;
-          
-          const blob = await new Promise((resolve, reject) => {
-            canvas.toBlob(b => b ? resolve(b) : reject(new Error("Blob failed")), 'image/jpeg', 0.8);
-          });
-          
-          const fileName = `shares/bg_${currentUser?.uid || 'anon'}_${Date.now()}.jpg`;
-          const fileRef = storageRef(storage, fileName);
-          await uploadBytes(fileRef, blob);
-          const url = await getDownloadURL(fileRef);
-          
-          setPreparedImageUrl(url);
-        } catch (error) {
-          console.error("Background image prepare failed:", error);
-        }
-      }, 600);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [selectedQuote, currentUser?.uid]);
-
   const handleSaveImage = async () => {
     setIsPreparing(true);
     // Give modal time to settle (solve first-try failure)
@@ -231,7 +202,7 @@ export default function QuoteList() {
     }
   };
 
-  const handleShareKakao = () => {
+  const handleShareKakao = async () => {
     if (!window.Kakao) {
       alert("카카오 SDK를 불러오지 못했습니다. 페이지를 새로고침해 주세요.");
       return;
@@ -242,42 +213,61 @@ export default function QuoteList() {
       if (kakaoKey) {
         window.Kakao.init(kakaoKey);
       } else {
-        alert("카카오 앱 키가 설정되지 않았습니다.");
+        alert("카카오 앱 키가 설정되지 않았습니다. 환경 변수를 확인해 주세요.");
         return;
       }
     }
 
-    // 완전히 동기식으로 호출하여 PC 팝업 차단 우회
-    if (!preparedImageUrl) {
-      alert("견적서 이미지를 처리 중입니다. 약 1~2초 후 다시 클릭해주세요!");
-      return;
-    }
+    setIsPreparing(true);
+    // Give modal time to settle (solve PC popup blocker and first-try failure)
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     try {
-      window.Kakao.Share.sendDefault({
-        objectType: 'feed',
-        content: {
-          title: `[견적서] ${selectedQuote.customerInfo.project || '견적 안내'}`,
-          description: `${selectedQuote.customerInfo.company || ''} ${selectedQuote.customerInfo.name || '고객'}님께 드리는 견적서입니다.\n합계금액: ${(selectedQuote.grandTotal || 0).toLocaleString()}원`,
-          imageUrl: preparedImageUrl,
-          link: {
-            mobileWebUrl: window.location.origin,
-            webUrl: window.location.origin,
-          },
-        },
-        buttons: [
-          {
-            title: '상세내역 확인',
+      const canvas = await captureImage();
+      if (!canvas) {
+        alert("이미지 생성에 실패했습니다.");
+        return;
+      }
+
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob(b => b ? resolve(b) : reject(new Error("Blob conversion failed")), 'image/jpeg', 0.8);
+      });
+      
+      const fileName = `shares/${currentUser?.uid || 'anon'}_${Date.now()}.jpg`;
+      const fileRef = storageRef(storage, fileName);
+      await uploadBytes(fileRef, blob);
+      const imageUrl = await getDownloadURL(fileRef);
+
+      if (window.Kakao.Share) {
+        window.Kakao.Share.sendDefault({
+          objectType: 'feed',
+          content: {
+            title: `[견적서] ${selectedQuote.customerInfo.project || '견적 안내'}`,
+            description: `${selectedQuote.customerInfo.company || ''} ${selectedQuote.customerInfo.name || '고객'}님께 드리는 견적서입니다.\n합계금액: ${selectedQuote.grandTotal.toLocaleString()}원`,
+            imageUrl: imageUrl,
             link: {
               mobileWebUrl: window.location.origin,
               webUrl: window.location.origin,
             },
           },
-        ],
-      });
+          buttons: [
+            {
+              title: '상세내역 확인',
+              link: {
+                mobileWebUrl: window.location.origin,
+                webUrl: window.location.origin,
+              },
+            },
+          ],
+        });
+      } else {
+        throw new Error("Kakao.Share 모듈을 찾을 수 없습니다.");
+      }
     } catch (error) {
       console.error("Kakao share error:", error);
       alert(`카카오톡 공유 실패: ${error.message || '알 수 없는 오류'}`);
+    } finally {
+      setIsPreparing(false);
     }
   };
 
