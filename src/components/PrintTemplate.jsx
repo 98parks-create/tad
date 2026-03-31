@@ -24,73 +24,77 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
     headerMarginBottom: compactLevel === 'very-dense' ? '2mm' : '4mm',
   };
 
-  // 요청하신 FIFO 정렬 (먼저 쓴 게 위로)
+  // FIFO 정렬 (먼저 작성한 것이 1번)
   const sortedItems = [...items].reverse();
 
-  // [추가 기능] 카카오톡/모바일 이미지 공유 로직
+  // [수정된 공유 로직]
   const handleShare = async () => {
     if (!ref.current) return;
+
     try {
       const canvas = await html2canvas(ref.current, {
         scale: 2,
         useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
       });
 
       canvas.toBlob(async (blob) => {
         if (!blob) return;
-        const file = new File([blob], `견적서_${customerInfo.name || '공유'}.png`, { type: 'image/png' });
+        const fileName = `견적서_${customerInfo.name || '고객'}.png`;
+        const file = new File([blob], fileName, { type: 'image/png' });
 
-        // 모바일 브라우저 표준 공유 기능 (Web Share API)
+        // 1. 모바일 브라우저 파일 공유 시도
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: '견적서 송부',
-            text: `${customerInfo.company || ''} ${customerInfo.name || ''}님 견적서입니다.`,
-          });
+          try {
+            await navigator.share({
+              files: [file],
+              title: '견적서 송부',
+            });
+          } catch (shareError) {
+            // 사용자가 취소하지 않은 경우에만 에러 처리
+            if (shareError.name !== 'AbortError') {
+              downloadFallback(blob, fileName);
+            }
+          }
         } else {
-          // PC나 지원하지 않는 브라우저의 경우 이미지 다운로드로 대체
-          const link = document.createElement('a');
-          link.href = URL.createObjectURL(blob);
-          link.download = `견적서_${customerInfo.name || '다운로드'}.png`;
-          link.click();
+          // 2. 공유 미지원 브라우저(PC 등)는 즉시 다운로드
+          downloadFallback(blob, fileName);
         }
       }, 'image/png');
     } catch (err) {
-      console.error("공유 중 오류 발생:", err);
       alert("이미지 생성 중 오류가 발생했습니다.");
     }
   };
 
+  const downloadFallback = (blob, fileName) => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    alert("이미지가 저장되었습니다. 카카오톡에서 사진을 전송해주세요.");
+  };
+
   return (
     <div style={{ width: '100%', backgroundColor: '#f1f5f9', padding: '20px 0' }}>
-      {/* 공유 버튼: 인쇄 시에는 보이지 않도록 'no-print' 클래스 권장 */}
-      <div style={{ width: '210mm', margin: '0 auto 10px auto', textAlign: 'right' }}>
+      <div className="no-print" style={{ width: '210mm', margin: '0 auto 10px auto', textAlign: 'right' }}>
         <button
           onClick={handleShare}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#FEE500',
-            color: '#3C1E1E',
-            border: 'none',
-            borderRadius: '6px',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-          }}
+          style={{ padding: '12px 24px', backgroundColor: '#FEE500', color: '#3C1E1E', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', fontSize: '11pt', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
         >
-          카톡/이미지 공유하기
+          견적서 이미지로 공유/저장
         </button>
       </div>
 
-      {/* 견적서 본문 영역 */}
       <div ref={ref} className="print-template" style={{ padding: styles.topBottomPadding, width: '210mm', minHeight: '290mm', boxSizing: 'border-box', margin: '0 auto', backgroundColor: 'white', color: 'black', fontFamily: "'Noto Sans KR', sans-serif", display: 'flex', flexDirection: 'column', boxShadow: '0 0 20px rgba(0,0,0,0.1)' }}>
+        {/* 견적서 상단 */}
         <div style={{ textAlign: 'center', marginBottom: styles.headerMarginBottom, borderBottom: '2px solid #003366', paddingBottom: '2mm', paddingTop: '5mm' }}>
           <h1 style={{ color: '#003366', fontSize: '28pt', margin: '0 0 4mm 0', letterSpacing: '6px', fontWeight: 900 }}>견 적 서</h1>
           <div style={{ display: 'flex', justifyContent: 'space-between', textAlign: 'left', fontSize: '11pt' }}>
             <div style={{ lineHeight: '1.5', marginTop: '5px' }}>
-              <p style={{ margin: 0, fontSize: '11pt' }}><strong>견적일자:</strong> {customerInfo.date}</p>
+              <p style={{ margin: 0 }}><strong>견적일자:</strong> {customerInfo.date}</p>
               <p style={{ margin: '8px 0' }}>
                 <span style={{ fontSize: '15pt', fontWeight: 'bold', borderBottom: '2px solid #000', paddingBottom: '2px' }}>
                   {customerInfo.company ? `${customerInfo.company} ` : ''}
@@ -98,23 +102,19 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
                 </span>
                 <span style={{ fontSize: '12pt', fontWeight: 'bold' }}> 귀하</span>
               </p>
-              <p style={{ margin: 0, fontSize: '10.5pt' }}><strong>연락처:</strong> {customerInfo.phone || '___________'}</p>
-              <p style={{ margin: 0, fontSize: '10.5pt' }}><strong>현장명:</strong> {customerInfo.project || '___________'}</p>
-              <p style={{ margin: '15px 0 0 0', fontSize: '11pt', fontWeight: 'bold' }}>아래와 같이 견적합니다.</p>
+              <p style={{ margin: 0 }}><strong>연락처:</strong> {customerInfo.phone || '___________'}</p>
+              <p style={{ margin: 0 }}><strong>현장명:</strong> {customerInfo.project || '___________'}</p>
+              <p style={{ margin: '15px 0 0 0', fontWeight: 'bold' }}>아래와 같이 견적합니다.</p>
             </div>
-            <div style={{ border: '2px solid #000', padding: '12px', borderRadius: '4px', lineHeight: '1.5', width: '260px', fontSize: '10.5pt', position: 'relative' }}>
+            <div style={{ border: '2px solid #000', padding: '12px', borderRadius: '4px', width: '260px', position: 'relative' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', zIndex: 2 }}>
                 <span style={{ fontWeight: 'bold' }}>공급자</span>
-                <span style={{ color: '#000', fontWeight: 'bold' }}>(인)</span>
+                <span style={{ fontWeight: 'bold' }}>(인)</span>
               </div>
               {providerInfo?.stampImage && (
-                <img
-                  src={providerInfo.stampImage}
-                  alt="직인"
-                  style={{ position: 'absolute', right: '8px', top: '8px', width: '45px', height: '45px', mixBlendMode: 'multiply', zIndex: 1 }}
-                />
+                <img src={providerInfo.stampImage} alt="직인" style={{ position: 'absolute', right: '8px', top: '8px', width: '45px', height: '45px', mixBlendMode: 'multiply', zIndex: 1 }} />
               )}
-              <div style={{ position: 'relative', zIndex: 2 }}>
+              <div style={{ position: 'relative', zIndex: 2, fontSize: '10.5pt' }}>
                 <p style={{ margin: '5px 0 0 0' }}>상호: <b>{providerInfo?.companyName || '__________________'}</b></p>
                 <p style={{ margin: '2px 0 0 0' }}>대표자: {providerInfo?.ceoName || '__________________'}</p>
                 <p style={{ margin: '2px 0 0 0' }}>등록번호: {providerInfo?.businessNumber || '__________________'}</p>
@@ -125,19 +125,21 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
           </div>
         </div>
 
+        {/* 총합계금액 */}
         <div style={{ margin: styles.titleMargin, padding: '12px 16px', backgroundColor: '#f8fafc', display: 'flex', alignItems: 'center', gap: '1rem', border: '2px solid #000', borderLeft: '8px solid #003366', borderRadius: '4px' }}>
-          <span style={{ fontWeight: 'bold', fontSize: '13pt', color: '#0f172a' }}>총 견적 금액 (VAT {includeVat ? '포함' : '별도'}):</span>
-          <span style={{ fontSize: '16pt', fontWeight: '900', color: '#000' }}>
+          <span style={{ fontWeight: 'bold', fontSize: '13pt' }}>총 견적 금액 (VAT {includeVat ? '포함' : '별도'}):</span>
+          <span style={{ fontSize: '16pt', fontWeight: '900' }}>
             {(grandTotal || 0) > 0 ? `일금 ${(grandTotal || 0).toLocaleString()} 원 정 (₩ ${(grandTotal || 0).toLocaleString()})` : '- 원'}
           </span>
         </div>
 
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: styles.tableFontSize, marginBottom: '5mm', pageBreakInside: 'avoid', border: '2px solid #000' }}>
+        {/* 품목 테이블 */}
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: styles.tableFontSize, marginBottom: '5mm', border: '2px solid #000' }}>
           <thead>
             <tr>
               <th style={{ padding: styles.headerPadding, backgroundColor: '#f1f5f9', border: '1px solid #000' }}>No</th>
               <th style={{ padding: styles.headerPadding, backgroundColor: '#f1f5f9', border: '1px solid #000' }}>품목/자재명</th>
-              <th style={{ padding: styles.headerPadding, backgroundColor: '#f1f5f9', border: '1px solid #000' }}>규격(가로x세로)</th>
+              <th style={{ padding: styles.headerPadding, backgroundColor: '#f1f5f9', border: '1px solid #000' }}>규격</th>
               <th style={{ padding: styles.headerPadding, backgroundColor: '#f1f5f9', border: '1px solid #000' }}>수량</th>
               <th style={{ padding: styles.headerPadding, backgroundColor: '#f1f5f9', border: '1px solid #000' }}>단위</th>
               <th style={{ padding: styles.headerPadding, backgroundColor: '#f1f5f9', border: '1px solid #000' }}>단가</th>
@@ -150,7 +152,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
               <tr key={i}>
                 <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'center' }}>{i + 1}</td>
                 <td style={{ padding: styles.cellPadding, border: '1px solid #000', fontWeight: '500' }}>{item.name}</td>
-                <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'center' }}>{item.specification || (item.type === 'area' && item.width && item.height ? `${item.width}*${item.height}` : '-')}</td>
+                <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'center' }}>{item.specification || (item.type === 'area' ? `${item.width}*${item.height}` : '-')}</td>
                 <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'center' }}>{item.quantity}</td>
                 <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'center' }}>{item.unit || 'EA'}</td>
                 <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'right' }}>{Number(item.unitPrice || 0).toLocaleString()}</td>
@@ -166,7 +168,8 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
           </tbody>
         </table>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', marginBottom: '5mm' }}>
+        {/* 하단 계산 내역 */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '5mm' }}>
           <table style={{ width: '420px', borderCollapse: 'collapse', fontSize: '11pt', border: '2px solid #000' }}>
             <tbody>
               <tr>
@@ -188,32 +191,30 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
                 <td style={{ border: '1px solid #000', padding: '8px', textAlign: 'right', backgroundColor: '#ffffff' }}>{(vat || 0).toLocaleString()} 원</td>
               </tr>
               <tr>
-                <td style={{ border: '2px solid #000', padding: '12px 8px', backgroundColor: '#f1f5f9', color: '#000', fontWeight: '900', fontSize: '14pt' }}>총 합 계</td>
+                <td style={{ border: '2px solid #000', padding: '12px 8px', backgroundColor: '#f1f5f9', fontWeight: '900', fontSize: '14pt' }}>총 합 계</td>
                 <td style={{ border: '2px solid #000', padding: '12px 8px', textAlign: 'right', fontWeight: '900', fontSize: '16pt', color: '#003366', backgroundColor: '#ffffff' }}>{(grandTotal || 0).toLocaleString()} 원</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <div style={{ marginTop: 'auto', paddingTop: compactLevel === 'very-dense' ? '2mm' : '5mm', paddingBottom: '3mm' }}>
+        {/* 하단 공지 및 사진 */}
+        <div style={{ marginTop: 'auto' }}>
           {remarks && (
-            <div style={{ marginBottom: compactLevel === 'very-dense' ? '2mm' : '5mm', textAlign: 'left', fontSize: '10pt', color: '#334155', backgroundColor: '#f1f5f9', padding: '12px 16px', borderRadius: '4px', border: '1px solid #cbd5e1', whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
-              <strong>[ 특약사항 및 공지 ]</strong><br />
-              {remarks}
+            <div style={{ marginBottom: '5mm', textAlign: 'left', fontSize: '10pt', backgroundColor: '#f1f5f9', padding: '12px 16px', borderRadius: '4px', border: '1px solid #cbd5e1', whiteSpace: 'pre-wrap' }}>
+              <strong>[ 특약사항 및 공지 ]</strong><br />{remarks}
             </div>
           )}
-          <div style={{ textAlign: 'center', fontSize: '11pt', color: '#0f172a', borderTop: '2px dashed #94a3b8', paddingTop: '8mm', marginTop: compactLevel === 'very-dense' ? '2mm' : '5mm', fontWeight: 'bold', letterSpacing: '2px' }}>
-            상기와 같이 견적합니다.
-          </div>
+          <div style={{ textAlign: 'center', fontSize: '11pt', borderTop: '2px dashed #94a3b8', paddingTop: '8mm', fontWeight: 'bold', letterSpacing: '2px' }}>상기와 같이 견적합니다.</div>
         </div>
 
-        {attachedImages && attachedImages.length > 0 && (
-          <div style={{ marginTop: compactLevel === 'very-dense' ? '5mm' : '10mm', pageBreakInside: 'avoid' }}>
-            <h3 style={{ fontSize: '11pt', borderBottom: '2px solid #00083a', paddingBottom: '3px', marginBottom: '10px', color: '#0f172a' }}>현장 증빙 사진</h3>
+        {attachedImages?.length > 0 && (
+          <div style={{ marginTop: '10mm' }}>
+            <h3 style={{ fontSize: '11pt', borderBottom: '2px solid #000', paddingBottom: '3px', marginBottom: '10px' }}>현장 증빙 사진</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
               {attachedImages.map((img, idx) => (
-                <div key={idx} style={{ aspectRatio: '1', border: '1px solid #cbd5e1', borderRadius: '4px', overflow: 'hidden', backgroundColor: '#f8fafc' }}>
-                  <img src={img} alt={`증빙 ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <div key={idx} style={{ aspectRatio: '1', border: '1px solid #cbd5e1', borderRadius: '4px', overflow: 'hidden' }}>
+                  <img src={img} alt="증빙" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
               ))}
             </div>
