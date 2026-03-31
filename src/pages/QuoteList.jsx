@@ -8,7 +8,7 @@ import { useReactToPrint } from 'react-to-print';
 import { useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import { storage } from '../firebase';
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref as storageRef } from 'firebase/storage';
 
 export default function QuoteList() {
   const { currentUser } = useAuth();
@@ -235,10 +235,13 @@ export default function QuoteList() {
         canvas.toBlob(b => b ? resolve(b) : reject(new Error("Blob conversion failed")), 'image/jpeg', 0.8);
       });
       
-      const fileName = `shares/${currentUser?.uid || 'anon'}_${Date.now()}.jpg`;
-      const fileRef = storageRef(storage, fileName);
-      await uploadBytes(fileRef, blob);
-      const imageUrl = await getDownloadURL(fileRef);
+      // 사용자 Firebase Storage 미설정 또는 보안 규칙 에러 (storage/unknown) 를 우회하기 위해
+      // 카카오톡 자체 임시 이미지 호스팅 서버로 다이렉트 업로드 (최대 100일 유지, 카톡 공유에 최적화)
+      const file = new File([blob], `quote_${Date.now()}.jpg`, { type: 'image/jpeg' });
+      const uploadResult = await window.Kakao.Share.uploadImage({
+        file: [file]
+      });
+      const imageUrl = uploadResult.infos.original.url;
 
       if (window.Kakao.Share) {
         window.Kakao.Share.sendDefault({
