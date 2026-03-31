@@ -1,10 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { industries, materialCategoriesByIndustry } from '../data/materials';
-import { Save, Printer, Plus, Trash2, ChevronDown, ChevronUp, Copy, Lock, Check } from 'lucide-react';
-import { useReactToPrint } from 'react-to-print';
-import html2canvas from 'html2canvas';
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../firebase';
+import { Save, Plus, Trash2, Lock, Check, Copy } from 'lucide-react';
 import PrintTemplate from '../components/PrintTemplate';
 import PaymentModal from '../components/PaymentModal';
 import { saveQuote, getQuotes } from '../services/quoteService';
@@ -31,7 +27,6 @@ export default function CreateQuote() {
   const [editId] = useState(editQuote?.id || null);
   const [showPaywall, setShowPaywall] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [isPreparing, setIsPreparing] = useState(false);
 
   // 로컬스토리지 임시저장 불러오기
   React.useEffect(() => {
@@ -187,100 +182,7 @@ export default function CreateQuote() {
 
   const { subTotal, vat, grandTotal } = useMemo(calculateTotals, [items, discount, includeVat]);
 
-  const handlePrint = useReactToPrint({
-    contentRef: printRef,
-    documentTitle: `견적서_${customerInfo.project || Date.now()}`,
-    pageStyle: "@page { size: A4; margin: 0; } @media print { body { -webkit-print-color-adjust: exact; } }"
-  });
-
-  const captureImage = async () => {
-    if (!printRef.current) return null;
-    
-    // Temporarily show the print template if it's hidden
-    const element = printRef.current;
-    const originalStyle = element.parentElement.style.display;
-    element.parentElement.style.display = 'block';
-    
-    try {
-      const canvas = await html2canvas(element, {
-        scale: 2, // Higher quality
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-      });
-      return canvas;
-    } finally {
-      element.parentElement.style.display = originalStyle;
-    }
-  };
-
-  const handleSaveImage = async () => {
-    setIsPreparing(true);
-    try {
-      const canvas = await captureImage();
-      if (!canvas) return;
-      
-      const link = document.createElement('a');
-      link.download = `견적서_${customerInfo.project || '미정'}_${customerInfo.name || '고객'}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    } catch (error) {
-      console.error("Image saving failed:", error);
-      alert("이미지 저장 중 오류가 발생했습니다.");
-    } finally {
-      setIsPreparing(false);
-    }
-  };
-
-  const handleShareKakao = async () => {
-    if (!window.Kakao) {
-      alert("카카오 SDK를 불러오지 못했습니다.");
-      return;
-    }
-
-    setIsPreparing(true);
-    try {
-      const canvas = await captureImage();
-      if (!canvas) return;
-
-      // Convert canvas to blob for upload
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
-      
-      // Upload to Firebase Storage
-      const fileName = `shares/${currentUser?.uid || 'anon'}_${Date.now()}.jpg`;
-      const fileRef = storageRef(storage, fileName);
-      await uploadBytes(fileRef, blob);
-      const imageUrl = await getDownloadURL(fileRef);
-
-      // Share via Kakao
-      window.Kakao.Share.sendDefault({
-        objectType: 'feed',
-        content: {
-          title: `[견적서] ${customerInfo.project || '견적 안내'}`,
-          description: `${customerInfo.company || ''} ${customerInfo.name || '고객'}님께 드리는 견적서입니다.\n합계금액: ${grandTotal.toLocaleString()}원`,
-          imageUrl: imageUrl,
-          link: {
-            mobileWebUrl: window.location.href,
-            webUrl: window.location.href,
-          },
-        },
-        buttons: [
-          {
-            title: '견적서 보기',
-            link: {
-              mobileWebUrl: window.location.href,
-              webUrl: window.location.href,
-            },
-          },
-        ],
-      });
-    } catch (error) {
-      console.error("Kakao share failed:", error);
-      alert("카카오톡 공유 중 오류가 발생했습니다.");
-    } finally {
-      setIsPreparing(false);
-    }
-  };
+  // (사용하지 않는 인쇄 및 카카오톡 캡처 함수 제거)
 
   const handleSave = async () => {
     if (items.length === 0) {

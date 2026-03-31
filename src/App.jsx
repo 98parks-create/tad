@@ -37,19 +37,22 @@ function AppContent() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [isIOS, setIsIOS] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
+  const [isIOS] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    }
+    return false;
+  });
+  const [isStandalone] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.matchMedia('(display-mode: standalone)').matches || (window.navigator.standalone);
+    }
+    return false;
+  });
   const [showIosGuide, setShowIosGuide] = useState(false);
 
   useEffect(() => {
-    // Detect iOS
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    const ios = /iphone|ipad|ipod/.test(userAgent);
-    setIsIOS(ios);
-
-    // Detect Standalone (Already installed)
-    const standalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator.standalone);
-    setIsStandalone(standalone);
+    // ios, standalone detects moved to useState lazy init
 
     // Initial check for captured prompt
     if (globalDeferredPrompt) {
@@ -84,7 +87,7 @@ function AppContent() {
   }
 
   // PWA Install Guide Modal for iOS
-  const PwaInstallGuide = () => {
+  const renderPwaInstallGuide = () => {
     const isChromeIOS = /crios/.test(window.navigator.userAgent.toLowerCase());
     
     return (
@@ -146,7 +149,7 @@ function AppContent() {
             앱 설치하기
           </button>
         )}
-        <PwaInstallGuide />
+        {renderPwaInstallGuide()}
         <Chatbot />
         <Footer />
       </div>
@@ -249,7 +252,7 @@ function AppContent() {
             앱 설치하기
           </button>
         )}
-        <PwaInstallGuide />
+        {renderPwaInstallGuide()}
         <Chatbot />
         <Footer />
       </main>

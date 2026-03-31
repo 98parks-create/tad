@@ -290,17 +290,7 @@ export default function QuoteList() {
     }
   }, [currentUser?.uid]);
 
-  // Handle background preparation when modal opens
-  useEffect(() => {
-    if (selectedQuote) {
-      setPreparedImageUrl(null);
-      // Small delay to ensure modal is rendered
-      const timer = setTimeout(() => {
-        captureAndUpload();
-      }, 800);
-      return () => clearTimeout(timer);
-    }
-  }, [selectedQuote]);
+  // 렌더링에 필요한 추가 상태가 없음
 
   return (
     <div className="card">
