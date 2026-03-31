@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 
-const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, discountReason, vat, grandTotal, providerInfo, remarks, includeVat = true }, ref) => {
+const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, discountReason, vat, grandTotal, providerInfo, remarks, includeVat = true, attachedImages = [] }, ref) => {
   const dynamicScale = items.length > 8 ? 8 / items.length : 1;
 
   return (
@@ -134,10 +134,29 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
               {remarks}
             </div>
           )}
-          <div style={{ textAlign: 'center', fontSize: '10pt', color: '#666', borderTop: '1px solid #ccc', paddingTop: '5mm' }}>
+          <div style={{ textAlign: 'center', fontSize: '10pt', color: '#64748b', borderTop: '2px solid #e2e8f0', paddingTop: '5mm', marginTop: '5mm', fontWeight: 'bold' }}>
             상기와 같이 견적합니다.
           </div>
         </div>
+
+        {attachedImages && attachedImages.length > 0 && (
+          <div style={{ marginTop: '10mm', pageBreakInside: 'avoid' }}>
+            <h3 style={{ fontSize: '11pt', borderBottom: '2px solid #00083a', paddingBottom: '3px', marginBottom: '10px', color: '#0f172a' }}>현장 증빙 사진</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+              {attachedImages.map((img, idx) => (
+                <div key={idx} style={{ 
+                  aspectRatio: '1', 
+                  border: '1px solid #cbd5e1', 
+                  borderRadius: '4px', 
+                  overflow: 'hidden',
+                  backgroundColor: '#f8fafc'
+                }}>
+                  <img src={img} alt={`증빙 ${idx+1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
     </div>
   );
 });

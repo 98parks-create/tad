@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, NavLink, Navigate, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, PlusCircle, Menu, X, Settings as SettingsIcon, Shield, Download } from 'lucide-react';
+import { LayoutDashboard, FileText, PlusCircle, Menu, X, Settings as SettingsIcon, Shield, Download, HelpCircle } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import CreateQuote from './pages/CreateQuote';
 import QuoteList from './pages/QuoteList';
@@ -14,7 +14,11 @@ import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
+import Refund from './pages/Refund';
+import Pricing from './pages/Pricing';
+import Guide from './pages/Guide';
 import Footer from './components/Footer';
+import Chatbot from './components/Chatbot';
 import './index.css';
 
 // Global variable to capture early beforeinstallprompt events
@@ -125,8 +129,11 @@ function AppContent() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/auth/callback/:provider" element={<AuthCallback />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/guide" element={<Guide />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/refund" element={<Refund />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
@@ -140,6 +147,7 @@ function AppContent() {
           </button>
         )}
         <PwaInstallGuide />
+        <Chatbot />
         <Footer />
       </div>
     );
@@ -182,6 +190,12 @@ function AppContent() {
           <NavLink to="/list" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <FileText size={20} />견적 내역
           </NavLink>
+          <NavLink to="/pricing" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+            <Shield size={20} />요금제 안내
+          </NavLink>
+          <NavLink to="/guide" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+            <HelpCircle size={20} />이용가이드
+          </NavLink>
           <NavLink to="/settings" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <SettingsIcon size={20} />설정 (회사정보)
           </NavLink>
@@ -218,8 +232,11 @@ function AppContent() {
             <Route path="/list" element={<PrivateRoute><QuoteList /></PrivateRoute>} />
             <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
             <Route path="/admin" element={<PrivateRoute><Admin /></PrivateRoute>} />
+            <Route path="/pricing" element={<PrivateRoute><Pricing /></PrivateRoute>} />
+            <Route path="/guide" element={<PrivateRoute><Guide /></PrivateRoute>} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/refund" element={<Refund />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
@@ -233,6 +250,7 @@ function AppContent() {
           </button>
         )}
         <PwaInstallGuide />
+        <Chatbot />
         <Footer />
       </main>
     </div>

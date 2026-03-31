@@ -24,6 +24,7 @@ export default function CreateQuote() {
   const [discount, setDiscount] = useState(editQuote?.discount || 0);
   const [discountReason, setDiscountReason] = useState(editQuote?.discountReason || '');
   const [remarks, setRemarks] = useState(editQuote?.remarks || '');
+  const [attachedImages, setAttachedImages] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [companyProfile, setCompanyProfile] = useState(null);
   const printRef = useRef(null);
@@ -32,12 +33,41 @@ export default function CreateQuote() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isPreparing, setIsPreparing] = useState(false);
 
+  // 로컬스토리지 임시저장 불러오기
+  React.useEffect(() => {
+    if (!editQuote && currentUser?.uid) {
+      const draft = localStorage.getItem(`tad_quote_draft_${currentUser.uid}`);
+      if (draft) {
+        try {
+          const parsed = JSON.parse(draft);
+          if (parsed.customerInfo) setCustomerInfo(parsed.customerInfo);
+          if (parsed.items && parsed.items.length > 0) setItems(parsed.items);
+          if (parsed.includeVat !== undefined) setIncludeVat(parsed.includeVat);
+          if (parsed.discount) setDiscount(parsed.discount);
+          if (parsed.discountReason) setDiscountReason(parsed.discountReason);
+          if (parsed.remarks) setRemarks(parsed.remarks);
+        } catch (e) {
+          console.error("Failed to parse draft", e);
+        }
+      }
+    }
+  }, [editQuote, currentUser]);
+
+  // 로컬스토리지에 실시간 임시저장
+  React.useEffect(() => {
+    if (currentUser?.uid && !editId) {
+      localStorage.setItem(`tad_quote_draft_${currentUser.uid}`, JSON.stringify({
+        customerInfo, items, includeVat, discount, discountReason, remarks
+      }));
+    }
+  }, [customerInfo, items, includeVat, discount, discountReason, remarks, currentUser, editId]);
+
   React.useEffect(() => {
     if (currentUser) {
       getProfile(currentUser.uid).then(profile => {
         if (profile) {
           setCompanyProfile(profile);
-          if (profile.defaultRemarks && !editQuote?.remarks && !remarks) {
+          if (profile.defaultRemarks && !editQuote?.remarks && !remarks && !localStorage.getItem(`tad_quote_draft_${currentUser.uid}`)) {
             setRemarks(profile.defaultRemarks);
           }
         }
@@ -52,7 +82,18 @@ export default function CreateQuote() {
 
       }).catch(console.error);
     }
-  }, [currentUser, editQuote, remarks]);
+  }, [currentUser, editQuote]);
+
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    const newImages = files.map(file => URL.createObjectURL(file));
+    setAttachedImages(prev => [...prev, ...newImages]);
+  };
+
+  const removeAttachedImage = (index) => {
+    setAttachedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
 
   const getCategoriesForIndustry = (industryId) => {
     let cats = materialCategoriesByIndustry[industryId] || [];
@@ -254,6 +295,9 @@ export default function CreateQuote() {
     setIsSaving(true);
     try {
       await saveQuote(currentUser.uid, { customerInfo, items, subTotal, discount, discountReason, vat, grandTotal, includeVat, remarks, status: 'pending' }, editId);
+      if (!editId) {
+        localStorage.removeItem(`tad_quote_draft_${currentUser.uid}`);
+      }
       alert(editId ? "견적서가 성공적으로 수정되었습니다." : "견적 데이터가 성공적으로 저장되었습니다.");
       navigate('/list');
     } catch (error) {
@@ -455,6 +499,30 @@ export default function CreateQuote() {
           </div>
         </div>
 
+        {/* 증빙 사진 첨부 */}
+        <div style={{ marginTop: '2rem', padding: '1.5rem', border: '1px dashed var(--border-color)', borderRadius: '8px', backgroundColor: '#f8fafc' }}>
+          <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--text-dark)' }}>현장 증빙 사진 첨부 (선택)</h3>
+          <p style={{ fontSize: '0.9rem', color: 'var(--text-light)', marginBottom: '1rem' }}>견적서 하단에 출력될 현장 사진을 첨부할 수 있습니다. (서버에 저장되지 않고 인쇄/이미지 내보내기 시에만 사용됩니다)</p>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            {attachedImages.map((imgUrl, idx) => (
+              <div key={idx} style={{ position: 'relative', width: '120px', height: '120px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #cbd5e1' }}>
+                <img src={imgUrl} alt={`첨부 ${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <button 
+                  onClick={() => removeAttachedImage(idx)}
+                  style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(255,0,0,0.8)', color: 'white', border: 'none', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
+            <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '120px', height: '120px', border: '2px dashed var(--primary-color)', borderRadius: '8px', cursor: 'pointer', backgroundColor: 'white', color: 'var(--primary-color)' }}>
+              <Plus size={24} style={{ marginBottom: '8px' }} />
+              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>사진 추가</span>
+              <input type="file" multiple accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
+            </label>
+          </div>
+        </div>
+
         <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center' }}>
           <button className="btn btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={handleSave} disabled={isSaving}>
             <Save size={20} />
@@ -476,6 +544,7 @@ export default function CreateQuote() {
           providerInfo={companyProfile}
           remarks={remarks}
           includeVat={includeVat}
+          attachedImages={attachedImages}
         />
       </div>
 

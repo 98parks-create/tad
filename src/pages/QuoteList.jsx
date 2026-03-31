@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { getQuotes, deleteQuote, updateQuoteStatus } from '../services/quoteService';
 import { getProfile } from '../services/profileService';
 import { useAuth } from '../contexts/AuthContext';
-import { Printer, X, Edit, Trash2, CheckCircle, Search, Image as ImageIcon, MessageCircle } from 'lucide-react';
+import { Printer, X, Edit, Trash2, CheckCircle, Search, Image as ImageIcon, MessageCircle, Copy, FileSpreadsheet } from 'lucide-react';
 import PrintTemplate from '../components/PrintTemplate';
 import { useReactToPrint } from 'react-to-print';
 import { useNavigate } from 'react-router-dom';
@@ -58,6 +58,55 @@ export default function QuoteList() {
 
   const handleEdit = () => {
     navigate('/create', { state: { editQuote: selectedQuote } });
+  };
+
+  const handleCopyQuote = () => {
+    if (window.confirm("이 견적을 기반으로 새로운 견적서를 작성하시겠습니까?\n(날짜는 오늘로 자동 설정됩니다)")) {
+      const copiedQuote = {
+        ...selectedQuote,
+        id: null,
+        customerInfo: {
+          ...selectedQuote.customerInfo,
+          date: new Date().toISOString().split('T')[0]
+        },
+        status: 'pending'
+      };
+      navigate('/create', { state: { editQuote: copiedQuote } });
+    }
+  };
+
+  const handleHometaxExport = () => {
+    if (!selectedQuote) return;
+    
+    const rows = [
+      ['작성일자', '공급받는자상호', '품목', '규격', '수량', '단가', '공급가액', '세액', '비고']
+    ];
+    
+    selectedQuote.items.forEach(item => {
+      const itemVat = selectedQuote.includeVat !== false ? Math.floor(item.total * 0.1) : 0; 
+      rows.push([
+        selectedQuote.customerInfo.date.replace(/-/g, ''), // YYYYMMDD
+        selectedQuote.customerInfo.company || selectedQuote.customerInfo.name,
+        item.name,
+        item.specification || '',
+        item.quantity,
+        item.unitPrice,
+        item.total,
+        itemVat,
+        item.remarks || ''
+      ]);
+    });
+
+    const csvContent = "\uFEFF" + rows.map(e => e.map(cell => `"${cell}"`).join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `홈택스업로드용_${selectedQuote.customerInfo.project || '미정'}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleDelete = async () => {
@@ -374,6 +423,12 @@ export default function QuoteList() {
                   <Edit size={18} /> 수정
                 </button>
               )}
+              <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#6366f1', borderColor: '#6366f1' }} onClick={handleCopyQuote}>
+                <Copy size={18} /> 견적 복사
+              </button>
+              <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#0ea5e9', borderColor: '#0ea5e9' }} onClick={handleHometaxExport} title="국세청 홈택스 일괄발행 양식(CSV)">
+                <FileSpreadsheet size={18} /> 홈택스 엑셀
+              </button>
               <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--danger-color)', borderColor: 'var(--danger-color)' }} onClick={handleDelete}>
                 <Trash2 size={18} /> 삭제
               </button>

@@ -1,9 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
 :root {
-  --primary-color: #00083a;
-  --primary-light: #1a2360;
-  --primary-dark: #00001a;
+  --primary-color: #003366;
+  --primary-light: #00509e;
+  --primary-dark: #001f3f;
   --bg-color: #f4f6f8;
   --surface-color: #ffffff;
   --text-dark: #1e293b;
@@ -75,6 +75,11 @@ button {
 .btn-outline:hover {
   background-color: var(--primary-color);
   color: white;
+}
+
+.btn:active, .nav-link:active, .feature-card:active {
+  transform: scale(0.97);
+  transition: transform 0.1s ease;
 }
 
 .btn-icon {
@@ -159,6 +164,11 @@ label {
 .nav-link:hover, .nav-link.active {
   background-color: var(--primary-light);
   color: white;
+}
+
+.nav-link:active {
+  transform: scale(0.97);
+  background-color: var(--primary-dark);
 }
 
 .main-content {
