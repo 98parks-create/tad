@@ -205,23 +205,7 @@ export default function QuoteList() {
   };
 
   const handleShareKakao = async () => {
-    if (!window.Kakao) {
-      alert("카카오 SDK를 불러오지 못했습니다. 페이지를 새로고침해 주세요.");
-      return;
-    }
-
-    if (!window.Kakao.isInitialized()) {
-      const kakaoKey = import.meta.env.VITE_KAKAO_JS_KEY;
-      if (kakaoKey) {
-        window.Kakao.init(kakaoKey);
-      } else {
-        alert("카카오 앱 키가 설정되지 않았습니다. 환경 변수를 확인해 주세요.");
-        return;
-      }
-    }
-
     setIsPreparing(true);
-    // Give modal time to settle (solve PC popup blocker and first-try failure)
     await new Promise(resolve => setTimeout(resolve, 500));
 
     try {
@@ -235,9 +219,40 @@ export default function QuoteList() {
         canvas.toBlob(b => b ? resolve(b) : reject(new Error("Blob conversion failed")), 'image/jpeg', 0.8);
       });
       
-      // 사용자 Firebase Storage 미설정 또는 보안 규칙 에러 (storage/unknown) 를 우회하기 위해
-      // 카카오톡 자체 임시 이미지 호스팅 서버로 다이렉트 업로드 (최대 100일 유지, 카톡 공유에 최적화)
-      const file = new File([blob], `quote_${Date.now()}.jpg`, { type: 'image/jpeg' });
+      const file = new File([blob], `견적서_${selectedQuote.customerInfo.project || '미정'}.jpg`, { type: 'image/jpeg' });
+      
+      // 1. 최우선 시도: 네이티브 공유 API (OS 기본 공유 - 스마트폰 카톡/문자 앱 즉시 연결)
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            title: `[견적서] ${selectedQuote.customerInfo.project || '안내'}`,
+            text: `${selectedQuote.customerInfo.company || ''} ${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.\n총 합계: ${selectedQuote.grandTotal.toLocaleString()}원`,
+            files: [file]
+          });
+          return; // 성공 시 여기서 종료
+        } catch (shareError) {
+          if (shareError.name === 'AbortError') {
+             return; // 사용자가 취소한 경우
+          }
+          console.warn('Native share failed, falling back to Kakao API', shareError);
+        }
+      }
+
+      // 2. 폴백: 데스크탑이나 구형 브라우저 등 Web Share 미지원 시 기존 카카오 SDK 연동
+      if (!window.Kakao) {
+        alert("카카오 SDK를 불러오지 못했습니다.");
+        return;
+      }
+      if (!window.Kakao.isInitialized()) {
+        const kakaoKey = import.meta.env.VITE_KAKAO_JS_KEY;
+        if (kakaoKey) {
+          window.Kakao.init(kakaoKey);
+        } else {
+          alert("카카오 키 설정이 누락되어 데스크탑 공유가 불가능합니다.");
+          return;
+        }
+      }
+
       const uploadResult = await window.Kakao.Share.uploadImage({
         file: [file]
       });
@@ -247,30 +262,28 @@ export default function QuoteList() {
         window.Kakao.Share.sendDefault({
           objectType: 'feed',
           content: {
-            title: `[견적서] ${selectedQuote.customerInfo.project || '견적 안내'}`,
-            description: `${selectedQuote.customerInfo.company || ''} ${selectedQuote.customerInfo.name || '고객'}님께 드리는 견적서입니다.\n합계금액: ${selectedQuote.grandTotal.toLocaleString()}원`,
+            title: `[견적서] ${selectedQuote.customerInfo.project || '안내'}`,
+            description: `${selectedQuote.customerInfo.company || ''} ${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.\n합계금액: ${selectedQuote.grandTotal.toLocaleString()}원`,
             imageUrl: imageUrl,
             link: {
-              mobileWebUrl: window.location.origin,
-              webUrl: window.location.origin,
+              mobileWebUrl: 'https://tad-one.vercel.app',
+              webUrl: 'https://tad-one.vercel.app',
             },
           },
           buttons: [
             {
-              title: '상세내역 확인',
+              title: '웹사이트 바로가기',
               link: {
-                mobileWebUrl: window.location.origin,
-                webUrl: window.location.origin,
+                mobileWebUrl: 'https://tad-one.vercel.app',
+                webUrl: 'https://tad-one.vercel.app',
               },
             },
           ],
         });
-      } else {
-        throw new Error("Kakao.Share 모듈을 찾을 수 없습니다.");
       }
     } catch (error) {
-      console.error("Kakao share error:", error);
-      alert(`카카오톡 공유 실패: ${error.message || '알 수 없는 오류'}`);
+      console.error("Share error:", error);
+      alert(`공유 중 오류가 발생했습니다: ${error.message}`);
     } finally {
       setIsPreparing(false);
     }
@@ -406,7 +419,7 @@ export default function QuoteList() {
                 <ImageIcon size={18} /> 이미지 저장
               </button>
               <button className="btn btn-outline" onClick={handleShareKakao} disabled={isPreparing} style={{ color: '#3A1D1D', borderColor: '#FEE500', backgroundColor: '#FEE500' }}>
-                <MessageCircle size={18} /> 카톡 공유
+                <MessageCircle size={18} /> 공유하기 (카톡/문자)
               </button>
               {selectedQuote.status === 'pending' && (
                 <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#059669', borderColor: '#059669' }} onClick={handleApprove}>
