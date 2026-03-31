@@ -29,3 +29,18 @@ If you are developing a production application, we recommend using TypeScript wi
 - **업무 효율화:** 견적서 발행 시간 80% 단축 (50분 → 10분 내외).
 - **데이터 무결성:** 자동 매핑 로직을 통해 입력 오류 및 누락률 90% 개선.
 - **실행력:** 운동선수 시절의 끈기로 AI와 협업하여 직접 디버깅 및 배포 완료.
+
+- ## 🚀 TAD v1.0 정식 업데이트 (2026.03.31)
+
+#[신규 기능 및 최적화]
+- **Premium UI/UX:** Peq/Plugging 스타일의 고도화된 모바일 전용 UI 적용 (Header/Tab-bar Fixed)
+- **Authority Design:** 견적서 출력물의 권위와 신뢰성을 높인 폰트 및 여백 최적화
+- **Business Logic:** - 국세청 홈택스 일괄발행 엑셀(.csv) 생성 기능 탑재
+  - 업체별 직인(인감) 및 로고 자동 날인 시스템 (mix-blend-mode) 고도화
+  - 3회 무료 체험 및 세금계산서 발행 프로세스 연동
+- **User Support:** 독립된 [요금제 안내], [이용가이드], [CS 챗봇] 페이지 구축 완료
+
+#[성능 및 버그 수정 (Hotfix)]
+- **UI Conflict Resolution:** 모바일 환경에서의 UI 요소 겹침(Overlapping) 현상 완전 해결
+- **Data Integrity:** QuoteList 인쇄 필드 누락 방지 및 DB 데이터 매칭 무결성 확보
+- **Responsive Patch:** 다양한 기기 해상도에서의 Flex/Grid 레이아웃 안정성 강화
