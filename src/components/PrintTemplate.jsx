@@ -81,8 +81,8 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
                 <td style={{ padding: '5px', border: '1px solid #cbd5e1', textAlign: 'center' }}>{item.specification || (item.type === 'area' && item.width && item.height ? `${item.width}*${item.height}` : '-')}</td>
                 <td style={{ padding: '5px', border: '1px solid #cbd5e1', textAlign: 'center' }}>{item.quantity}</td>
                 <td style={{ padding: '5px', border: '1px solid #cbd5e1', textAlign: 'center' }}>{item.unit || 'EA'}</td>
-                <td style={{ padding: '5px', border: '1px solid #cbd5e1', textAlign: 'right' }}>{Number(item.unitPrice).toLocaleString()}</td>
-                <td style={{ padding: '5px', border: '1px solid #cbd5e1', textAlign: 'right' }}>{item.total.toLocaleString()}</td>
+                <td style={{ padding: '5px', border: '1px solid #cbd5e1', textAlign: 'right' }}>{Number(item.unitPrice || 0).toLocaleString()}</td>
+                <td style={{ padding: '5px', border: '1px solid #cbd5e1', textAlign: 'right' }}>{Number(item.total || 0).toLocaleString()}</td>
                 <td style={{ padding: '5px', border: '1px solid #cbd5e1' }}>{item.remarks}</td>
               </tr>
             ))}

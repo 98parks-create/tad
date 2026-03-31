@@ -282,7 +282,7 @@ export default function CreateQuote() {
                     <label>기본 구분 (선택)</label>
                     <select value={item.itemId} onChange={e => handleItemChange(item.id, 'itemId', e.target.value)} disabled={!item.categoryId}>
                       <option value="">-- 자재/종류 선택 --</option>
-                      {getCategoriesForIndustry(item.industry || 'sign').find(c => c.id === item.categoryId)?.items.map(mat => (
+                      {getCategoriesForIndustry(item.industry || 'sign').find(c => c.id === item.categoryId)?.items?.map(mat => (
                         <option key={mat.id} value={mat.id}>{mat.name}</option>
                       ))}
                     </select>
@@ -331,7 +331,7 @@ export default function CreateQuote() {
 
                   <div className="form-group" style={{ marginBottom: 0, gridColumn: '1 / -1', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--bg-color)', padding: '0.5rem 1rem', borderRadius: '6px' }}>
                     <span style={{ fontWeight: 500, color: 'var(--text-light)' }}>항목 소계:</span>
-                    <span style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--primary-color)' }}>{item.total.toLocaleString()} 원</span>
+                    <span style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--primary-color)' }}>{Number(item.total || 0).toLocaleString()} 원</span>
                   </div>
 
                 </div>
@@ -363,7 +363,7 @@ export default function CreateQuote() {
           <div style={{ flex: '0 0 320px', backgroundColor: '#f8fafc', padding: '1.5rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
               <span style={{ color: 'var(--text-light)' }}>공급가액 소계</span>
-              <span>{subTotal.toLocaleString()} 원</span>
+              <span>{Number(subTotal || 0).toLocaleString()} 원</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -393,11 +393,11 @@ export default function CreateQuote() {
                 <input type="checkbox" checked={includeVat} onChange={e => setIncludeVat(e.target.checked)} style={{ width: 'auto' }} />
                 부가세 (10%)
               </label>
-              <span>{vat.toLocaleString()} 원</span>
+              <span>{Number(vat || 0).toLocaleString()} 원</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontWeight: 600, fontSize: '1.1rem' }}>최종 합계</span>
-              <span style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--primary-color)' }}>{grandTotal.toLocaleString()} 원</span>
+              <span style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--primary-color)' }}>{Number(grandTotal || 0).toLocaleString()} 원</span>
             </div>
           </div>
         </div>
