@@ -47,7 +47,7 @@ export default function Pricing() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '1.1rem', fontWeight: 600 }}>
             <CheckCircle color="var(--success-color)" size={24} />
-            <span>고객 관리 DB 자동 저장 (재구매 유도)</span>
+            <span>고객 관리 DB 자동 저장</span>
           </div>
         </div>
 

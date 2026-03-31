@@ -36,7 +36,7 @@ function AppContent() {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [deferredPrompt, setDeferredPrompt] = useState(globalDeferredPrompt);
   const [isIOS] = useState(() => {
     if (typeof window !== 'undefined') {
       return /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
@@ -54,10 +54,7 @@ function AppContent() {
   useEffect(() => {
     // ios, standalone detects moved to useState lazy init
 
-    // Initial check for captured prompt
-    if (globalDeferredPrompt) {
-      setDeferredPrompt(globalDeferredPrompt);
-    }
+    // globalDeferredPrompt 초기화는 useState에서 처리됨
 
     const handlePromptEvent = () => {
       setDeferredPrompt(globalDeferredPrompt);

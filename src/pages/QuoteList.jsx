@@ -428,8 +428,8 @@ export default function QuoteList() {
               <div style={{ transform: 'scale(0.85)', transformOrigin: 'top center', marginBottom: '-50mm' }}>
                 <PrintTemplate
                   ref={printRef}
-                  customerInfo={selectedQuote.customerInfo}
-                  items={selectedQuote.items}
+                  customerInfo={selectedQuote.customerInfo || {}}
+                  items={selectedQuote.items || []}
                   subTotal={selectedQuote.subTotal}
                   vat={selectedQuote.vat}
                   grandTotal={selectedQuote.grandTotal}

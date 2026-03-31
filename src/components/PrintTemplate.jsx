@@ -56,7 +56,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
         <div style={{ margin: '4mm 0', padding: '8px', backgroundColor: '#f8fafc', display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <span style={{ fontWeight: 'bold', fontSize: '11pt' }}>총 견적 금액 (VAT {includeVat ? '포함' : '별도'}):</span>
           <span style={{ fontSize: '14pt', fontWeight: 'bold', color: '#0f172a' }}>
-            {grandTotal > 0 ? `일금 ${grandTotal.toLocaleString()} 원 정 (₩ ${grandTotal.toLocaleString()})` : '- 원'}
+            {(grandTotal || 0) > 0 ? `일금 ${(grandTotal || 0).toLocaleString()} 원 정 (₩ ${(grandTotal || 0).toLocaleString()})` : '- 원'}
           </span>
         </div>
 
@@ -107,21 +107,21 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
             <tbody>
               <tr>
                 <td style={{ border: '1px solid #cbd5e1', padding: '6px', backgroundColor: '#f1f5f9', fontWeight: 'bold', width: '120px' }}>공급가액</td>
-                <td style={{ border: '1px solid #cbd5e1', padding: '6px', textAlign: 'right' }}>{Number(subTotal).toLocaleString()} 원</td>
+                <td style={{ border: '1px solid #cbd5e1', padding: '6px', textAlign: 'right' }}>{Number(subTotal || 0).toLocaleString()} 원</td>
               </tr>
-              {discount > 0 && (
+              {(discount || 0) > 0 && (
                 <tr>
                   <td style={{ border: '1px solid #cbd5e1', padding: '6px', backgroundColor: '#fcd34d', fontWeight: 'bold' }}>할인액 {discountReason ? `(${discountReason})` : ''}</td>
-                  <td style={{ border: '1px solid #cbd5e1', padding: '6px', textAlign: 'right', color: '#b45309', fontWeight: 'bold' }}>- {Number(discount).toLocaleString()} 원</td>
+                  <td style={{ border: '1px solid #cbd5e1', padding: '6px', textAlign: 'right', color: '#b45309', fontWeight: 'bold' }}>- {Number(discount || 0).toLocaleString()} 원</td>
                 </tr>
               )}
               <tr>
                 <td style={{ border: '1px solid #cbd5e1', padding: '6px', backgroundColor: '#f1f5f9', fontWeight: 'bold' }}>부가세 (VAT)</td>
-                <td style={{ border: '1px solid #cbd5e1', padding: '6px', textAlign: 'right' }}>{vat.toLocaleString()} 원</td>
+                <td style={{ border: '1px solid #cbd5e1', padding: '6px', textAlign: 'right' }}>{(vat || 0).toLocaleString()} 원</td>
               </tr>
               <tr>
                 <td style={{ border: '1px solid #cbd5e1', padding: '8px', backgroundColor: '#00083a', color: 'white', fontWeight: 'bold', fontSize: '12pt' }}>합 계</td>
-                <td style={{ border: '1px solid #cbd5e1', padding: '8px', textAlign: 'right', fontWeight: 'bold', fontSize: '13pt' }}>{grandTotal.toLocaleString()} 원</td>
+                <td style={{ border: '1px solid #cbd5e1', padding: '8px', textAlign: 'right', fontWeight: 'bold', fontSize: '13pt' }}>{(grandTotal || 0).toLocaleString()} 원</td>
               </tr>
             </tbody>
           </table>
