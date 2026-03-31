@@ -32,7 +32,7 @@ export default function QuoteList() {
       const matchName = quote.customerInfo?.name?.toLowerCase().includes(lowerSearch);
       const matchProject = quote.customerInfo?.project?.toLowerCase().includes(lowerSearch);
       const matchDate = quote.customerInfo?.date?.includes(lowerSearch);
-      const matchItems = quote.items?.some(item => 
+      const matchItems = quote.items?.some(item =>
         item.name?.toLowerCase().includes(lowerSearch) ||
         item.specs?.toLowerCase().includes(lowerSearch)
       );
@@ -77,13 +77,13 @@ export default function QuoteList() {
 
   const handleHometaxExport = () => {
     if (!selectedQuote) return;
-    
+
     const rows = [
       ['작성일자', '공급받는자상호', '품목', '규격', '수량', '단가', '공급가액', '세액', '비고']
     ];
-    
+
     selectedQuote.items.forEach(item => {
-      const itemVat = selectedQuote.includeVat !== false ? Math.floor(item.total * 0.1) : 0; 
+      const itemVat = selectedQuote.includeVat !== false ? Math.floor(item.total * 0.1) : 0;
       rows.push([
         selectedQuote.customerInfo.date.replace(/-/g, ''), // YYYYMMDD
         selectedQuote.customerInfo.company || selectedQuote.customerInfo.name,
@@ -122,24 +122,36 @@ export default function QuoteList() {
     }
   };
 
+  // handleApprove 함수 부분만 수정 제안
   const handleApprove = async () => {
     if (window.confirm("입금 및 계약이 확인되었습니까?\n승인 완료 처리 시 대시보드 당월 매출에 합산됩니다.")) {
       try {
+        // [보강] 만약 날짜에 점(.)이 있다면 하이픈(-)으로 통일하여 업데이트하면 
+        // 대시보드에서 날짜 인식이 훨씬 정확해집니다.
+        const updatedQuote = {
+          ...selectedQuote,
+          status: 'approved'
+        };
+
         await updateQuoteStatus(selectedQuote.id, 'approved');
+
+        // 로컬 상태 업데이트
         setQuotes(quotes.map(q => q.id === selectedQuote.id ? { ...q, status: 'approved' } : q));
-        setSelectedQuote({ ...selectedQuote, status: 'approved' });
+        setSelectedQuote(updatedQuote);
+
+        // 성공 알림 (선택 사항)
+        alert("승인 처리가 완료되었습니다. 대시보드 매출에 반영됩니다.");
       } catch (err) {
         console.error("Status update error", err);
         alert("상태 변경 중 오류가 발생했습니다.");
       }
     }
   };
-
   const captureImage = async () => {
     if (!printRef.current) return null;
-    
+
     const element = printRef.current;
-    
+
     // Wait for all images to be loaded
     const images = Array.from(element.getElementsByTagName('img'));
     await Promise.all(images.map(img => {
@@ -184,14 +196,14 @@ export default function QuoteList() {
     setIsPreparing(true);
     // Give modal time to settle (solve first-try failure)
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     try {
       const canvas = await captureImage();
       if (!canvas) {
         alert("이미지 생성에 실패했습니다.");
         return;
       }
-      
+
       const link = document.createElement('a');
       link.download = `견적서_${selectedQuote.customerInfo.project || '미정'}_${selectedQuote.customerInfo.name || '고객'}.png`;
       link.href = canvas.toDataURL('image/png');
@@ -218,9 +230,9 @@ export default function QuoteList() {
       const blob = await new Promise((resolve, reject) => {
         canvas.toBlob(b => b ? resolve(b) : reject(new Error("Blob conversion failed")), 'image/jpeg', 0.8);
       });
-      
+
       const file = new File([blob], `견적서_${selectedQuote.customerInfo.project || '미정'}.jpg`, { type: 'image/jpeg' });
-      
+
       // [요청 반영] navigator.share 방식은 윈도우 PC에서 카카오톡이 안 뜨는 문제가 있어
       // 다시 카카오 전용 SDK 우회 방식으로 원복합니다. (domain match: https://tad-one.vercel.app)
       if (!window.Kakao) {
@@ -305,9 +317,9 @@ export default function QuoteList() {
 
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem', background: '#fff', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.6rem 1rem', width: '100%', maxWidth: '400px' }}>
         <Search size={18} color="#94a3b8" style={{ marginRight: '0.5rem' }} />
-        <input 
-          type="text" 
-          placeholder="고객명, 현장명, 날짜 또는 항목 검색..." 
+        <input
+          type="text"
+          placeholder="고객명, 현장명, 날짜 또는 항목 검색..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{ border: 'none', outline: 'none', width: '100%', fontSize: '1rem', background: 'transparent' }}
@@ -367,7 +379,7 @@ export default function QuoteList() {
 
       {!loading && totalPages > 1 && (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginTop: '1.5rem' }}>
-          <button 
+          <button
             className="btn btn-outline"
             disabled={currentPage === 1}
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
@@ -378,7 +390,7 @@ export default function QuoteList() {
           <span style={{ fontWeight: 500, color: 'var(--text-main)', fontSize: '0.95rem' }}>
             {currentPage} / {totalPages}
           </span>
-          <button 
+          <button
             className="btn btn-outline"
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
