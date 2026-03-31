@@ -19,6 +19,7 @@ import Pricing from './pages/Pricing';
 import Guide from './pages/Guide';
 import Footer from './components/Footer';
 import Chatbot from './components/Chatbot';
+import MoreMenuModal from './components/MoreMenuModal';
 import './index.css';
 
 // Global variable to capture early beforeinstallprompt events
@@ -36,6 +37,7 @@ function AppContent() {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(globalDeferredPrompt);
   const [isIOS] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -212,16 +214,13 @@ function AppContent() {
 
       {/* Main Content */}
       <main className="main-content">
-        <header className="top-header">
+        <header className="top-header glass-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
-            <button className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(true)}>
-              <Menu size={24} />
-            </button>
-            <h2 className="header-title" style={{ fontSize: '1.25rem', color: 'var(--text-dark)', margin: 0 }}>맞춤형 자동 견적 솔루션</h2>
+            <h2 className="header-title" style={{ fontSize: '1.25rem', color: 'var(--primary-color)', margin: 0, fontWeight: 700 }}>TAD 시스템</h2>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
             <span className="header-email" style={{ fontSize: '0.9rem', color: 'var(--text-light)', fontWeight: 500 }}>{currentUser.email}</span>
-            <button className="btn btn-outline" style={{ padding: '0.35rem 0.7rem', fontSize: '0.85rem' }} onClick={handleLogout}>로그아웃</button>
+            <button className="btn btn-outline tap-effect" style={{ padding: '0.35rem 0.7rem', fontSize: '0.85rem' }} onClick={handleLogout}>로그아웃</button>
           </div>
         </header>
         
@@ -252,6 +251,29 @@ function AppContent() {
         {renderPwaInstallGuide()}
         <Chatbot />
         <Footer />
+        
+        {/* Mobile Bottom Tab Bar */}
+        <nav className="bottom-nav">
+          <NavLink to="/" className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`} onClick={() => setIsMoreMenuOpen(false)}>
+            <LayoutDashboard size={24} />
+            <span>대시보드</span>
+          </NavLink>
+          <NavLink to="/create" className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`} onClick={() => setIsMoreMenuOpen(false)}>
+            <PlusCircle size={24} />
+            <span>견적작성</span>
+          </NavLink>
+          <NavLink to="/list" className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`} onClick={() => setIsMoreMenuOpen(false)}>
+            <FileText size={24} />
+            <span>내역조회</span>
+          </NavLink>
+          <button className="bottom-nav-item" onClick={() => setIsMoreMenuOpen(true)}>
+            <Menu size={24} />
+            <span>더보기</span>
+          </button>
+        </nav>
+        
+        {/* More Menu Modal */}
+        <MoreMenuModal isOpen={isMoreMenuOpen} onClose={() => setIsMoreMenuOpen(false)} />
       </main>
     </div>
   );
