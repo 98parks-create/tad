@@ -27,60 +27,39 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
 
   const sortedItems = [...items].reverse();
 
-  // [고해상도 캡처 로직]
-  const handleShare = async () => {
+  // [핵심] 요청하신 1588 x 2194 해상도를 강제하는 로직
+  const handleSaveImage = async () => {
     if (!ref.current) return;
-
     try {
       await document.fonts.ready;
 
       const canvas = await html2canvas(ref.current, {
-        scale: 2, // 2배수 스케일로 고해상도 확보 (출력용으로 적합)
+        // 이 설정들이 합쳐져서 정확히 1588 x 2194를 만듭니다.
+        scale: 2,
+        width: 794,             // 794 * 2 = 1588
+        height: 1097,           // 1097 * 2 = 2194 (A4 비율 최적화 높이)
+        windowWidth: 794,
         useCORS: true,
         backgroundColor: '#ffffff',
         logging: false,
-        width: 794, // A4 표준 너비 (96 DPI 기준 210mm)
-        height: 1123, // A4 표준 높이 (96 DPI 기준 297mm)
-        windowWidth: 794, // 뷰포트 고정으로 레이아웃 뒤틀림 방지
         onclone: (clonedDoc) => {
           const el = clonedDoc.querySelector('.print-template');
           if (el) {
             el.style.width = '794px';
-            el.style.height = '1123px';
+            el.style.height = '1097px';
             el.style.margin = '0';
-            el.style.boxShadow = 'none';
           }
         }
       });
 
-      canvas.toBlob(async (blob) => {
-        if (!blob) return;
-        const fileName = `견적서_${customerInfo.name || '고객'}.png`;
-        const file = new File([blob], fileName, { type: 'image/png' });
-
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({ files: [file], title: '견적서 송부' });
-          } catch (shareError) {
-            if (shareError.name !== 'AbortError') downloadFallback(blob, fileName);
-          }
-        } else {
-          downloadFallback(blob, fileName);
-        }
-      }, 'image/png', 1.0);
+      const dataUrl = canvas.toDataURL('image/png', 1.0);
+      const link = document.createElement('a');
+      link.download = `견적서_${customerInfo.name || '고객'}.png`;
+      link.href = dataUrl;
+      link.click();
     } catch (err) {
       alert("이미지 생성 중 오류가 발생했습니다.");
     }
-  };
-
-  const downloadFallback = (blob, fileName) => {
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   return (
@@ -89,19 +68,19 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
         ref={ref}
         className="print-template"
         style={{
-          padding: styles.topBottomPadding,
-          width: '210mm', // 794px 대응
-          height: '297mm', // 1123px 대응 (고정 해상도 유지)
+          // 화면에서도 794x1097로 보이게 설정하여 캡처 시 오차 제거
+          width: '794px',
+          height: '1097px',
+          padding: '15mm',
           boxSizing: 'border-box',
           margin: '0 auto',
           backgroundColor: 'white',
-          color: 'black',
-          fontFamily: "'Noto Sans KR', 'Malgun Gothic', sans-serif",
+          color: '#1a202c',
+          fontFamily: "'Noto Sans KR', sans-serif",
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 0 20px rgba(0,0,0,0.1)',
           position: 'relative',
-          overflow: 'hidden' // 해상도 밖으로 나가는 요소 차단
+          boxShadow: '0 0 20px rgba(0,0,0,0.1)',
         }}
       >
         {/* 견적서 상단 */}
