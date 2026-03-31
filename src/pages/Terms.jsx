@@ -9,7 +9,7 @@ export default function Terms() {
         <section style={{ marginBottom: '1.5rem' }}>
           <h3 style={{ fontSize: '1.1rem', color: 'var(--text-dark)', marginBottom: '0.8rem' }}>제 1조 (목적)</h3>
           <p style={{ margin: 0 }}>
-            본 약관은 TAD B2B(이하 "회사")가 제공하는 견적서 자동화 및 관련 서비스의 이용과 관련하여, 회사와 회원 간의 권리, 의무, 책임사항 및 기타 필요한 사항을 규정함을 목적으로 합니다.
+            본 약관은 태드스마트견적(TAD)(이하 "회사")가 제공하는 견적서 자동화 및 관련 서비스의 이용과 관련하여, 회사와 회원 간의 권리, 의무, 책임사항 및 기타 필요한 사항을 규정함을 목적으로 합니다.
           </p>
         </section>
         

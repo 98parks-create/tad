@@ -10,7 +10,7 @@ export default function Refund() {
       <h2 style={{ fontSize: '1.8rem', color: 'var(--primary-color)', marginBottom: '1.5rem' }}>환불규정</h2>
       <div className="card" style={{ padding: '2rem', lineHeight: '1.8', color: '#334155' }}>
         <p><strong>제1조 (환불의 원칙)</strong><br />
-        1. TAD스마트견적은 사용자가 결제한 프리미엄 서비스(Pro 요금제 등)에 대해 관련 법령에 따른 환불 규정을 준수합니다.<br />
+        1. 태드스마트견적(TAD)은 사용자가 결제한 프리미엄 서비스(Pro 요금제 등)에 대해 관련 법령에 따른 환불 규정을 준수합니다.<br />
         2. 환불 금액은 결제 수수료 및 기 사용 기간에 비례한 금액을 공제한 후 산정됩니다. 단, 결제 수일 이내 미사용 상태에서의 환불은 전액 환불을 원칙으로 합니다.
         </p>
 
