@@ -636,13 +636,28 @@ label {
   }
 }
 
-/* Print Isolation for Mobile Devices */
+/* Print Isolation for Mobile & Desktop Browsers */
 @media print {
-  /* iOS Safari 다이얼로그 전채화면 출력 방지: 컨테이너 은폐 및 지정 클래스만 현출 */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+    background-color: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Hide everything by default */
   body * {
     visibility: hidden;
+    overflow: visible !important;
   }
   
+  /* Only show the print template and its children */
   .print-template, .print-template * {
     visibility: visible;
   }
@@ -657,22 +672,41 @@ label {
     transform: none !important;
     width: 210mm !important;
     height: auto !important;
+    min-height: 297mm !important;
     box-sizing: border-box !important;
     background-color: white !important;
+    display: block !important;
+    overflow: visible !important;
   }
 
-  /* 네비게이션 및 사이드 버튼 강제 숨김 */
-  .pwa-install-btn-floating, .chatbot-wrapper, .bottom-nav, .top-header, .sidebar, .mobile-menu-btn {
+  /* Prevent page breaks inside critical sections */
+  .print-template table, 
+  .print-template .summary-section,
+  .print-template .image-section {
+    page-break-inside: avoid !important;
+  }
+
+  /* 강제 숨김 처리 */
+  .pwa-install-btn-floating, 
+  .chatbot-wrapper, 
+  .bottom-nav, 
+  .top-header, 
+  .sidebar, 
+  .mobile-menu-btn,
+  .no-print {
     display: none !important;
   }
 
-  /* Remove any overlay scaling */
-  .print-preview-scale, .print-preview-container {
+  /* Remove any overlay scaling/constraints from parent containers */
+  .print-preview-scale, .print-preview-container, .main-content, .app-container {
     transform: none !important;
     zoom: 1 !important;
     border: none !important;
     background: transparent !important;
     padding: 0 !important;
     margin: 0 !important;
+    display: block !important;
+    overflow: visible !important;
+    height: auto !important;
   }
 }

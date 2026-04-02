@@ -87,7 +87,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
         style={{
           padding: styles.topBottomPadding,
           width: '210mm',
-          minHeight: '290mm',
+          minHeight: '297mm',
           boxSizing: 'border-box',
           margin: '0 auto',
           backgroundColor: 'white',
@@ -96,7 +96,8 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
           display: 'flex',
           flexDirection: 'column',
           boxShadow: '0 0 20px rgba(0,0,0,0.1)',
-          position: 'relative'
+          position: 'relative',
+          overflow: 'visible'
         }}
       >
         {/* 상단 섹션 */}
