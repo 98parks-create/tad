@@ -53,7 +53,18 @@ export default function QuoteList() {
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: `견적서_${selectedQuote?.customerInfo?.project || Date.now()}`,
-    pageStyle: "@page { size: A4; margin: 0; } @media print { body { -webkit-print-color-adjust: exact; } }"
+    pageStyle: () => {
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+      const isMobileBrowser = isMobile && !isStandalone;
+
+      const basePageStyle = "@page { size: A4; margin: 0; } @media print { body { -webkit-print-color-adjust: exact !important; } }";
+      
+      if (isMobileBrowser) {
+        return `${basePageStyle} @media print { .print-template { height: 1123px !important; width: 210mm !important; margin: 0 auto !important; border: none !important; box-shadow: none !important; padding: 10mm 15mm !important; } }`;
+      }
+      return basePageStyle;
+    }
   });
 
   const handleEdit = () => {
@@ -243,6 +254,11 @@ export default function QuoteList() {
     setIsPreparing(true);
     await new Promise(resolve => setTimeout(resolve, 500));
 
+    // 정밀 환경 체크 (PC 브라우저 vs 설치된 앱 vs 모바일 브라우저)
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    const isMobileBrowser = isMobile && !isStandalone;
+
     try {
       const canvas = await captureImage();
       if (!canvas) {
@@ -257,26 +273,31 @@ export default function QuoteList() {
 
       const file = new File([blob], `견적서_${selectedQuote.customerInfo.project || '미정'}.jpg`, { type: 'image/jpeg' });
 
-      // [핵심 개선] 모바일 웹/앱 모든 환경에서 카톡 앱 즉시 호출을 위해 Web Share API 우선 사용
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: `[견적서] ${selectedQuote.customerInfo.project || '안내'}`,
-            text: `${selectedQuote.customerInfo.company || ''} ${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.\n전체 확인: https://tadsmart.co.kr`,
-            files: [file]
-          });
-          setIsPreparing(false);
-          return;
-        } catch (shareError) {
-          console.log("Navigator share failed:", shareError.name);
-          if (shareError.name === 'AbortError') {
+      // [핵심 로직 분리]
+      // 1. 모바일 일반 웹 브라우저 환경 (비Standalone)
+      if (isMobileBrowser) {
+        // 모바일 브라우저에선 무조건 Web Share API 우선 시도 (카톡 앱 리다이렉트 방지)
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              title: `[견적서] ${selectedQuote.customerInfo.project || '안내'}`,
+              text: `${selectedQuote.customerInfo.company || ''} ${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.\n전체 확인: https://tadsmart.co.kr`,
+              files: [file]
+            });
             setIsPreparing(false);
             return;
+          } catch (shareError) {
+            console.log("Navigator share failed:", shareError.name);
+            if (shareError.name === 'AbortError') {
+              setIsPreparing(false);
+              return;
+            }
+            // AbortError가 아닌 경우 SDK 폴백 시도
           }
         }
       }
 
-      // [기존 SDK 방식 - 폴백 및 데스크톱]
+      // 2. PC 브라우저이거나, Standalone(앱) 모드이거나, Web Share API가 실패한 경우 -> 기존 SDK 방식
       if (!window.Kakao) {
         alert("카카오 SDK를 불러오지 못했습니다.");
         setIsPreparing(false);
