@@ -224,6 +224,7 @@ export default function QuoteList() {
       const canvas = await captureImage();
       if (!canvas) {
         alert("이미지 생성에 실패했습니다.");
+        setIsPreparing(false);
         return;
       }
 
@@ -233,66 +234,36 @@ export default function QuoteList() {
 
       const file = new File([blob], `견적서_${selectedQuote.customerInfo.project || '미정'}.jpg`, { type: 'image/jpeg' });
 
-      // [PWA 독립 모드 감지]
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-
-      // [독립 모드 대응 로직 추가]
-      if (isStandalone) {
-        // 이미지가 서버에 먼저 올라가야 하므로 SDK 초기화 및 업로드 진행
-        if (window.Kakao) {
-          if (!window.Kakao.isInitialized()) {
-            const kakaoKey = import.meta.env.VITE_KAKAO_JS_KEY;
-            if (kakaoKey) window.Kakao.init(kakaoKey);
-          }
-
-          if (window.Kakao.isInitialized()) {
-            try {
-              // 1. 이미지 업로드
-              const uploadResult = await window.Kakao.Share.uploadImage({ file: [file] });
-              const imageUrl = uploadResult.infos.original.url;
-
-              // 2. 카카오톡 앱 강제 실행을 위한 URL 생성 (팝업 방지를 위해 location.href 사용)
-              // (참고: API가 직접 URL을 반환하지 않는 경우를 대비해 스키마 직접 구성 또는 navigator share 사용)
-              if (window.Kakao.Share && window.Kakao.Share.sendDefault) {
-                // Standalone 모드에서는 팝업 대기열 문제로 sendDefault 대신 직접 실행 선호
-                // 하지만 최신 SDK에서는 모바일 환경 판단 시 자동으로 scheme 호출을 시도하므로 
-                // location.href 방식으로 우회하는 것이 가장 안전함.
-                
-                // 만약 navigator.share가 있으면 이것이 가장 확실한 PWA 대응책입니다.
-                // 사용자 요청에 따라 kakaolink 우선 순위를 고려하여 logic 재구성
-                
-                // [긴급 대응] Standalone 앱 환경에서는 팝업 차단이 강력하므로 
-                // SDK의 내부 URL 생성기를 호출하거나 navigator.share로 즉시 넘깁니다.
-                if (navigator.share) {
-                  await navigator.share({
-                    title: `[견적서] ${selectedQuote.customerInfo.project || '안내'}`,
-                    text: `${selectedQuote.customerInfo.company || ''} ${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.\n합계금액: ${selectedQuote.grandTotal.toLocaleString()}원`,
-                    files: [file]
-                  });
-                  return;
-                }
-              }
-            } catch (err) {
-              console.warn("Kakao Standalone processing failed, trying fallback:", err);
-            }
+      // [핵심 개선] 모바일 웹/앱 모든 환경에서 카톡 앱 즉시 호출을 위해 Web Share API 우선 사용
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `[견적서] ${selectedQuote.customerInfo.project || '안내'}`,
+            text: `${selectedQuote.customerInfo.company || ''} ${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.\n합계금액: ${selectedQuote.grandTotal.toLocaleString()}원\n전체 확인: https://tadsmart.co.kr`,
+            files: [file]
+          });
+          setIsPreparing(false);
+          return;
+        } catch (shareError) {
+          // 사용자가 취소한 경우 외에 오류 발생 시 기존 SDK로 폴백
+          console.log("Navigator share failed:", shareError.name);
+          if (shareError.name === 'AbortError') {
+            setIsPreparing(false);
+            return;
           }
         }
       }
 
+      // [기존 SDK 방식 - 폴백 및 데스크톱]
       if (!window.Kakao) {
         alert("카카오 SDK를 불러오지 못했습니다.");
         setIsPreparing(false);
         return;
       }
+
       if (!window.Kakao.isInitialized()) {
         const kakaoKey = import.meta.env.VITE_KAKAO_JS_KEY;
-        if (kakaoKey) {
-          window.Kakao.init(kakaoKey);
-        } else {
-          alert("설정된 카카오 앱 키가 없습니다.");
-          setIsPreparing(false);
-          return;
-        }
+        if (kakaoKey) window.Kakao.init(kakaoKey);
       }
 
       const uploadResult = await window.Kakao.Share.uploadImage({
@@ -301,9 +272,6 @@ export default function QuoteList() {
       const imageUrl = uploadResult.infos.original.url;
 
       if (window.Kakao.Share) {
-        // [수정] Standalone 모드에서는 팝업 차단 방지를 위해 직접 location.href 방식을 고려할 수도 있으나,
-        // SDK에서 지원하는 sendDefault가 내부적으로 intent/scheme을 사용하므로 
-        // 일반 브라우저에서는 기존 방식을 그대로 유지합니다.
         window.Kakao.Share.sendDefault({
           objectType: 'feed',
           content: {
@@ -485,23 +453,21 @@ export default function QuoteList() {
               </button>
             </div>
 
-            <div className="print-preview-container">
-              <div className="print-preview-scale">
-                <PrintTemplate
-                  ref={printRef}
-                  customerInfo={selectedQuote.customerInfo || {}}
-                  items={selectedQuote.items || []}
-                  subTotal={selectedQuote.subTotal}
-                  vat={selectedQuote.vat}
-                  grandTotal={selectedQuote.grandTotal}
-                  discount={selectedQuote.discount}
-                  discountReason={selectedQuote.discountReason}
-                  remarks={selectedQuote.remarks}
-                  attachedImages={selectedQuote.attachedImages}
-                  providerInfo={companyProfile}
-                  includeVat={selectedQuote.includeVat !== false}
-                />
-              </div>
+            <div className="print-preview-container" style={{ padding: '1rem', background: '#cbd5e1', borderRadius: '8px' }}>
+              <PrintTemplate
+                ref={printRef}
+                customerInfo={selectedQuote.customerInfo || {}}
+                items={selectedQuote.items || []}
+                subTotal={selectedQuote.subTotal}
+                vat={selectedQuote.vat}
+                grandTotal={selectedQuote.grandTotal}
+                discount={selectedQuote.discount}
+                discountReason={selectedQuote.discountReason}
+                remarks={selectedQuote.remarks}
+                attachedImages={selectedQuote.attachedImages}
+                providerInfo={companyProfile}
+                includeVat={selectedQuote.includeVat !== false}
+              />
             </div>
           </div>
         </div>

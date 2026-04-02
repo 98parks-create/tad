@@ -86,13 +86,13 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
         className="print-template"
         style={{
           padding: styles.topBottomPadding,
-          width: '210mm',
-          minHeight: '297mm',
+          width: '100%',
+          maxWidth: '850px',
           boxSizing: 'border-box',
           margin: '0 auto',
           backgroundColor: 'white',
           color: 'black',
-          fontFamily: "'Noto Sans KR', 'Malgun Gothic', sans-serif",
+          fontFamily: "'Noto Sans KR', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif",
           display: 'flex',
           flexDirection: 'column',
           boxShadow: '0 0 20px rgba(0,0,0,0.1)',

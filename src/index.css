@@ -636,7 +636,7 @@ label {
   }
 }
 
-/* Print Isolation for Mobile & Desktop Browsers */
+/* Print Isolation for Mobile & Desktop Browsers - Final Sync (App Style Print) */
 @media print {
   @page {
     size: A4;
@@ -644,8 +644,11 @@ label {
   }
 
   html, body {
-    height: auto !important;
-    overflow: visible !important;
+    width: 210mm !important;
+    height: 297mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important; 
     background-color: white !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
@@ -654,7 +657,6 @@ label {
   /* Hide everything by default */
   body * {
     visibility: hidden;
-    overflow: visible !important;
   }
   
   /* Only show the print template and its children */
@@ -668,15 +670,16 @@ label {
     top: 0 !important;
     margin: 0 !important;
     padding: 10mm 15mm !important;
-    zoom: 1 !important;
-    transform: none !important;
     width: 210mm !important;
-    height: auto !important;
-    min-height: 297mm !important;
+    height: 297mm !important;
+    max-height: 297mm !important;
     box-sizing: border-box !important;
     background-color: white !important;
     display: block !important;
-    overflow: visible !important;
+    overflow: hidden !important; 
+    zoom: 1 !important;
+    transform: none !important;
+    box-shadow: none !important;
   }
 
   /* Prevent page breaks inside critical sections */
