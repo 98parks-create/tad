@@ -595,45 +595,9 @@ label {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Desktop Default Scale for Modal Preview - (Mobile handled by JS) */
 .print-preview-scale {
-  /* Default Desktop Scale */
-  zoom: 0.85;
-  /* Compatibility Fallback */
-  -webkit-transform: scale(0.85);
-  -moz-transform: scale(0.85);
-  transform: scale(0.85);
-  -webkit-transform-origin: top center;
-  -moz-transform-origin: top center;
-  transform-origin: top center;
-}
-
-@media (max-width: 768px) {
-  .print-preview-container {
-    padding: 0.5rem;
-  }
-  .print-preview-scale {
-    zoom: 0.45;
-    -webkit-transform: scale(0.45);
-    -moz-transform: scale(0.45);
-    transform: scale(0.45);
-  }
-}
-
-@media (max-width: 480px) {
-  .print-preview-scale {
-    zoom: 0.42;
-    -webkit-transform: scale(0.42);
-    -moz-transform: scale(0.42);
-    transform: scale(0.42);
-  }
-}
-@media (max-width: 380px) {
-  .print-preview-scale {
-    zoom: 0.38;
-    -webkit-transform: scale(0.38);
-    -moz-transform: scale(0.38);
-    transform: scale(0.38);
-  }
+  margin: 0 auto;
 }
 
 /* Print Isolation for Mobile & Desktop Browsers - Final Sync (App Style Print) */

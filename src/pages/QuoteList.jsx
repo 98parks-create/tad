@@ -216,6 +216,29 @@ export default function QuoteList() {
     }
   };
 
+  const [previewScale, setPreviewScale] = useState(0.85);
+
+  // [다이내믹 스케일링 로직] PC는 보호하고 모바일/태블릿만 해상도에 맞춰 꽉 차게!
+  useEffect(() => {
+    const updateScale = () => {
+      // PC(1024px) 이상이면 사용자님이 원하시는 0.85 고정
+      if (window.innerWidth >= 1024) {
+        setPreviewScale(0.85);
+        return;
+      }
+      
+      // 모바일/태블릿이면 해상도에 맞춰 꽉 차게 계산 (원래 로직 복원)
+      const availableWidth = window.innerWidth - 48; // 모달 좌우 여백 제외
+      const documentWidth = 794; // 약 210mm
+      const newScale = availableWidth / documentWidth;
+      setPreviewScale(Math.min(newScale, 1));
+    };
+
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, []);
+
   const handleShareKakao = async () => {
     setIsPreparing(true);
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -239,13 +262,12 @@ export default function QuoteList() {
         try {
           await navigator.share({
             title: `[견적서] ${selectedQuote.customerInfo.project || '안내'}`,
-            text: `${selectedQuote.customerInfo.company || ''} ${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.\n합계금액: ${selectedQuote.grandTotal.toLocaleString()}원\n전체 확인: https://tadsmart.co.kr`,
+            text: `${selectedQuote.customerInfo.company || ''} ${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.\n전체 확인: https://tadsmart.co.kr`,
             files: [file]
           });
           setIsPreparing(false);
           return;
         } catch (shareError) {
-          // 사용자가 취소한 경우 외에 오류 발생 시 기존 SDK로 폴백
           console.log("Navigator share failed:", shareError.name);
           if (shareError.name === 'AbortError') {
             setIsPreparing(false);
@@ -453,21 +475,37 @@ export default function QuoteList() {
               </button>
             </div>
 
-            <div className="print-preview-container" style={{ padding: '1rem', background: '#cbd5e1', borderRadius: '8px' }}>
-              <PrintTemplate
-                ref={printRef}
-                customerInfo={selectedQuote.customerInfo || {}}
-                items={selectedQuote.items || []}
-                subTotal={selectedQuote.subTotal}
-                vat={selectedQuote.vat}
-                grandTotal={selectedQuote.grandTotal}
-                discount={selectedQuote.discount}
-                discountReason={selectedQuote.discountReason}
-                remarks={selectedQuote.remarks}
-                attachedImages={selectedQuote.attachedImages}
-                providerInfo={companyProfile}
-                includeVat={selectedQuote.includeVat !== false}
-              />
+            <div className="print-preview-container" style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              overflow: 'hidden', 
+              width: '100%',
+              backgroundColor: '#cbd5e1',
+              borderRadius: '8px',
+              padding: '1rem 0'
+            }}>
+              <div style={{ 
+                transform: `scale(${previewScale})`, 
+                transformOrigin: 'top center',
+                transition: 'transform 0.2s ease',
+                width: '794px', // 210mm
+                minWidth: '794px'
+              }}>
+                <PrintTemplate
+                  ref={printRef}
+                  customerInfo={selectedQuote.customerInfo || {}}
+                  items={selectedQuote.items || []}
+                  subTotal={selectedQuote.subTotal}
+                  vat={selectedQuote.vat}
+                  grandTotal={selectedQuote.grandTotal}
+                  discount={selectedQuote.discount}
+                  discountReason={selectedQuote.discountReason}
+                  remarks={selectedQuote.remarks}
+                  attachedImages={selectedQuote.attachedImages}
+                  providerInfo={companyProfile}
+                  includeVat={selectedQuote.includeVat !== false}
+                />
+              </div>
             </div>
           </div>
         </div>

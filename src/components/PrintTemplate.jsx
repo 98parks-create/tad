@@ -138,10 +138,10 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
         </div>
 
         {/* 금액 요약 섹션 */}
-        <div style={{ margin: styles.titleMargin, padding: '12px 16px', backgroundColor: '#f8fafc', border: '2px solid #000', borderLeft: '8px solid #003366', borderRadius: '4px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <span style={{ fontWeight: 'bold', fontSize: '13pt' }}>총 견적 금액 (VAT {includeVat ? '포함' : '별도'}):</span>
-            <span style={{ fontSize: '16pt', fontWeight: '900' }}>
+        <div style={{ margin: styles.titleMargin, padding: '10px 16px', backgroundColor: '#f8fafc', border: '2px solid #000', borderLeft: '8px solid #003366', borderRadius: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden' }}>
+            <span style={{ fontWeight: 'bold', fontSize: '12pt' }}>총 견적 금액 (VAT {includeVat ? '포함' : '별도'}):</span>
+            <span style={{ fontSize: '14pt', fontWeight: '900', color: '#003366' }}>
               {(grandTotal || 0) > 0 ? `일금 ${(grandTotal || 0).toLocaleString()} 원 정 (₩ ${(grandTotal || 0).toLocaleString()})` : '- 원'}
             </span>
           </div>
@@ -192,73 +192,72 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
           </tbody>
         </table>
 
-        {/* 합계 테이블 */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '5mm' }}>
-          <table style={{ width: '400px', borderCollapse: 'collapse', fontSize: '11pt', border: '2px solid #000' }}>
-            <tbody>
-              <tr>
-                <td style={{ border: '1px solid #000', padding: '8px', backgroundColor: '#f8fafc', fontWeight: 'bold', width: '150px' }}>공급가액</td>
-                <td style={{ border: '1px solid #000', padding: '8px', textAlign: 'right' }}>{Number(subTotal || 0).toLocaleString()} 원</td>
-              </tr>
-              {(discount || 0) > 0 && (
+        {/* 합계 및 이미지 섹션 (나란히 배치) */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '5mm', pageBreakInside: 'avoid' }}>
+          {/* 이미지를 합계 박스 왼편에 배치 */}
+          <div style={{ flex: 1, marginRight: '15px' }}>
+            {attachedImages && attachedImages.length > 0 && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                {attachedImages.map((img, idx) => (
+                  <div key={idx} style={{
+                    aspectRatio: '1/1',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '4px',
+                    overflow: 'hidden',
+                    backgroundColor: '#f8fafc'
+                  }}>
+                    <img
+                      src={img}
+                      alt={`증빙사진 ${idx + 1}`}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      crossOrigin="anonymous"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 합계 테이블 */}
+          <div style={{ width: '380px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10.5pt', border: '2px solid #000' }}>
+              <tbody>
                 <tr>
-                  <td style={{ border: '1px solid #000', padding: '8px', backgroundColor: '#fff9c4', fontWeight: 'bold' }}>
-                    할인액 <span style={{ fontSize: '8pt', fontWeight: 'normal', display: 'block' }}>{discountReason ? `(${discountReason})` : ''}</span>
-                  </td>
-                  <td style={{ border: '1px solid #000', padding: '8px', textAlign: 'right', color: '#d32f2f', fontWeight: 'bold' }}>
-                    - {Number(discount || 0).toLocaleString()} 원
-                  </td>
+                  <td style={{ border: '1px solid #000', padding: '6px 8px', backgroundColor: '#f8fafc', fontWeight: 'bold', width: '130px' }}>공급가액</td>
+                  <td style={{ border: '1px solid #000', padding: '6px 8px', textAlign: 'right' }}>{Number(subTotal || 0).toLocaleString()} 원</td>
                 </tr>
-              )}
-              <tr>
-                <td style={{ border: '1px solid #000', padding: '8px', backgroundColor: '#f8fafc', fontWeight: 'bold' }}>부가세 (VAT)</td>
-                <td style={{ border: '1px solid #000', padding: '8px', textAlign: 'right' }}>{(vat || 0).toLocaleString()} 원</td>
-              </tr>
-              <tr>
-                <td style={{ border: '2px solid #000', padding: '12px 8px', backgroundColor: '#f1f5f9', fontWeight: '900', fontSize: '13pt' }}>총 합 계</td>
-                <td style={{ border: '2px solid #000', padding: '12px 8px', textAlign: 'right', fontWeight: '900', fontSize: '15pt', color: '#003366' }}>{(grandTotal || 0).toLocaleString()} 원</td>
-              </tr>
-            </tbody>
-          </table>
+                {(discount || 0) > 0 && (
+                  <tr>
+                    <td style={{ border: '1px solid #000', padding: '6px 8px', backgroundColor: '#fff9c4', fontWeight: 'bold' }}>
+                      할인액 <span style={{ fontSize: '8pt', fontWeight: 'normal' }}>{discountReason ? `(${discountReason})` : ''}</span>
+                    </td>
+                    <td style={{ border: '1px solid #000', padding: '6px 8px', textAlign: 'right', color: '#d32f2f', fontWeight: 'bold' }}>
+                      - {Number(discount || 0).toLocaleString()} 원
+                    </td>
+                  </tr>
+                )}
+                <tr>
+                  <td style={{ border: '1px solid #000', padding: '6px 8px', backgroundColor: '#f8fafc', fontWeight: 'bold' }}>부가세 (VAT)</td>
+                  <td style={{ border: '1px solid #000', padding: '6px 8px', textAlign: 'right' }}>{(vat || 0).toLocaleString()} 원</td>
+                </tr>
+                <tr>
+                  <td style={{ border: '2px solid #000', padding: '10px 8px', backgroundColor: '#f1f5f9', fontWeight: '900', fontSize: '12pt' }}>총 합 계</td>
+                  <td style={{ border: '2px solid #000', padding: '10px 8px', textAlign: 'right', fontWeight: '900', fontSize: '14pt', color: '#003366' }}>{(grandTotal || 0).toLocaleString()} 원</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* 특약사항 및 공지 */}
-        <div style={{ marginBottom: '5mm' }}>
+        <div style={{ marginBottom: '3mm' }}>
           {remarks && (
-            <div style={{ textAlign: 'left', fontSize: '9pt', backgroundColor: '#f1f5f9', padding: '10px 14px', borderRadius: '4px', border: '1px solid #cbd5e1', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
+            <div style={{ textAlign: 'left', fontSize: '8.5pt', backgroundColor: '#f1f5f9', padding: '8px 12px', borderRadius: '4px', border: '1px solid #cbd5e1', whiteSpace: 'pre-wrap', lineHeight: '1.4' }}>
               <strong>[ 특약사항 및 공지 ]</strong><br />{remarks}
             </div>
           )}
-          <div style={{ textAlign: 'center', fontSize: '11pt', borderTop: '2px dashed #94a3b8', paddingTop: '6mm', marginTop: '4mm', fontWeight: 'bold', letterSpacing: '2px' }}>상기와 같이 견적합니다.</div>
+          <div style={{ textAlign: 'center', fontSize: '10.5pt', borderTop: '1px dashed #94a3b8', paddingTop: '4mm', marginTop: '3mm', fontWeight: 'bold', letterSpacing: '2px' }}>상기와 같이 견적합니다.</div>
         </div>
-
-        {/* [수정된 증빙 사진 섹션] */}
-        {attachedImages && attachedImages.length > 0 && (
-          <div style={{ marginTop: '10px', pageBreakInside: 'avoid' }}>
-            <h3 style={{ fontSize: '10pt', borderBottom: '2px solid #003366', paddingBottom: '3px', marginBottom: '10px', color: '#003366', fontWeight: 'bold' }}>현장 증빙 사진</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-              {attachedImages.map((img, idx) => (
-                <div key={idx} style={{
-                  aspectRatio: '4/3',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '4px',
-                  overflow: 'hidden',
-                  backgroundColor: '#f8fafc',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <img
-                    src={img}
-                    alt={`증빙사진 ${idx + 1}`}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    crossOrigin="anonymous" // 캡처 시 이미지 깨짐 방지
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
