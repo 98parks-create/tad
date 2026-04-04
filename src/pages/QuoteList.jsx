@@ -429,13 +429,11 @@ export default function QuoteList() {
           console.error("Clipboard copy failed:", clipboardErr);
         }
 
-        // 2. PDF 파일 즉시 저장 및 열기 (사장님 필수 요청)
-        const pdfUrl = URL.createObjectURL(pdfBlob);
+        // 2. PDF 파일 즉시 저장 (사장님 필수 요청 - 자동 열기는 제거됨)
         downloadFile(pdfBlob, `${fileName}.pdf`);
-        window.open(pdfUrl, '_blank');
 
         // 3. 최종 안내 (주소 링크창은 사장님 요청으로 완전히 제거됨)
-        alert("견적서 이미지가 복사되었습니다! 카카오톡 대화방에서 '붙여넣기(Ctrl+V)'를 하시면 진짜 이미지 파일로 바로 전송됩니다.");
+        alert("견적서 파일이 저장되었습니다. 카카오톡 대화방으로 파일을 끌어넣어 전송해 주세요.");
       }
     } catch (error) {
       console.error("Share process failed:", error);
