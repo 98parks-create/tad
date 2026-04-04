@@ -14,14 +14,27 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
     else if (itemCount > 10) compactLevel = 'dense';
   }
 
+  // [수정] A4 고정 높이(1123px) 및 자동 스케일링 로직 보완
+  const heightInPx = 1123;
+  // 아이템 수와 이미지 여부에 따라 미세 스케일 조정 (1장에 담기게)
+  let contentScale = 1;
+  if (hasImages) {
+    if (itemCount > 15) contentScale = 0.82;
+    else if (itemCount > 10) contentScale = 0.9;
+  } else {
+    if (itemCount > 25) contentScale = 0.85;
+    else if (itemCount > 20) contentScale = 0.92;
+  }
+
   const styles = {
-    tableFontSize: compactLevel === 'very-dense' ? '8pt' : compactLevel === 'dense' ? '8.5pt' : '9.5pt',
-    cellPadding: compactLevel === 'very-dense' ? '3px 2px' : compactLevel === 'dense' ? '5px 4px' : '6px 5px',
-    headerPadding: compactLevel === 'very-dense' ? '5px 2px' : compactLevel === 'dense' ? '6px 4px' : '8px 5px',
-    rowHeight: compactLevel === 'very-dense' ? '18px' : compactLevel === 'dense' ? '24px' : '30px',
-    topBottomPadding: compactLevel === 'very-dense' ? '5mm 15mm' : '10mm 15mm',
-    titleMargin: compactLevel === 'very-dense' ? '3mm 0' : '6mm 0 4mm 0',
-    headerMarginBottom: compactLevel === 'very-dense' ? '2mm' : '4mm',
+    contentScale,
+    tableFontSize: compactLevel === 'ultra-dense' ? '7.5pt' : compactLevel === 'very-dense' ? '8.5pt' : compactLevel === 'dense' ? '9pt' : '10pt',
+    cellPadding: compactLevel === 'ultra-dense' ? '2px 2px' : compactLevel === 'very-dense' ? '3px 2px' : compactLevel === 'dense' ? '5px 4px' : '7px 5px',
+    headerPadding: compactLevel === 'ultra-dense' ? '3px 1px' : compactLevel === 'very-dense' ? '5px 2px' : compactLevel === 'dense' ? '6px 4px' : '8px 5px',
+    rowHeight: compactLevel === 'ultra-dense' ? '16px' : compactLevel === 'very-dense' ? '20px' : compactLevel === 'dense' ? '24px' : '28px',
+    topBottomPadding: compactLevel === 'ultra-dense' ? '4mm 8mm' : compactLevel === 'very-dense' ? '6mm 12mm' : '8mm 15mm',
+    titleMargin: compactLevel === 'ultra-dense' ? '0' : compactLevel === 'very-dense' ? '1mm 0' : '3mm 0 2mm 0',
+    headerMarginBottom: compactLevel === 'ultra-dense' ? '1mm' : compactLevel === 'very-dense' ? '2mm' : '4mm',
   };
 
   const sortedItems = [...items].reverse();
@@ -76,7 +89,10 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
     link.download = fileName;
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    setTimeout(() => {
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }, 100);
   };
 
   return (
@@ -86,20 +102,29 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
         className="print-template"
         style={{
           padding: styles.topBottomPadding,
-          width: '100%',
-          maxWidth: '850px',
+          width: '210mm',
+          height: `${heightInPx}px`, // [수정] 1123px 고정
+          maxHeight: `${heightInPx}px`,
           boxSizing: 'border-box',
           margin: '0 auto',
           backgroundColor: 'white',
           color: 'black',
           fontFamily: "'Noto Sans KR', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif",
+          lineHeight: '1.3',
           display: 'flex',
           flexDirection: 'column',
           boxShadow: '0 0 20px rgba(0,0,0,0.1)',
           position: 'relative',
-          overflow: 'visible'
+          overflow: 'hidden'
         }}
       >
+        <div style={{ 
+          transform: `scale(${styles.contentScale})`, 
+          transformOrigin: 'top center',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
         {/* 상단 섹션 */}
         <div style={{ textAlign: 'center', marginBottom: styles.headerMarginBottom, borderBottom: '2px solid #003366', paddingBottom: '2mm', paddingTop: '5mm' }}>
           <h1 style={{ color: '#003366', fontSize: '28pt', margin: '0 0 4mm 0', letterSpacing: '6px', fontWeight: 900 }}>견 적 서</h1>
@@ -138,10 +163,10 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
         </div>
 
         {/* 금액 요약 섹션 */}
-        <div style={{ margin: styles.titleMargin, padding: '10px 16px', backgroundColor: '#f8fafc', border: '2px solid #000', borderLeft: '8px solid #003366', borderRadius: '4px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden' }}>
-            <span style={{ fontWeight: 'bold', fontSize: '12pt' }}>총 견적 금액 (VAT {includeVat ? '포함' : '별도'}):</span>
-            <span style={{ fontSize: '14pt', fontWeight: '900', color: '#003366' }}>
+        <div style={{ margin: styles.titleMargin, padding: '12px 16px', backgroundColor: '#f8fafc', border: '2px solid #000', borderLeft: '8px solid #003366', borderRadius: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <span style={{ fontWeight: 'bold', fontSize: '13pt' }}>총 견적 금액 (VAT {includeVat ? '포함' : '별도'}):</span>
+            <span style={{ fontSize: '16pt', fontWeight: '900' }}>
               {(grandTotal || 0) > 0 ? `일금 ${(grandTotal || 0).toLocaleString()} 원 정 (₩ ${(grandTotal || 0).toLocaleString()})` : '- 원'}
             </span>
           </div>
@@ -184,7 +209,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
                 <td style={{ padding: styles.cellPadding, border: '1px solid #000', fontSize: '8pt', textAlign: 'center' }}>{item.remarks}</td>
               </tr>
             ))}
-            {Array.from({ length: Math.max(0, 8 - sortedItems.length) }).map((_, i) => (
+            {Array.from({ length: Math.max(0, (hasImages ? 3 : 6) - sortedItems.length) }).map((_, i) => (
               <tr key={`empty-${i}`} style={{ height: styles.rowHeight }}>
                 <td colSpan="8" style={{ border: '1px solid #000' }}></td>
               </tr>
@@ -192,71 +217,66 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
           </tbody>
         </table>
 
-        {/* 합계 및 이미지 섹션 (나란히 배치) */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '5mm', pageBreakInside: 'avoid' }}>
-          {/* 이미지를 합계 박스 왼편에 배치 */}
-          <div style={{ flex: 1, marginRight: '15px' }}>
+        {/* 증빙 사진 및 합계 테이블 래퍼 (좌우 배치) */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2mm', pageBreakInside: 'avoid' }}>
+          
+          {/* 현장 증빙 사진 (좌측 여백 활용) */}
+          <div style={{ flex: 1, paddingRight: '15px' }}>
             {attachedImages && attachedImages.length > 0 && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-                {attachedImages.map((img, idx) => (
-                  <div key={idx} style={{
-                    aspectRatio: '1/1',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '4px',
-                    overflow: 'hidden',
-                    backgroundColor: '#f8fafc'
-                  }}>
-                    <img
-                      src={img}
-                      alt={`증빙사진 ${idx + 1}`}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      crossOrigin="anonymous"
-                    />
-                  </div>
-                ))}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <span style={{ fontSize: '8pt', color: '#64748b', fontWeight: 'bold' }}>[ 현장 증빙 사진 ]</span>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  {attachedImages.map((img, idx) => (
+                    <div key={idx} style={{
+                      width: '65px', height: '65px',
+                      border: '1px solid #cbd5e1', borderRadius: '4px', overflow: 'hidden',
+                      backgroundColor: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    }}>
+                      <img src={img} alt={`증빙사진 ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} crossOrigin="anonymous" />
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
 
-          {/* 합계 테이블 */}
-          <div style={{ width: '380px' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10.5pt', border: '2px solid #000' }}>
-              <tbody>
+          {/* 합계 테이블 (우측 고정) */}
+          <table style={{ width: '380px', borderCollapse: 'collapse', fontSize: '11pt', border: '2px solid #000' }}>
+            <tbody>
+              <tr>
+                <td style={{ border: '1px solid #000', padding: '8px', backgroundColor: '#f8fafc', fontWeight: 'bold', width: '150px' }}>공급가액</td>
+                <td style={{ border: '1px solid #000', padding: '8px', textAlign: 'right' }}>{Number(subTotal || 0).toLocaleString()} 원</td>
+              </tr>
+              {(discount || 0) > 0 && (
                 <tr>
-                  <td style={{ border: '1px solid #000', padding: '6px 8px', backgroundColor: '#f8fafc', fontWeight: 'bold', width: '130px' }}>공급가액</td>
-                  <td style={{ border: '1px solid #000', padding: '6px 8px', textAlign: 'right' }}>{Number(subTotal || 0).toLocaleString()} 원</td>
+                  <td style={{ border: '1px solid #000', padding: '8px', backgroundColor: '#fff9c4', fontWeight: 'bold' }}>
+                    할인액 <span style={{ fontSize: '8pt', fontWeight: 'normal', display: 'block' }}>{discountReason ? `(${discountReason})` : ''}</span>
+                  </td>
+                  <td style={{ border: '1px solid #000', padding: '8px', textAlign: 'right', color: '#d32f2f', fontWeight: 'bold' }}>
+                    - {Number(discount || 0).toLocaleString()} 원
+                  </td>
                 </tr>
-                {(discount || 0) > 0 && (
-                  <tr>
-                    <td style={{ border: '1px solid #000', padding: '6px 8px', backgroundColor: '#fff9c4', fontWeight: 'bold' }}>
-                      할인액 <span style={{ fontSize: '8pt', fontWeight: 'normal' }}>{discountReason ? `(${discountReason})` : ''}</span>
-                    </td>
-                    <td style={{ border: '1px solid #000', padding: '6px 8px', textAlign: 'right', color: '#d32f2f', fontWeight: 'bold' }}>
-                      - {Number(discount || 0).toLocaleString()} 원
-                    </td>
-                  </tr>
-                )}
-                <tr>
-                  <td style={{ border: '1px solid #000', padding: '6px 8px', backgroundColor: '#f8fafc', fontWeight: 'bold' }}>부가세 (VAT)</td>
-                  <td style={{ border: '1px solid #000', padding: '6px 8px', textAlign: 'right' }}>{(vat || 0).toLocaleString()} 원</td>
-                </tr>
-                <tr>
-                  <td style={{ border: '2px solid #000', padding: '10px 8px', backgroundColor: '#f1f5f9', fontWeight: '900', fontSize: '12pt' }}>총 합 계</td>
-                  <td style={{ border: '2px solid #000', padding: '10px 8px', textAlign: 'right', fontWeight: '900', fontSize: '14pt', color: '#003366' }}>{(grandTotal || 0).toLocaleString()} 원</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+              )}
+              <tr>
+                <td style={{ border: '1px solid #000', padding: '8px', backgroundColor: '#f8fafc', fontWeight: 'bold' }}>부가세 (VAT)</td>
+                <td style={{ border: '1px solid #000', padding: '8px', textAlign: 'right' }}>{(vat || 0).toLocaleString()} 원</td>
+              </tr>
+              <tr>
+                <td style={{ border: '2px solid #000', padding: '12px 8px', backgroundColor: '#f1f5f9', fontWeight: '900', fontSize: '13pt' }}>총 합 계</td>
+                <td style={{ border: '2px solid #000', padding: '12px 8px', textAlign: 'right', fontWeight: '900', fontSize: '15pt', color: '#003366' }}>{(grandTotal || 0).toLocaleString()} 원</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        {/* 특약사항 및 공지 */}
-        <div style={{ marginBottom: '3mm' }}>
+        <div style={{ marginBottom: '2mm', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
           {remarks && (
             <div style={{ textAlign: 'left', fontSize: '8.5pt', backgroundColor: '#f1f5f9', padding: '8px 12px', borderRadius: '4px', border: '1px solid #cbd5e1', whiteSpace: 'pre-wrap', lineHeight: '1.4' }}>
               <strong>[ 특약사항 및 공지 ]</strong><br />{remarks}
             </div>
           )}
-          <div style={{ textAlign: 'center', fontSize: '10.5pt', borderTop: '1px dashed #94a3b8', paddingTop: '4mm', marginTop: '3mm', fontWeight: 'bold', letterSpacing: '2px' }}>상기와 같이 견적합니다.</div>
+          <div style={{ textAlign: 'center', fontSize: '11pt', borderTop: '2px dashed #94a3b8', paddingTop: '4mm', marginTop: '3mm', fontWeight: 'bold', letterSpacing: '2px' }}>상기와 같이 견적합니다.</div>
+        </div>
         </div>
       </div>
     </div>

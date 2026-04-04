@@ -7,6 +7,7 @@ import PrintTemplate from '../components/PrintTemplate';
 import { useReactToPrint } from 'react-to-print';
 import { useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import { storage } from '../firebase';
 import { ref as storageRef } from 'firebase/storage';
 
@@ -110,14 +111,24 @@ export default function QuoteList() {
 
     const csvContent = "\uFEFF" + rows.map(e => e.map(cell => `"${cell}"`).join(",")).join("\n");
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
+    downloadFile(blob, `홈택스업로드용_${selectedQuote.customerInfo.project || '미정'}.csv`);
+  };
+
+  // [보강] 범용 다운로드 & 메모리 해제 헬퍼 (Standalone 모드 오류 대응)
+  const downloadFile = (blob, fileName) => {
     const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `홈택스업로드용_${selectedQuote.customerInfo.project || '미정'}.csv`);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    
+    // 즉시 제거 및 URL 해제 (연속 다운로드 보안 대응)
+    setTimeout(() => {
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }, 100);
   };
 
   const handleDelete = async () => {
@@ -133,24 +144,17 @@ export default function QuoteList() {
     }
   };
 
-  // handleApprove 함수 부분만 수정 제안
   const handleApprove = async () => {
     if (window.confirm("입금 및 계약이 확인되었습니까?\n승인 완료 처리 시 대시보드 당월 매출에 합산됩니다.")) {
       try {
-        // [보강] 만약 날짜에 점(.)이 있다면 하이픈(-)으로 통일하여 업데이트하면 
-        // 대시보드에서 날짜 인식이 훨씬 정확해집니다.
         const updatedQuote = {
           ...selectedQuote,
           status: 'approved'
         };
 
         await updateQuoteStatus(selectedQuote.id, 'approved');
-
-        // 로컬 상태 업데이트
         setQuotes(quotes.map(q => q.id === selectedQuote.id ? { ...q, status: 'approved' } : q));
         setSelectedQuote(updatedQuote);
-
-        // 성공 알림 (선택 사항)
         alert("승인 처리가 완료되었습니다. 대시보드 매출에 반영됩니다.");
       } catch (err) {
         console.error("Status update error", err);
@@ -158,22 +162,20 @@ export default function QuoteList() {
       }
     }
   };
+
   const captureImage = async () => {
     if (!printRef.current) return null;
-
     const element = printRef.current;
 
-    // Wait for all images to be loaded
     const images = Array.from(element.getElementsByTagName('img'));
     await Promise.all(images.map(img => {
       if (img.complete) return Promise.resolve();
       return new Promise(resolve => {
         img.onload = resolve;
-        img.onerror = resolve; // Continue even if one image fails
+        img.onerror = resolve;
       });
     }));
 
-    // Add a small delay for any layout settling
     await new Promise(resolve => setTimeout(resolve, 300));
 
     try {
@@ -183,9 +185,6 @@ export default function QuoteList() {
         logging: false,
         backgroundColor: '#ffffff',
         onclone: (clonedDoc) => {
-          // Find the template in the cloned document
-          // We search by style or structure since we don't have a unique ID easily available here
-          // But we can identify it by the fact it's the 210mm wide div
           const clonedElement = Array.from(clonedDoc.getElementsByTagName('div')).find(div => div.style.width === '210mm');
           if (clonedElement && clonedElement.parentElement) {
             clonedElement.parentElement.className = '';
@@ -205,20 +204,18 @@ export default function QuoteList() {
 
   const handleSaveImage = async () => {
     setIsPreparing(true);
-    // Give modal time to settle (solve first-try failure)
     await new Promise(resolve => setTimeout(resolve, 500));
-
     try {
       const canvas = await captureImage();
       if (!canvas) {
         alert("이미지 생성에 실패했습니다.");
         return;
       }
-
-      const link = document.createElement('a');
-      link.download = `견적서_${selectedQuote.customerInfo.project || '미정'}_${selectedQuote.customerInfo.name || '고객'}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
+      canvas.toBlob((blob) => {
+        if (blob) {
+          downloadFile(blob, `견적서_${selectedQuote.customerInfo.project || '미정'}_${selectedQuote.customerInfo.name || '고객'}.png`);
+        }
+      }, 'image/png');
     } catch (error) {
       console.error("Image saving failed:", error);
       alert("이미지 저장 중 오류가 발생했습니다.");
@@ -229,117 +226,59 @@ export default function QuoteList() {
 
   const [previewScale, setPreviewScale] = useState(0.85);
 
-  // [다이내믹 스케일링 로직] PC는 보호하고 모바일/태블릿만 해상도에 맞춰 꽉 차게!
   useEffect(() => {
     const updateScale = () => {
-      // PC(1024px) 이상이면 사용자님이 원하시는 0.85 고정
       if (window.innerWidth >= 1024) {
         setPreviewScale(0.85);
         return;
       }
-      
-      // 모바일/태블릿이면 해상도에 맞춰 꽉 차게 계산 (원래 로직 복원)
-      const availableWidth = window.innerWidth - 48; // 모달 좌우 여백 제외
-      const documentWidth = 794; // 약 210mm
+      const availableWidth = window.innerWidth - 48;
+      const documentWidth = 794; 
       const newScale = availableWidth / documentWidth;
       setPreviewScale(Math.min(newScale, 1));
     };
-
     updateScale();
     window.addEventListener('resize', updateScale);
     return () => window.removeEventListener('resize', updateScale);
   }, []);
 
+  const generatePDF = async () => {
+    const canvas = await captureImage();
+    if (!canvas) return null;
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+    return pdf.output('blob');
+  };
+
   const handleShareKakao = async () => {
     setIsPreparing(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // 정밀 환경 체크 (PC 브라우저 vs 설치된 앱 vs 모바일 브라우저)
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-    const isMobileBrowser = isMobile && !isStandalone;
-
     try {
-      const canvas = await captureImage();
-      if (!canvas) {
-        alert("이미지 생성에 실패했습니다.");
-        setIsPreparing(false);
+      const pdfBlob = await generatePDF();
+      if (!pdfBlob) {
+        alert("파일 생성에 실패했습니다.");
         return;
       }
+      const fileName = `견적서_${selectedQuote.customerInfo.project || '미정'}.pdf`;
+      const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+      downloadFile(pdfBlob, fileName);
 
-      const blob = await new Promise((resolve, reject) => {
-        canvas.toBlob(b => b ? resolve(b) : reject(new Error("Blob conversion failed")), 'image/jpeg', 0.8);
-      });
-
-      const file = new File([blob], `견적서_${selectedQuote.customerInfo.project || '미정'}.jpg`, { type: 'image/jpeg' });
-
-      // [핵심 로직 분리]
-      // 1. 모바일 일반 웹 브라우저 환경 (비Standalone)
-      if (isMobileBrowser) {
-        // 모바일 브라우저에선 무조건 Web Share API 우선 시도 (카톡 앱 리다이렉트 방지)
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({
-              title: `[견적서] ${selectedQuote.customerInfo.project || '안내'}`,
-              text: `${selectedQuote.customerInfo.company || ''} ${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.\n전체 확인: https://tadsmart.co.kr`,
-              files: [file]
-            });
-            setIsPreparing(false);
-            return;
-          } catch (shareError) {
-            console.log("Navigator share failed:", shareError.name);
-            if (shareError.name === 'AbortError') {
-              setIsPreparing(false);
-              return;
-            }
-            // AbortError가 아닌 경우 SDK 폴백 시도
-          }
-        }
-      }
-
-      // 2. PC 브라우저이거나, Standalone(앱) 모드이거나, Web Share API가 실패한 경우 -> 기존 SDK 방식
-      if (!window.Kakao) {
-        alert("카카오 SDK를 불러오지 못했습니다.");
-        setIsPreparing(false);
-        return;
-      }
-
-      if (!window.Kakao.isInitialized()) {
-        const kakaoKey = import.meta.env.VITE_KAKAO_JS_KEY;
-        if (kakaoKey) window.Kakao.init(kakaoKey);
-      }
-
-      const uploadResult = await window.Kakao.Share.uploadImage({
-        file: [file]
-      });
-      const imageUrl = uploadResult.infos.original.url;
-
-      if (window.Kakao.Share) {
-        window.Kakao.Share.sendDefault({
-          objectType: 'feed',
-          content: {
-            title: `[견적서] ${selectedQuote.customerInfo.project || '안내'}`,
-            description: `${selectedQuote.customerInfo.company || ''} ${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.\n합계금액: ${selectedQuote.grandTotal.toLocaleString()}원`,
-            imageUrl: imageUrl,
-            link: {
-              mobileWebUrl: 'https://tadsmart.co.kr',
-              webUrl: 'https://tadsmart.co.kr',
-            },
-          },
-          buttons: [
-            {
-              title: '웹사이트 바로가기',
-              link: {
-                mobileWebUrl: 'https://tadsmart.co.kr',
-                webUrl: 'https://tadsmart.co.kr',
-              },
-            },
-          ],
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: `[견적서] ${selectedQuote.customerInfo.project || '기본'}`,
+          text: `${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.\n금액: ${selectedQuote.grandTotal.toLocaleString()}원`,
         });
+      } else {
+        alert("기기에서 파일 직접 공유를 지원하지 않습니다. 다운로드된 PDF 파일을 직접 카톡으로 전송해주세요.");
       }
     } catch (error) {
       console.error("Share error:", error);
-      alert(`공유 중 오류가 발생했습니다: ${error.message}`);
+      if (error.name !== 'AbortError') {
+        alert(`공유 중 오류가 발생했습니다: ${error.message}`);
+      }
     } finally {
       setIsPreparing(false);
     }
@@ -363,8 +302,6 @@ export default function QuoteList() {
       fetchQuotes();
     }
   }, [currentUser?.uid]);
-
-  // 렌더링에 필요한 추가 상태가 없음
 
   return (
     <div className="card">
@@ -509,7 +446,7 @@ export default function QuoteList() {
                 transform: `scale(${previewScale})`, 
                 transformOrigin: 'top center',
                 transition: 'transform 0.2s ease',
-                width: '794px', // 210mm
+                width: '794px', 
                 minWidth: '794px'
               }}>
                 <PrintTemplate
