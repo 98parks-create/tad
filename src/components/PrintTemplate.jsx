@@ -37,74 +37,17 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
     headerMarginBottom: compactLevel === 'ultra-dense' ? '1mm' : compactLevel === 'very-dense' ? '2mm' : '4mm',
   };
 
-  const sortedItems = [...items].reverse();
-
-  // [글자 깨짐 방지 보정 로직]
-  const handleShare = async () => {
-    if (!ref.current) return;
-
-    try {
-      // 폰트 및 첨부 이미지들이 로드될 때까지 대기
-      await document.fonts.ready;
-
-      const canvas = await html2canvas(ref.current, {
-        scale: 3,
-        useCORS: true, // 이미지 서버 CORS 허용 필수
-        backgroundColor: '#ffffff',
-        logging: false,
-        letterRendering: true,
-        allowTaint: true,
-        onclone: (clonedDoc) => {
-          const el = clonedDoc.querySelector('.print-template');
-          if (el) {
-            el.style.transform = 'none';
-          }
-        }
-      });
-
-      canvas.toBlob(async (blob) => {
-        if (!blob) return;
-        const fileName = `견적서_${customerInfo.name || '고객'}.png`;
-        const file = new File([blob], fileName, { type: 'image/png' });
-
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({ files: [file], title: '견적서 송부' });
-          } catch (shareError) {
-            if (shareError.name !== 'AbortError') downloadFallback(blob, fileName);
-          }
-        } else {
-          downloadFallback(blob, fileName);
-        }
-      }, 'image/png', 1.0);
-    } catch (err) {
-      alert("이미지 생성 중 오류가 발생했습니다.");
-    }
-  };
-
-  const downloadFallback = (blob, fileName) => {
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    setTimeout(() => {
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }, 100);
-  };
-
+  // [정제] 중복 공유 로직 제거 및 스타일 동기화
   return (
-    <div style={{ width: '100%', backgroundColor: '#f1f5f9', padding: '20px 0' }}>
+    <div className="print-template-wrapper" style={{ width: '100%', backgroundColor: '#f1f5f9', padding: '0' }}>
       <div
         ref={ref}
         className="print-template"
         style={{
           padding: styles.topBottomPadding,
           width: '210mm',
-          height: `${heightInPx}px`, // [수정] 1123px 고정
-          maxHeight: `${heightInPx}px`,
+          height: '1123px', // [고정] A4 절대 높이 (1123px)
+          maxHeight: '1123px',
           boxSizing: 'border-box',
           margin: '0 auto',
           backgroundColor: 'white',
@@ -115,7 +58,9 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
           flexDirection: 'column',
           boxShadow: '0 0 20px rgba(0,0,0,0.1)',
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'hidden', // [필수] 1페이지 초과 방지
+          printColorAdjust: 'exact',
+          WebkitPrintColorAdjust: 'exact'
         }}
       >
         <div style={{ 

@@ -60,11 +60,9 @@ export default function QuoteList() {
       const isMobileBrowser = isMobile && !isStandalone;
 
       const basePageStyle = "@page { size: A4; margin: 0; } @media print { body { -webkit-print-color-adjust: exact !important; } }";
-      
-      if (isMobileBrowser) {
-        return `${basePageStyle} @media print { .print-template { height: 1123px !important; width: 210mm !important; margin: 0 auto !important; border: none !important; box-shadow: none !important; padding: 10mm 15mm !important; } }`;
-      }
-      return basePageStyle;
+
+      // 모든 브라우저에서 인쇄 시 A4 1123px 규격 강제 (분할 방지)
+      return `${basePageStyle} @media print { .print-template { height: 1123px !important; width: 210mm !important; margin: 0 auto !important; border: none !important; box-shadow: none !important; padding: 10mm 15mm !important; } }`;
     }
   });
 
@@ -116,19 +114,23 @@ export default function QuoteList() {
 
   // [보강] 범용 다운로드 & 메모리 해제 헬퍼 (Standalone 모드 오류 대응)
   const downloadFile = (blob, fileName) => {
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = fileName;
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    
-    // 즉시 제거 및 URL 해제 (연속 다운로드 보안 대응)
-    setTimeout(() => {
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }, 100);
+    try {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+
+      // 즉시 제거 및 URL 해제 (연속 다운로드 보안 대응 및 메모리 초기화)
+      setTimeout(() => {
+        if (document.body.contains(link)) document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 150);
+    } catch (e) {
+      console.error("Download failed:", e);
+    }
   };
 
   const handleDelete = async () => {
@@ -163,28 +165,35 @@ export default function QuoteList() {
     }
   };
 
+  // [신규] 고해상도 이미지 캡처 통합 엔진 (scale: 2.5 고정)
   const captureImage = async () => {
     if (!printRef.current) return null;
     const element = printRef.current;
 
-    const images = Array.from(element.getElementsByTagName('img'));
-    await Promise.all(images.map(img => {
-      if (img.complete) return Promise.resolve();
-      return new Promise(resolve => {
-        img.onload = resolve;
-        img.onerror = resolve;
-      });
-    }));
-
-    await new Promise(resolve => setTimeout(resolve, 300));
-
     try {
+      // 폰트 및 이미지 로드 상태 완벽 대기
+      await document.fonts.ready;
+      const images = Array.from(element.getElementsByTagName('img'));
+      await Promise.all(images.map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise(resolve => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      }));
+
+      // 레이아웃 안정화 대기
+      await new Promise(resolve => setTimeout(resolve, 400));
+
       const canvas = await html2canvas(element, {
-        scale: 2,
+        scale: 2.5, // 고해상도 고정
         useCORS: true,
-        logging: false,
+        allowTaint: true,
+        letterRendering: true,
         backgroundColor: '#ffffff',
+        logging: false,
         onclone: (clonedDoc) => {
+          // 출력용 규격(210mm) 강제 적용 유지
           const clonedElement = Array.from(clonedDoc.getElementsByTagName('div')).find(div => div.style.width === '210mm');
           if (clonedElement && clonedElement.parentElement) {
             clonedElement.parentElement.className = '';
@@ -202,9 +211,30 @@ export default function QuoteList() {
     }
   };
 
+  // [신규] PDF 생성 단일 인터페이스 (A4 규격 강제)
+  const generatePDF = async () => {
+    const canvas = await captureImage();
+    if (!canvas) return null;
+
+    try {
+      const imgData = canvas.toDataURL('image/jpeg', 0.98); // 품질 향상
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+      return {
+        blob: pdf.output('blob'),
+        dataUrl: imgData // 폴백용 이미지 데이터 병행 보관
+      };
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+      return null;
+    }
+  };
+
   const handleSaveImage = async () => {
     setIsPreparing(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
     try {
       const canvas = await captureImage();
       if (!canvas) {
@@ -215,11 +245,11 @@ export default function QuoteList() {
         if (blob) {
           downloadFile(blob, `견적서_${selectedQuote.customerInfo.project || '미정'}_${selectedQuote.customerInfo.name || '고객'}.png`);
         }
-      }, 'image/png');
+        setIsPreparing(false);
+      }, 'image/png', 1.0);
     } catch (error) {
       console.error("Image saving failed:", error);
       alert("이미지 저장 중 오류가 발생했습니다.");
-    } finally {
       setIsPreparing(false);
     }
   };
@@ -233,7 +263,7 @@ export default function QuoteList() {
         return;
       }
       const availableWidth = window.innerWidth - 48;
-      const documentWidth = 794; 
+      const documentWidth = 794;
       const newScale = availableWidth / documentWidth;
       setPreviewScale(Math.min(newScale, 1));
     };
@@ -242,43 +272,85 @@ export default function QuoteList() {
     return () => window.removeEventListener('resize', updateScale);
   }, []);
 
-  const generatePDF = async () => {
-    const canvas = await captureImage();
-    if (!canvas) return null;
-    const imgData = canvas.toDataURL('image/jpeg', 0.95);
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-    pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-    return pdf.output('blob');
-  };
+  const handleShareKakao = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
 
-  const handleShareKakao = async () => {
     setIsPreparing(true);
     try {
-      const pdfBlob = await generatePDF();
-      if (!pdfBlob) {
-        alert("파일 생성에 실패했습니다.");
+      const result = await generatePDF();
+      if (!result || !result.blob) {
+        alert("파일 추출에 실패했습니다. 다시 시도해주세요.");
         return;
       }
-      const fileName = `견적서_${selectedQuote.customerInfo.project || '미정'}.pdf`;
-      const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
-      downloadFile(pdfBlob, fileName);
 
+      const { blob, dataUrl } = result;
+      const fileName = `견적서_${selectedQuote.customerInfo.project || '미정'}.pdf`;
+      const file = new File([blob], fileName, { type: 'application/pdf' });
+
+      // 기기 저장 (사장님 소장용)
+      downloadFile(blob, fileName);
+
+      // [핵심] navigator.share 시도 (MIME 타입 체크 포함)
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: `[견적서] ${selectedQuote.customerInfo.project || '기본'}`,
-          text: `${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.\n금액: ${selectedQuote.grandTotal.toLocaleString()}원`,
+        try {
+          await navigator.share({
+            files: [file],
+            title: `[견적서] ${selectedQuote.customerInfo.project || '제출'}`,
+            text: `${selectedQuote.customerInfo.name || '고객'}님 견적서가 생성되었습니다.`,
+          });
+          return; // 공유 성공 시 종료
+        } catch (shareErr) {
+          if (shareErr.name === 'AbortError') return;
+          console.warn("Navigator share failed, attempting SDK fallback:", shareErr);
+        }
+      }
+
+      // [폴백] 카카오톡 SDK 활용 (이미지 업로드 방식)
+      if (window.Kakao) {
+        if (!window.Kakao.isInitialized()) {
+          const kakaoKey = import.meta.env.VITE_KAKAO_JS_KEY;
+          if (kakaoKey) window.Kakao.init(kakaoKey);
+        }
+
+        // PDF 대신 캡처된 이미지를 파일화하여 업로드
+        const imgBlob = await (await fetch(dataUrl)).blob();
+        const imgFile = new File([imgBlob], `quote.jpg`, { type: 'image/jpeg' });
+
+        const uploadResult = await window.Kakao.Share.uploadImage({
+          file: [imgFile]
+        });
+
+        const shareImageUrl = uploadResult.infos.original.url;
+        window.Kakao.Share.sendDefault({
+          objectType: 'feed',
+          content: {
+            title: `[TAD견적서] ${selectedQuote.customerInfo.project || '안내'}`,
+            description: `${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.\n금액: ${selectedQuote.grandTotal.toLocaleString()}원`,
+            imageUrl: shareImageUrl,
+            link: {
+              mobileWebUrl: 'https://tadsmart.co.kr',
+              webUrl: 'https://tadsmart.co.kr',
+            },
+          },
+          buttons: [
+            {
+              title: '자세히 보기',
+              link: {
+                mobileWebUrl: 'https://tadsmart.co.kr',
+                webUrl: 'https://tadsmart.co.kr',
+              },
+            },
+          ],
         });
       } else {
-        alert("기기에서 파일 직접 공유를 지원하지 않습니다. 다운로드된 PDF 파일을 직접 카톡으로 전송해주세요.");
+        alert("이 기기에서는 직접 공유를 지원하지 않습니다. 다운로드된 PDF를 직접 전송해주세요.");
       }
     } catch (error) {
-      console.error("Share error:", error);
-      if (error.name !== 'AbortError') {
-        alert(`공유 중 오류가 발생했습니다: ${error.message}`);
-      }
+      console.error("Full share process failed:", error);
+      alert("공유 준비 중 오류가 발생했습니다.");
     } finally {
       setIsPreparing(false);
     }
@@ -433,20 +505,20 @@ export default function QuoteList() {
               </button>
             </div>
 
-            <div className="print-preview-container" style={{ 
-              display: 'flex', 
-              justifyContent: 'center', 
-              overflow: 'hidden', 
+            <div className="print-preview-container" style={{
+              display: 'flex',
+              justifyContent: 'center',
+              overflow: 'hidden',
               width: '100%',
               backgroundColor: '#cbd5e1',
               borderRadius: '8px',
               padding: '1rem 0'
             }}>
-              <div style={{ 
-                transform: `scale(${previewScale})`, 
+              <div style={{
+                transform: `scale(${previewScale})`,
                 transformOrigin: 'top center',
                 transition: 'transform 0.2s ease',
-                width: '794px', 
+                width: '794px',
                 minWidth: '794px'
               }}>
                 <PrintTemplate
