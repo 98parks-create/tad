@@ -75,27 +75,37 @@ export default function QuoteList() {
   const handlePrint = async (e) => {
     if (e) e.preventDefault();
 
+    // PC 웹: 표준 브라우저 인쇄 모드 (Native)
     if (!isMobileTarget) {
       handlePrintStandard();
       return;
     }
 
-    // 모바일/태블릿: 하이샘플링 PDF 생성 후 새창 미리보기 (PWA 차단 우회)
+    // 모바일/태블릿 (PWA 포함): 팝업 차단 방지를 위해 즉시 창 열기 (User Gesture 확보)
+    const printWin = window.open('', '_blank');
+    if (!printWin) {
+      alert("팝업이 차단되었습니다. 브라우저 설정에서 팝업 허용을 확인해주세요.");
+      return;
+    }
+    
+    // 로딩 문구 삽입
+    printWin.document.write('<html><head><title>견적서 생성 중</title></head><body style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;"><div><h3>견적서를 생성 중입니다...</h3><p>잠시만 기다려주세요.</p></div></body></html>');
+
     setIsPreparing(true);
     try {
       const result = await generatePDF();
       if (result && result.blob) {
         const url = URL.createObjectURL(result.blob);
-        // [핵심] PWA 보안 정책 우회를 위한 Blob URL 새창 열기
-        const printWin = window.open(url, '_blank');
-        if (!printWin) {
-          alert("팝업이 차단되었습니다. 설정을 확인해주세요.");
-        }
+        // [핵심] 준비된 창의 위치를 업데이트
+        printWin.location.href = url;
       } else {
+        printWin.close();
         alert("PDF 생성에 실패했습니다.");
       }
     } catch (err) {
       console.error("Mobile print error:", err);
+      printWin.close();
+      alert("출력 준비 중 오류가 발생했습니다.");
     } finally {
       setIsPreparing(false);
     }
@@ -348,71 +358,67 @@ export default function QuoteList() {
       }
 
       const { blob, dataUrl } = result;
-      const fileName = `견적서_${selectedQuote.customerInfo.project || '미정'}.pdf`;
+      const fileName = `견적서_${selectedQuote.customerInfo.project || '미정'}_${selectedQuote.customerInfo.name || '고객'}.pdf`;
       const file = new File([blob], fileName, { type: 'application/pdf' });
 
-      // 1. [기본] 공유 전 기기 저장 (사장님 보관용)
-      downloadFile(blob, fileName);
-
-      // 2. [시도] navigator.share (MIME 타입 체크 포함)
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({
-            files: [file],
-            title: `[TAD견적서] ${selectedQuote.customerInfo.project || '안내'}`,
-            text: `${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.`,
-          });
-          setIsPreparing(false);
-          return; // 공유 성공 시 종료
-        } catch (shareErr) {
-          // 중단(Abort)이 아닌 실제 오류일 때만 폴백 진행
-          if (shareErr.name === 'AbortError') {
-            setIsPreparing(false);
-            return;
-          }
-          console.warn("Navigator share failed, attempting Kakao fallback:", shareErr);
-        }
+      // 1. [우선] 기기 저장 (사장님 보관용)
+      try {
+        downloadFile(blob, fileName);
+      } catch (e) {
+        console.warn("Auto-download failed:", e);
       }
 
-      // 3. [폴백] 카카오톡 SDK (이미지 피드 방식)
+      // [지연] 다운로드와 카톡 연동 사이의 충돌 방지
+      await new Promise(resolve => setTimeout(resolve, 250));
+
+      // 2. [직행] 카카오톡 SDK 실행 (통합공유 창 건너뛰고 카톡으로 직접 연결)
       if (window.Kakao) {
+        // 초기화 확인 및 실행
         if (!window.Kakao.isInitialized()) {
-          const kakaoKey = import.meta.env.VITE_KAKAO_JS_KEY;
-          if (kakaoKey) window.Kakao.init(kakaoKey);
+          const kakaoKey = import.meta.env.VITE_KAKAO_JS_KEY || "d282f30a269e559cd7fcfd623a021b06";
+          try {
+            window.Kakao.init(kakaoKey);
+          } catch (initErr) {
+            console.error("Kakao Init Error:", initErr);
+          }
         }
 
-        // PDF 대신 캡처된 이미지를 파일화하여 업로드 (카톡은 이미지 공유 최적화)
-        const imgBlob = await (await fetch(dataUrl)).blob();
-        const imgFile = new File([imgBlob], `quote.jpg`, { type: 'image/jpeg' });
+        if (window.Kakao.isInitialized()) {
+          // PDF 대신 캡처된 이미지를 파일화하여 업로드 (카톡 최적화)
+          const imgBlob = await (await fetch(dataUrl)).blob();
+          const imgFile = new File([imgBlob], `quote.jpg`, { type: 'image/jpeg' });
 
-        const uploadResult = await window.Kakao.Share.uploadImage({
-          file: [imgFile]
-        });
+          const uploadResult = await window.Kakao.Share.uploadImage({
+            file: [imgFile]
+          });
 
-        const shareImageUrl = uploadResult.infos.original.url;
-        window.Kakao.Share.sendDefault({
-          objectType: 'feed',
-          content: {
-            title: `[TAD견적서] ${selectedQuote.customerInfo.project || '안내'}`,
-            description: `${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.\n금액: ${selectedQuote.grandTotal.toLocaleString()}원`,
-            imageUrl: shareImageUrl,
-            link: {
-              mobileWebUrl: 'https://tadsmart.co.kr',
-              webUrl: 'https://tadsmart.co.kr',
-            },
-          },
-          buttons: [
-            {
-              title: '자세히 보기',
+          const shareImageUrl = uploadResult.infos.original.url;
+          window.Kakao.Share.sendDefault({
+            objectType: 'feed',
+            content: {
+              title: `[TAD견적서] ${selectedQuote.customerInfo.project || '안내'}`,
+              description: `${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.\n금액: ${selectedQuote.grandTotal.toLocaleString()}원`,
+              imageUrl: shareImageUrl,
               link: {
-                mobileWebUrl: 'https://tadsmart.co.kr',
-                webUrl: 'https://tadsmart.co.kr',
+                mobileWebUrl: window.location.origin,
+                webUrl: window.location.origin,
               },
             },
-          ],
-        });
+            buttons: [
+              {
+                title: '자세히 보기',
+                link: {
+                  mobileWebUrl: window.location.origin,
+                  webUrl: window.location.origin,
+                },
+              },
+            ],
+          });
+        } else {
+          alert("카카오톡 초기화에 실패했습니다. 관리자에게 문의해주세요.");
+        }
       } else {
-        alert("공유를 지원하지 않는 기기입니다. 다운로드된 파일을 직접 전송해주세요.");
+        alert("카카오톡 서비스를 불러올 수 없습니다. 네트워크 상태를 확인해주세요.");
       }
     } catch (error) {
       console.error("Full share process failed:", error);
