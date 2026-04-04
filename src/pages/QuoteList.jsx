@@ -419,11 +419,16 @@ export default function QuoteList() {
           alert("파일이 다운로드되었습니다. 갤러리 앱에서 확인해주세요.");
         }
       } else {
-        /** [3] PC 웹: PDF 다운로드 + 카카오톡 공유창 (동시 실행 고정) **/
-        // 우선 PDF 파일 즉시 저장 (사용자 로컬 보관용 - 사장님 필수 요청)
+        /** [3] PC 웹: PDF 다운로드 + PDF 즉시 열기 + 카카오톡 공유창 (연결) **/
+        // 1. PDF 파일 즉시 저장 (사장님 필수 요청)
+        const pdfUrl = URL.createObjectURL(pdfBlob);
         downloadFile(pdfBlob, `${fileName}.pdf`);
 
-        // 가장 안정적인 고화질 카톡 피드 전송 (윈도우/맥 범용)
+        // 2. PDF 파일 새 창에서 열기 (파일 확인용 - 사장님 요청)
+        window.open(pdfUrl, '_blank');
+
+        // 3. 가장 안정적인 고화질 카톡 피드 전송 (윈도우/맥 범용)
+        // 윈도우/맥 시스템 공유창(navigator.share)은 PC에서 불확실하므로 명시적으로 제외함.
         if (window.Kakao && window.Kakao.isInitialized()) {
           const uploadResult = await window.Kakao.Share.uploadImage({
             file: [imgFile]
