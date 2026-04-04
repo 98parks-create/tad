@@ -419,7 +419,7 @@ export default function QuoteList() {
           alert("파일이 다운로드되었습니다. 갤러리 앱에서 확인해주세요.");
         }
       } else {
-        /** [3] PC 웹: PDF 다운로드 + PDF 즉시 열기 + 카카오톡 공유창 (연결) **/
+        /** [3] PC 웹: PDF 다운로드 + PDF 즉시 열기 + 카카오톡 공유창 (복구 연동) **/
         // 1. PDF 파일 즉시 저장 (사장님 필수 요청)
         const pdfUrl = URL.createObjectURL(pdfBlob);
         downloadFile(pdfBlob, `${fileName}.pdf`);
@@ -427,8 +427,22 @@ export default function QuoteList() {
         // 2. PDF 파일 새 창에서 열기 (파일 확인용 - 사장님 요청)
         window.open(pdfUrl, '_blank');
 
-        // 3. 가장 안정적인 고화질 카톡 피드 전송 (윈도우/맥 범용)
-        // 윈도우/맥 시스템 공유창(navigator.share)은 PC에서 불확실하므로 명시적으로 제외함.
+        // 3. 진짜 "파일" 공유 시도 (시스템 공유창 우선)
+        // 사장님 요청에 따라 시스템 공유창(navigator.share)을 다시 활성화하여 파일형태의 전달을 시도함.
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+          try {
+            await navigator.share({
+              files: [pdfFile],
+              title: `[TAD견적서] ${fileName}`,
+              text: '견적서 PDF 파일입니다.',
+            });
+            return; // 성공 시 카톡 피드 생략
+          } catch (e) {
+            if (e.name !== 'AbortError') console.error("Native share failed:", e);
+          }
+        }
+
+        // 4. 폴백: 시각적으로 이미지만 강조된 고해상도 카톡 피드 전송 (범용)
         if (window.Kakao && window.Kakao.isInitialized()) {
           const uploadResult = await window.Kakao.Share.uploadImage({
             file: [imgFile]
