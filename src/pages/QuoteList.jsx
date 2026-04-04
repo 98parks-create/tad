@@ -59,50 +59,47 @@ export default function QuoteList() {
     currentPage * ITEMS_PER_PAGE
   );
 
-  const handlePrint = useReactToPrint({
+  // [표준] PC 전용 인쇄 핸들러
+  const handlePrintStandard = useReactToPrint({
     contentRef: printRef,
     documentTitle: `견적서_${selectedQuote?.customerInfo?.project || Date.now()}`,
-    pageStyle: isMobileTarget ? `
-      @page { size: A4; margin: 0 !important; }
-      @media print {
-        html, body {
-          height: 297mm !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          overflow: hidden !important;
-          background-color: white !important;
-        }
-        .print-template-wrapper { 
-          background-color: white !important; 
-          padding: 0 !important; 
-          margin: 0 !important; 
-          transform: none !important; 
-        }
-        #pdf-capture-area, .print-template { 
-          height: 297mm !important; 
-          width: 210mm !important; 
-          margin: 0 !important; 
-          padding: 10mm 15mm !important;
-          border: none !important;
-          box-shadow: none !important;
-          transform: none !important; /* 모바일 흰 화면 방지 핵심 */
-          overflow: hidden !important; 
-          display: block !important;
-          background: white !important;
-          opacity: 1 !important;
-          visibility: visible !important;
-        }
-      }
-    ` : `
+    pageStyle: `
       @page { size: A4; margin: 10mm; }
       @media print {
-        .print-template { 
-          box-shadow: none !important;
-          margin: 0 auto !important;
-        }
+        .print-template { box-shadow: none !important; margin: 0 auto !important; }
       }
     `
   });
+
+  // [신규] 통합 PDF 액션 핸들러 (인쇄/공유 로직 단일화)
+  const handlePrint = async (e) => {
+    if (e) e.preventDefault();
+
+    if (!isMobileTarget) {
+      handlePrintStandard();
+      return;
+    }
+
+    // 모바일/태블릿: 하이샘플링 PDF 생성 후 새창 미리보기 (PWA 차단 우회)
+    setIsPreparing(true);
+    try {
+      const result = await generatePDF();
+      if (result && result.blob) {
+        const url = URL.createObjectURL(result.blob);
+        // [핵심] PWA 보안 정책 우회를 위한 Blob URL 새창 열기
+        const printWin = window.open(url, '_blank');
+        if (!printWin) {
+          alert("팝업이 차단되었습니다. 설정을 확인해주세요.");
+        }
+      } else {
+        alert("PDF 생성에 실패했습니다.");
+      }
+    } catch (err) {
+      console.error("Mobile print error:", err);
+    } finally {
+      setIsPreparing(false);
+    }
+  };
 
   const handleEdit = () => {
     navigate('/create', { state: { editQuote: selectedQuote } });
@@ -321,9 +318,10 @@ export default function QuoteList() {
 
     setIsPreparing(true);
     try {
+      // [동기화] 인쇄와 동일한 단일 PDF 생성 엔진 사용
       const result = await generatePDF();
       if (!result || !result.blob) {
-        alert("파일 추출에 실패했습니다. 다시 시도해주세요.");
+        alert("PDF 생성에 실패했습니다. 다시 시도해주세요.");
         return;
       }
 
@@ -331,32 +329,37 @@ export default function QuoteList() {
       const fileName = `견적서_${selectedQuote.customerInfo.project || '미정'}.pdf`;
       const file = new File([blob], fileName, { type: 'application/pdf' });
 
-      // 기기 저장 (사장님 소장용)
+      // 1. [기본] 공유 전 기기 저장 (사장님 보관용)
       downloadFile(blob, fileName);
 
-      // [핵심] navigator.share 시도 (MIME 타입 체크 포함)
+      // 2. [시도] navigator.share (MIME 타입 체크 포함)
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
             files: [file],
-            title: `[견적서] ${selectedQuote.customerInfo.project || '제출'}`,
-            text: `${selectedQuote.customerInfo.name || '고객'}님 견적서가 생성되었습니다.`,
+            title: `[TAD견적서] ${selectedQuote.customerInfo.project || '안내'}`,
+            text: `${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.`,
           });
+          setIsPreparing(false);
           return; // 공유 성공 시 종료
         } catch (shareErr) {
-          if (shareErr.name === 'AbortError') return;
-          console.warn("Navigator share failed, attempting SDK fallback:", shareErr);
+          // 중단(Abort)이 아닌 실제 오류일 때만 폴백 진행
+          if (shareErr.name === 'AbortError') {
+            setIsPreparing(false);
+            return;
+          }
+          console.warn("Navigator share failed, attempting Kakao fallback:", shareErr);
         }
       }
 
-      // [폴백] 카카오톡 SDK 활용 (이미지 업로드 방식)
+      // 3. [폴백] 카카오톡 SDK (이미지 피드 방식)
       if (window.Kakao) {
         if (!window.Kakao.isInitialized()) {
           const kakaoKey = import.meta.env.VITE_KAKAO_JS_KEY;
           if (kakaoKey) window.Kakao.init(kakaoKey);
         }
 
-        // PDF 대신 캡처된 이미지를 파일화하여 업로드
+        // PDF 대신 캡처된 이미지를 파일화하여 업로드 (카톡은 이미지 공유 최적화)
         const imgBlob = await (await fetch(dataUrl)).blob();
         const imgFile = new File([imgBlob], `quote.jpg`, { type: 'image/jpeg' });
 
@@ -387,11 +390,11 @@ export default function QuoteList() {
           ],
         });
       } else {
-        alert("이 기기에서는 직접 공유를 지원하지 않습니다. 다운로드된 PDF를 직접 전송해주세요.");
+        alert("공유를 지원하지 않는 기기입니다. 다운로드된 파일을 직접 전송해주세요.");
       }
     } catch (error) {
       console.error("Full share process failed:", error);
-      alert("공유 준비 중 오류가 발생했습니다.");
+      alert("공유 준비 중 예상치 못한 오류가 발생했습니다.");
     } finally {
       setIsPreparing(false);
     }
