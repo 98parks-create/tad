@@ -419,7 +419,7 @@ export default function QuoteList() {
           alert("파일이 다운로드되었습니다. 갤러리 앱에서 확인해주세요.");
         }
       } else {
-        /** [3] PC 웹: PDF 다운로드 + PDF 즉시 열기 + 카카오톡 공유창 (복구 연동) **/
+        /** [3] PC 웹: 진짜 "PDF 파일" 공유 (주소 방식 완전 제거) **/
         // 1. PDF 파일 즉시 저장 (사장님 필수 요청)
         const pdfUrl = URL.createObjectURL(pdfBlob);
         downloadFile(pdfBlob, `${fileName}.pdf`);
@@ -427,8 +427,8 @@ export default function QuoteList() {
         // 2. PDF 파일 새 창에서 열기 (파일 확인용 - 사장님 요청)
         window.open(pdfUrl, '_blank');
 
-        // 3. 진짜 "파일" 공유 시도 (시스템 공유창 우선)
-        // 사장님 요청에 따라 시스템 공유창(navigator.share)을 다시 활성화하여 파일형태의 전달을 시도함.
+        // 3. 진짜 "파일" 공유 시도 (시스템 공유창 전용)
+        // 사장님 요청에 따라 주소 형태의 카톡 SDK 창은 PC에서 완전히 제거됨.
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
           try {
             await navigator.share({
@@ -436,40 +436,12 @@ export default function QuoteList() {
               title: `[TAD견적서] ${fileName}`,
               text: '견적서 PDF 파일입니다.',
             });
-            return; // 성공 시 카톡 피드 생략
           } catch (e) {
             if (e.name !== 'AbortError') console.error("Native share failed:", e);
           }
-        }
-
-        // 4. 폴백: 시각적으로 이미지만 강조된 고해상도 카톡 피드 전송 (범용)
-        if (window.Kakao && window.Kakao.isInitialized()) {
-          const uploadResult = await window.Kakao.Share.uploadImage({
-            file: [imgFile]
-          });
-          const shareImageUrl = uploadResult.infos.original.url;
-          
-          window.Kakao.Share.sendDefault({
-            objectType: 'feed',
-            content: {
-              title: `[TAD견적서] ${selectedQuote.customerInfo.project || '안내'}`,
-              description: `금액: ${selectedQuote.grandTotal.toLocaleString()}원`, // 텍스트 최소화 (이미지 강조)
-              imageUrl: shareImageUrl,
-              link: {
-                mobileWebUrl: window.location.origin,
-                webUrl: window.location.origin,
-              },
-            },
-            buttons: [
-              {
-                title: '견적 상세 보기', 
-                link: {
-                  mobileWebUrl: window.location.origin,
-                  webUrl: window.location.origin,
-                },
-              },
-            ],
-          });
+        } else {
+          // 시스템 공유 지원이 안 될 경우, 사장님 요청에 따른 수동 파일 안내
+          alert("견적서 PDF 파일이 저장되었습니다. 컴퓨터 하단에 다운로드된 파일을 카카오톡 채팅방으로 끌어넣어 전송해 주세요.");
         }
       }
     } catch (error) {
