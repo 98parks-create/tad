@@ -59,10 +59,25 @@ export default function QuoteList() {
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
       const isMobileBrowser = isMobile && !isStandalone;
 
-      const basePageStyle = "@page { size: A4; margin: 0; } @media print { body { -webkit-print-color-adjust: exact !important; } }";
-
-      // 모든 브라우저에서 인쇄 시 A4 1123px 규격 강제 (분할 방지)
-      return `${basePageStyle} @media print { .print-template { height: 1123px !important; width: 210mm !important; margin: 0 auto !important; border: none !important; box-shadow: none !important; padding: 10mm 15mm !important; } }`;
+      const basePageStyle = `
+        @page { size: A4; margin: 0; }
+        @media print {
+          body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; margin: 0 !important; padding: 0 !important; }
+          .print-template-wrapper { background-color: white !important; padding: 0 !important; }
+          .print-template { 
+            height: 297mm !important; 
+            width: 210mm !important; 
+            margin: 0 auto !important; 
+            border: none !important; 
+            box-shadow: none !important; 
+            padding: 10mm 15mm !important;
+            overflow: hidden !important;
+            page-break-after: avoid !important;
+            page-break-before: avoid !important;
+          }
+        }
+      `;
+      return basePageStyle;
     }
   });
 
