@@ -342,25 +342,21 @@ export default function QuoteList() {
     return () => window.removeEventListener('resize', updateScale);
   }, []);
 
-  // [신규] 카카오톡 공유 핸들러 (저장 + 오픈 + 카톡 연동 통합)
+  // [개선] 카카오톡 공유 핸들러 (탭 없이 깔끔한 이미지 저장 및 공유 연동)
   const handleShareKakao = async (e) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
 
-    // [팝업 차단 방지] 미리 확인용 창 확보
-    const previewWin = window.open('', '_blank');
-    if (previewWin) {
-      previewWin.document.write('<html><head><title>견적서 생성 중</title></head><body style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;"><div><h3>견적서를 생성 중입니다...</h3><p>잠시만 기다려주세요.</p></div></body></html>');
-    }
-
+    // 설치된 PWA(앱) 환경인지 확인
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    
     setIsPreparing(true);
     try {
-      // 1. 고화질 생성 엔진 실행
+      // 1. 고화질 견적서 생성 (인쇄용 엔진 활용)
       const result = await generatePDF();
       if (!result || !result.blob) {
-        if (previewWin) previewWin.close();
         alert("견적서 생성에 실패했습니다. 다시 시도해주세요.");
         return;
       }
@@ -368,105 +364,73 @@ export default function QuoteList() {
       const { blob: pdfBlob, dataUrl: imageUrl } = result;
       const baseFileName = `견적서_${selectedQuote.customerInfo.project || '미정'}_${selectedQuote.customerInfo.name || '고객'}`;
       
-      // 2. [기기별 분기 처리]
-      if (isMobileTarget) {
-        /** [모바일/앱]: 기존 PDF 방식 유지 **/
-        const pdfFile = new File([pdfBlob], `${baseFileName}.pdf`, { type: 'application/pdf' });
-        const pdfUrl = URL.createObjectURL(pdfBlob);
+      // 이미지 전송용 공통 이미지 블롭 생성
+      const imgResponse = await fetch(imageUrl);
+      const imgBlob = await imgResponse.blob();
+      const imgFile = new File([imgBlob], `${baseFileName}.jpg`, { type: 'image/jpeg' });
 
-        // 오픈 & 저장
-        if (previewWin) previewWin.location.href = pdfUrl;
-        else downloadFile(pdfBlob, `${baseFileName}.pdf`);
+      // 2. [기기 및 접속 환경별 분기 처리]
+      if (isStandalone) {
+        /** [1] 설치형 앱(PWA): 기존 PDF 방식 유지 **/
+        const pdfFile = new File([pdfBlob], `${baseFileName}.pdf`, { type: 'application/pdf' });
         downloadFile(pdfBlob, `${baseFileName}.pdf`);
 
-        // 공유 실행
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+          await navigator.share({
+            files: [pdfFile],
+            title: `[TAD견적서] ${selectedQuote.customerInfo.project || '안내'}`,
+            text: `${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.`,
+          });
+        }
+      } else if (isMobileTarget) {
+        /** [2] 모바일 웹(브라우저): 이미지 저장 + 통합공유 모달 **/
+        downloadFile(imgBlob, `${baseFileName}.jpg`);
+
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [imgFile] })) {
           try {
             await navigator.share({
-              files: [pdfFile],
+              files: [imgFile],
               title: `[TAD견적서] ${selectedQuote.customerInfo.project || '안내'}`,
               text: `${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.`,
             });
-            setIsPreparing(false);
-            return;
           } catch (shareErr) {
-            if (shareErr.name === 'AbortError') {
-              setIsPreparing(false);
-              return;
-            }
-            console.warn("Navigator share failed, switching to Kakao SDK:", shareErr.name);
+            if (shareErr.name !== 'AbortError') throw shareErr;
           }
         }
       } else {
-        /** [PC/웹]: 이미지 전용 방식으로 전환 (사용자 요청) **/
-        const imgBlob = await (await fetch(imageUrl)).blob();
-        
-        // 오픈 & 저장 (이미지 기반)
-        if (previewWin) {
-          previewWin.document.body.innerHTML = `
-            <div style="display:flex;justify-content:center;background:#f0f0f0;padding:20px;min-height:100vh;">
-              <img src="${imageUrl}" style="max-width:100%;height:auto;box-shadow:0 0 20px rgba(0,0,0,0.2);background:white;"/>
-            </div>
-          `;
-          previewWin.document.title = baseFileName;
-        }
+        /** [3] PC 웹: 이미지 다운로드 + 카카오톡 공유창 **/
         downloadFile(imgBlob, `${baseFileName}.jpg`);
-      }
 
-      // 3. [공통 가동] 카카오톡 SDK 연동 (이미지 피드 방식)
-      if (window.Kakao) {
-        try {
-          if (!window.Kakao.isInitialized()) {
-            const kakaoKey = import.meta.env.VITE_KAKAO_JS_KEY || "d282f30a269e559cd7fcfd623a021b06";
-            window.Kakao.init(kakaoKey);
-          }
-
-          if (window.Kakao.isInitialized()) {
-            // 메인 카톡 공유 실행
-            const response = await fetch(imageUrl);
-            const kakaoImgBlob = await response.blob();
-            const kakaoImgFile = new File([kakaoImgBlob], `quote.jpg`, { type: 'image/jpeg' });
-
-            const uploadResult = await window.Kakao.Share.uploadImage({
-              file: [kakaoImgFile]
-            });
-
-            const shareImageUrl = uploadResult.infos.original.url;
-            window.Kakao.Share.sendDefault({
-              objectType: 'feed',
-              content: {
-                title: `[TAD견적서] ${selectedQuote.customerInfo.project || '안내'}`,
-                description: `${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.\n금액: ${selectedQuote.grandTotal.toLocaleString()}원`,
-                imageUrl: shareImageUrl,
+        if (window.Kakao && window.Kakao.isInitialized()) {
+          const uploadResult = await window.Kakao.Share.uploadImage({
+            file: [imgFile]
+          });
+          const shareImageUrl = uploadResult.infos.original.url;
+          window.Kakao.Share.sendDefault({
+            objectType: 'feed',
+            content: {
+              title: `[TAD견적서] ${selectedQuote.customerInfo.project || '안내'}`,
+              description: `${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.\n금액: ${selectedQuote.grandTotal.toLocaleString()}원`,
+              imageUrl: shareImageUrl,
+              link: {
+                mobileWebUrl: window.location.origin,
+                webUrl: window.location.origin,
+              },
+            },
+            buttons: [
+              {
+                title: '자세히 보기',
                 link: {
                   mobileWebUrl: window.location.origin,
                   webUrl: window.location.origin,
                 },
               },
-              buttons: [
-                {
-                  title: '자세히 보기',
-                  link: {
-                    mobileWebUrl: window.location.origin,
-                    webUrl: window.location.origin,
-                  },
-                },
-              ],
-            });
-
-            if (!isMobileTarget) {
-              alert("텍스트 정렬이 완료된 고화질 이미지가 다운로드되었습니다.\n카카오톡으로도 해당 이미지가 전송됩니다.");
-            }
-          }
-        } catch (kakaoErr) {
-          console.error("Kakao SDK Error:", kakaoErr);
-          alert("카카오톡 실행 중 오류가 발생했습니다. 저장된 파일을 직접 전달해주세요.");
+            ],
+          });
         }
-      } else {
-        alert("카카오톡 서비스를 불러올 수 없습니다. 네트워크를 확인해주세요.");
       }
     } catch (error) {
-      console.error("Overall share process failed:", error);
+      console.error("Share process failed:", error);
       if (!isMobileTarget) alert("공유 준비 중 예상치 못한 오류가 발생했습니다.");
     } finally {
       setIsPreparing(false);
