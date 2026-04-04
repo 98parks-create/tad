@@ -14,19 +14,20 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
     else if (itemCount > 10) compactLevel = 'dense';
   }
 
-  // [수정] A4 고정 높이(1123px) 및 자동 스케일링 로직 보완
+  // [수정] A4 고정 높이(297mm) 및 자동 스케일링 로직 보완
   const heightInPx = 1123;
   let contentScale = 1;
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0 && /Macintosh/.test(navigator.userAgent));
   
-  // 아이템 수와 이미지 여부에 따라 미세 스케일 조정 (1장에 담기게 더욱 타이트하게 조정)
+  // 아이템 수와 이미지 여부에 따라 미세 스케일 조정
   if (hasImages) {
-    if (itemCount > 15) contentScale = 0.75; // 더 작게
-    else if (itemCount > 10) contentScale = 0.85;
-    else if (itemCount > 5) contentScale = 0.93;
+    if (itemCount > 15) contentScale = isMobile ? 0.72 : 0.78; // 모바일이면 더 작게
+    else if (itemCount > 10) contentScale = isMobile ? 0.82 : 0.88;
+    else if (itemCount > 5) contentScale = isMobile ? 0.90 : 0.95;
   } else {
-    if (itemCount > 25) contentScale = 0.78;
-    else if (itemCount > 20) contentScale = 0.88;
-    else if (itemCount > 15) contentScale = 0.95;
+    if (itemCount > 25) contentScale = isMobile ? 0.75 : 0.82;
+    else if (itemCount > 20) contentScale = isMobile ? 0.85 : 0.90;
+    else if (itemCount > 15) contentScale = isMobile ? 0.92 : 0.97;
   }
 
   const styles = {
@@ -47,12 +48,13 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
     <div className="print-template-wrapper" style={{ width: '100%', backgroundColor: '#f1f5f9', padding: '0' }}>
       <div
         ref={ref}
+        id="pdf-capture-area"
         className="print-template"
         style={{
           padding: styles.topBottomPadding,
           width: '210mm',
-          height: '1123px', // [고정] A4 절대 높이 (1123px)
-          maxHeight: '1123px',
+          height: '297mm', // [고정] A4 절대 규격
+          maxHeight: '297mm',
           boxSizing: 'border-box',
           margin: '0 auto',
           backgroundColor: 'white',
@@ -63,7 +65,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
           flexDirection: 'column',
           boxShadow: '0 0 20px rgba(0,0,0,0.1)',
           position: 'relative',
-          overflow: 'hidden', // [필수] 1페이지 초과 방지
+          overflow: 'hidden',
           printColorAdjust: 'exact',
           WebkitPrintColorAdjust: 'exact'
         }}

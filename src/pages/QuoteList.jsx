@@ -55,29 +55,57 @@ export default function QuoteList() {
     contentRef: printRef,
     documentTitle: `견적서_${selectedQuote?.customerInfo?.project || Date.now()}`,
     pageStyle: () => {
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      // 태블릿(아이패드 데스크톱 모드 포함) 광범위 모바일 감지
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0 && /Macintosh/.test(navigator.userAgent));
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-      const isMobileBrowser = isMobile && !isStandalone;
-
-      const basePageStyle = `
-        @page { size: A4; margin: 0; }
+      const isMobileTarget = isMobile || isStandalone;
+      
+      // 모바일/태블릿일 때만 강제 1페이지 및 글자 크기 축소 최적화 적용
+      if (isMobileTarget) {
+        return `
+          @page { size: A4; margin: 0; }
+          @media print {
+            html, body {
+              height: 297mm !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              overflow: hidden !important;
+              background-color: white !important;
+            }
+            .print-template-wrapper { 
+              background-color: white !important; 
+              padding: 0 !important; 
+              margin: 0 !important; 
+              transform: none !important; 
+            }
+            #pdf-capture-area, .print-template { 
+              height: 297mm !important; 
+              width: 210mm !important; 
+              margin: 0 !important; 
+              padding: 10mm 15mm !important;
+              border: none !important;
+              box-shadow: none !important;
+              transform: none !important; /* 모바일 흰 화면 방지 핵심 */
+              overflow: hidden !important; 
+              display: block !important;
+              background: white !important;
+              opacity: 1 !important;
+              visibility: visible !important;
+            }
+          }
+        `;
+      }
+      
+      // PC 웹 레이아웃 (표준 A4)
+      return `
+        @page { size: A4; margin: 10mm; }
         @media print {
-          body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; margin: 0 !important; padding: 0 !important; }
-          .print-template-wrapper { background-color: white !important; padding: 0 !important; }
           .print-template { 
-            height: 297mm !important; 
-            width: 210mm !important; 
-            margin: 0 auto !important; 
-            border: none !important; 
-            box-shadow: none !important; 
-            padding: 10mm 15mm !important;
-            overflow: hidden !important;
-            page-break-after: avoid !important;
-            page-break-before: avoid !important;
+            box-shadow: none !important;
+            margin: 0 auto !important;
           }
         }
       `;
-      return basePageStyle;
     }
   });
 
@@ -201,21 +229,23 @@ export default function QuoteList() {
       await new Promise(resolve => setTimeout(resolve, 400));
 
       const canvas = await html2canvas(element, {
-        scale: 2.5, // 고해상도 고정
+        scale: 2.5, 
         useCORS: true,
         allowTaint: true,
         letterRendering: true,
         backgroundColor: '#ffffff',
         logging: false,
         onclone: (clonedDoc) => {
-          // 출력용 규격(210mm) 강제 적용 유지
-          const clonedElement = Array.from(clonedDoc.getElementsByTagName('div')).find(div => div.style.width === '210mm');
-          if (clonedElement && clonedElement.parentElement) {
-            clonedElement.parentElement.className = '';
-            clonedElement.parentElement.style.transform = 'none';
-            clonedElement.parentElement.style.marginBottom = '0';
-            clonedElement.parentElement.style.display = 'block';
-            clonedElement.parentElement.style.zoom = '1';
+          // ID로 확실하게 타겟팅하여 스타일 초기화 (캡처용)
+          const clonedElement = clonedDoc.getElementById('pdf-capture-area');
+          if (clonedElement) {
+            clonedElement.style.transform = 'none';
+            clonedElement.style.margin = '0';
+            clonedElement.style.boxShadow = 'none';
+            if (clonedElement.parentElement) {
+              clonedElement.parentElement.style.padding = '0';
+              clonedElement.parentElement.style.backgroundColor = 'white';
+            }
           }
         }
       });
