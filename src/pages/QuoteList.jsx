@@ -368,20 +368,18 @@ export default function QuoteList() {
         console.warn("Auto-download failed:", e);
       }
 
-      // [지연] 브라우저 부하 및 간섭 방지
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // [지연 제거] 브라우저 클릭 제스처 유지를 위해 즉시 실행 (중요: PC 웹 리다이렉트 방지)
 
       // 2. [모바일/앱] 실제 PDF '파일' 그대로 공유 시도
       if (isMobileTarget && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
-          // [중요] '파일 전송'을 위해서는 반드시 시스템 공유 메뉴(통합공유)를 사용해야 합니다.
           await navigator.share({
             files: [file],
             title: `[TAD견적서] ${selectedQuote.customerInfo.project || '안내'}`,
             text: `${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.`,
           });
           setIsPreparing(false);
-          return; // 성공 시 종료
+          return;
         } catch (shareErr) {
           if (shareErr.name !== 'AbortError') {
             console.warn("Navigator share failed, switching to Kakao SDK:", shareErr);
@@ -394,7 +392,6 @@ export default function QuoteList() {
 
       // 3. [PC/웹 또는 모바일 실패 시] 카카오톡 SDK 연동 (이미지 피드 방식)
       if (window.Kakao) {
-        // 초기화 확인 및 실행
         if (!window.Kakao.isInitialized()) {
           const kakaoKey = import.meta.env.VITE_KAKAO_JS_KEY || "d282f30a269e559cd7fcfd623a021b06";
           try {
@@ -405,7 +402,7 @@ export default function QuoteList() {
         }
 
         if (window.Kakao.isInitialized()) {
-          // PC에서는 파일 직접 전송이 브라우저 보안상 불가능하므로, 고화질 이미지와 링크로 대신합니다.
+          // 클릭 제스처가 살아있는 짧은 시간 안에 이미지 업로드와 공유를 연달아 수행
           const imgBlob = await (await fetch(dataUrl)).blob();
           const imgFile = new File([imgBlob], `quote.jpg`, { type: 'image/jpeg' });
 
@@ -436,7 +433,6 @@ export default function QuoteList() {
             ],
           });
 
-          // PC 사용자를 위한 추가 안내 (선택적)
           if (!isMobileTarget) {
             alert("PC 카카오톡에서는 생성된 이미지와 링크가 전송됩니다.\n고화질 PDF 원본은 방금 다운로드된 파일을 직접 카톡창으로 드래그해주세요.");
           }
