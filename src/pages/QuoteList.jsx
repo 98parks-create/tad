@@ -280,47 +280,30 @@ export default function QuoteList() {
     }
   };
 
-  // [신규] PDF 생성 단일 인터페이스 (A4 규격 강제)
+  // [신규] PDF/이미지 병행 생성 엔진 (A4 규격 강제 및 성능 최적화)
   const generatePDF = async () => {
     const canvas = await captureImage();
     if (!canvas) return null;
 
     try {
-      const imgData = canvas.toDataURL('image/jpeg', 0.98); // 품질 향상
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.98);
+      
+      // Blob 변환을 비선점형(Promise)으로 처리하여 성능 확보
+      const imgBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.98));
+
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+      pdf.addImage(dataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+      
       return {
-        blob: pdf.output('blob'),
-        dataUrl: imgData // 폴백용 이미지 데이터 병행 보관
+        pdfBlob: pdf.output('blob'),
+        imgBlob: imgBlob,
+        dataUrl: dataUrl
       };
     } catch (err) {
-      console.error("PDF generation failed:", err);
+      console.error("Format generation failed:", err);
       return null;
-    }
-  };
-
-  const handleSaveImage = async () => {
-    setIsPreparing(true);
-    try {
-      const canvas = await captureImage();
-      if (!canvas) {
-        alert("이미지 생성에 실패했습니다.");
-        setIsPreparing(false);
-        return;
-      }
-      canvas.toBlob((blob) => {
-        if (blob) {
-          downloadFile(blob, `견적서_${selectedQuote.customerInfo.project || '미정'}_${selectedQuote.customerInfo.name || '고객'}.png`);
-        }
-        setIsPreparing(false);
-      }, 'image/png', 1.0);
-    } catch (error) {
-      console.error("Image saving failed:", error);
-      alert("이미지 저장 중 오류가 발생했습니다.");
-      setIsPreparing(false);
     }
   };
 
@@ -342,7 +325,7 @@ export default function QuoteList() {
     return () => window.removeEventListener('resize', updateScale);
   }, []);
 
-  // [개선] 카카오톡 공유 핸들러 (탭 없이 깔끔한 이미지 저장 및 공유 연동)
+  // [개선] 카카오톡 공유 핸들러 (이미지 저장 및 앨범 저장 최적화)
   const handleShareKakao = async (e) => {
     if (e) {
       e.preventDefault();
@@ -354,19 +337,15 @@ export default function QuoteList() {
     
     setIsPreparing(true);
     try {
-      // 1. 고화질 견적서 생성 (인쇄용 엔진 활용)
+      // 1. 고화질 견적서 생성 (PDF/이미지 동시 준비)
       const result = await generatePDF();
-      if (!result || !result.blob) {
+      if (!result) {
         alert("견적서 생성에 실패했습니다. 다시 시도해주세요.");
         return;
       }
 
-      const { blob: pdfBlob, dataUrl: imageUrl } = result;
+      const { pdfBlob, imgBlob, dataUrl } = result;
       const baseFileName = `견적서_${selectedQuote.customerInfo.project || '미정'}_${selectedQuote.customerInfo.name || '고객'}`;
-      
-      // 이미지 전송용 공통 이미지 블롭 생성
-      const imgResponse = await fetch(imageUrl);
-      const imgBlob = await imgResponse.blob();
       const imgFile = new File([imgBlob], `${baseFileName}.jpg`, { type: 'image/jpeg' });
 
       // 2. [기기 및 접속 환경별 분기 처리]
@@ -383,9 +362,8 @@ export default function QuoteList() {
           });
         }
       } else if (isMobileTarget) {
-        /** [2] 모바일 웹(브라우저): 이미지 저장 + 통합공유 모달 **/
-        downloadFile(imgBlob, `${baseFileName}.jpg`);
-
+        /** [2] 모바일 웹(브라우저): 통합 공유창 (이미지 저장 + 카톡 연동) **/
+        // 앨범 저장을 위해 downloadFile 대신 navigator.share의 '이미지 저장' 활용 권장 (가장 확실한 방법)
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [imgFile] })) {
           try {
             await navigator.share({
@@ -394,14 +372,22 @@ export default function QuoteList() {
               text: `${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.`,
             });
           } catch (shareErr) {
-            if (shareErr.name !== 'AbortError') throw shareErr;
+            if (shareErr.name !== 'AbortError') {
+              // 실패 시 폴백 (이미지 저장 강제)
+              downloadFile(imgBlob, `${baseFileName}.jpg`);
+            }
           }
+        } else {
+          // 공유 미지원 환경(일부 구형 웹)
+          downloadFile(imgBlob, `${baseFileName}.jpg`);
         }
       } else {
-        /** [3] PC 웹: 이미지 다운로드 + 카카오톡 공유창 **/
+        /** [3] PC 웹: 이미지 다운로드 + 고화질 카톡 피드 **/
+        // 우선 이미지 파일 저장 (PC 로컬)
         downloadFile(imgBlob, `${baseFileName}.jpg`);
 
         if (window.Kakao && window.Kakao.isInitialized()) {
+          // 이미지 업로드 및 전송 연동
           const uploadResult = await window.Kakao.Share.uploadImage({
             file: [imgFile]
           });
@@ -427,6 +413,7 @@ export default function QuoteList() {
               },
             ],
           });
+          alert("고화질 견적서 이미지가 저장되었습니다. 카카오톡 전송 창이 열립니다.");
         }
       }
     } catch (error) {
