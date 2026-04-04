@@ -361,12 +361,11 @@ export default function QuoteList() {
       alert("데이터를 준비 중입니다. 잠시만 기다려주세요.");
       return;
     }
-    
     downloadFile(preparedData.imgBlob, `${preparedData.fileName}.jpg`);
     if (!isMobileTarget) alert("이미지가 성공적으로 저장되었습니다.");
   };
 
-  // [개선] 카카오톡 공유 핸들러 (즉시 실행 - 탭 없이 앨범 저장 및 카톡 연동)
+  // [개선] 카카오톡 공유 핸들러 (즉시 실행 - 오직 공유 기능만 제공)
   const handleShareKakao = async (e) => {
     if (e) {
       e.preventDefault();
@@ -382,12 +381,14 @@ export default function QuoteList() {
     
     setIsPreparing(true);
     try {
-      const { pdfBlob, imgBlob, dataUrl, imgFile, pdfFile, fileName } = preparedData;
+      const { imgFile, pdfFile } = preparedData;
 
       // 1. [기기 및 접속 환경별 분기 처리]
       if (isStandalone) {
-        /** [1] 설치형 앱(PWA): 기존 PDF 방식 유지 **/
+        /** [1] 설치형 앱(PWA): PDF 저장 + 통합 공유창 **/
+        const { pdfBlob, pdfFile, fileName } = preparedData;
         downloadFile(pdfBlob, `${fileName}.pdf`);
+
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
           await navigator.share({
             files: [pdfFile],
@@ -396,8 +397,9 @@ export default function QuoteList() {
           });
         }
       } else if (isMobileTarget) {
-        /** [2] 모바일 웹(브라우저): 통합 공유창 (이미지 저장 + 카톡 연동) **/
-        // [핵심] 여기서 전송하는 파일이 앨범 저장([이미지 저장] 버튼)과 카톡 공유를 모두 담당합니다.
+        /** [2] 모바일 웹(브라우저): 기존 기능 유지 + 통합 공유창 자동 실행 **/
+        const { imgFile } = preparedData;
+        
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [imgFile] })) {
           try {
             await navigator.share({
@@ -408,18 +410,15 @@ export default function QuoteList() {
           } catch (shareErr) {
             if (shareErr.name !== 'AbortError') throw shareErr;
           }
-        } else {
-          // 지원하지 않는 구형 브라우저 등
-          downloadFile(imgBlob, `${fileName}.jpg`);
-          alert("파일이 다운로드되었습니다. 갤러리 앱에서 확인해주세요.");
         }
       } else {
-        /** [3] PC 웹: PDF 다운로드 + 미리보기 창 + 카톡 피드 (롤백) **/
-        // PDF 저장 및 미리보기 (사장님 이전 요청 방식)
+        /** [3] PC 웹: PDF 저장 + 카카오톡 공유창 실행 (동시 실행) **/
+        const { pdfBlob, imgFile, fileName } = preparedData;
+        
+        // 1. PDF 파일 즉시 저장
         downloadFile(pdfBlob, `${fileName}.pdf`);
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        window.open(pdfUrl, '_blank');
 
+        // 2. 카카오톡 공유창 실행
         if (window.Kakao && window.Kakao.isInitialized()) {
           const uploadResult = await window.Kakao.Share.uploadImage({
             file: [imgFile]
