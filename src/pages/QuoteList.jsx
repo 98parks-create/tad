@@ -419,30 +419,23 @@ export default function QuoteList() {
           alert("파일이 다운로드되었습니다. 갤러리 앱에서 확인해주세요.");
         }
       } else {
-        /** [3] PC 웹: 진짜 "PDF 파일" 공유 (주소 방식 완전 제거) **/
-        // 1. PDF 파일 즉시 저장 (사장님 필수 요청)
+        /** [3] PC 웹: 이미지 복사 + PDF 저장 + PDF 즉시 열기 (진짜 "파일" 공유 연계) **/
+        // 1. 견적서 이미지를 클립보드에 자동으로 복사 (사장님 요청: 웹/앱처럼 이미지 전송 느낌)
+        try {
+          // 최신 브라우저의 클립보드 기능을 사용하여 이미지 데이터를 복사함.
+          const data = [new ClipboardItem({ [imgBlob.type]: imgBlob })];
+          await navigator.clipboard.write(data);
+        } catch (clipboardErr) {
+          console.error("Clipboard copy failed:", clipboardErr);
+        }
+
+        // 2. PDF 파일 즉시 저장 및 열기 (사장님 필수 요청)
         const pdfUrl = URL.createObjectURL(pdfBlob);
         downloadFile(pdfBlob, `${fileName}.pdf`);
-
-        // 2. PDF 파일 새 창에서 열기 (파일 확인용 - 사장님 요청)
         window.open(pdfUrl, '_blank');
 
-        // 3. 진짜 "파일" 공유 시도 (시스템 공유창 전용)
-        // 사장님 요청에 따라 주소 형태의 카톡 SDK 창은 PC에서 완전히 제거됨.
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-          try {
-            await navigator.share({
-              files: [pdfFile],
-              title: `[TAD견적서] ${fileName}`,
-              text: '견적서 PDF 파일입니다.',
-            });
-          } catch (e) {
-            if (e.name !== 'AbortError') console.error("Native share failed:", e);
-          }
-        } else {
-          // 시스템 공유 지원이 안 될 경우, 사장님 요청에 따른 수동 파일 안내
-          alert("견적서 PDF 파일이 저장되었습니다. 컴퓨터 하단에 다운로드된 파일을 카카오톡 채팅방으로 끌어넣어 전송해 주세요.");
-        }
+        // 3. 최종 안내 (주소 링크창은 사장님 요청으로 완전히 제거됨)
+        alert("견적서 이미지가 복사되었습니다! 카카오톡 대화방에서 '붙여넣기(Ctrl+V)'를 하시면 진짜 이미지 파일로 바로 전송됩니다.");
       }
     } catch (error) {
       console.error("Share process failed:", error);
