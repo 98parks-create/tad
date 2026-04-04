@@ -61,7 +61,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
           backgroundColor: 'white',
           color: 'black',
           fontFamily: "'Noto Sans KR', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif",
-          lineHeight: '1.3',
+          lineHeight: 1.4, // [보정] numeric value로 캡처 정확도 향상
           display: 'flex',
           flexDirection: 'column',
           boxShadow: '0 0 20px rgba(0,0,0,0.1)',
@@ -152,14 +152,14 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
           <tbody>
             {sortedItems.map((item, i) => (
               <tr key={i} style={{ height: styles.rowHeight }}>
-                <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'center' }}>{i + 1}</td>
-                <td style={{ padding: styles.cellPadding, border: '1px solid #000', fontWeight: '500', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{item.name}</td>
-                <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'center' }}>{item.specification || (item.type === 'area' ? `${item.width}*${item.height}` : '-')}</td>
-                <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'center' }}>{item.quantity}</td>
-                <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'center' }}>{item.unit || 'EA'}</td>
-                <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'right' }}>{Number(item.unitPrice || 0).toLocaleString()}</td>
-                <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'right', fontWeight: 'bold' }}>{Number(item.total || 0).toLocaleString()}</td>
-                <td style={{ padding: styles.cellPadding, border: '1px solid #000', fontSize: '8pt', textAlign: 'center' }}>{item.remarks}</td>
+                <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'center', verticalAlign: 'middle' }}>{i + 1}</td>
+                <td style={{ padding: styles.cellPadding, border: '1px solid #000', fontWeight: '500', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', verticalAlign: 'middle' }}>{item.name}</td>
+                <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'center', verticalAlign: 'middle' }}>{item.specification || (item.type === 'area' ? `${item.width}*${item.height}` : '-')}</td>
+                <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'center', verticalAlign: 'middle' }}>{item.quantity}</td>
+                <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'center', verticalAlign: 'middle' }}>{item.unit || 'EA'}</td>
+                <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'right', verticalAlign: 'middle' }}>{Number(item.unitPrice || 0).toLocaleString()}</td>
+                <td style={{ padding: styles.cellPadding, border: '1px solid #000', textAlign: 'right', fontWeight: 'bold', verticalAlign: 'middle' }}>{Number(item.total || 0).toLocaleString()}</td>
+                <td style={{ padding: styles.cellPadding, border: '1px solid #000', fontSize: '8pt', textAlign: 'center', verticalAlign: 'middle' }}>{item.remarks}</td>
               </tr>
             ))}
             {Array.from({ length: Math.max(0, (hasImages ? 3 : 6) - sortedItems.length) }).map((_, i) => (

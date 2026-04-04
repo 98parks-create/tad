@@ -228,15 +228,37 @@ export default function QuoteList() {
         backgroundColor: '#ffffff',
         logging: false,
         onclone: (clonedDoc) => {
-          // ID로 확실하게 타겟팅하여 스타일 초기화 (캡처용)
+          // [핵심] 캡처용 복제 문서의 스타일 환경을 완벽히 표준화 (PC/모바일 공통 적용)
           const clonedElement = clonedDoc.getElementById('pdf-capture-area');
           if (clonedElement) {
+            // 부모 트리의 모든 간섭 제거 (폭과 높이 제한 해제)
+            let current = clonedElement.parentElement;
+            while (current && current !== clonedDoc.body) {
+              current.style.margin = '0';
+              current.style.padding = '0';
+              current.style.display = 'block';
+              current.style.width = 'auto';
+              current.style.height = 'auto';
+              current.style.overflow = 'visible';
+              current.style.transform = 'none';
+              current = current.parentElement;
+            }
+
+            // 출력물 규격 강제 (A4 @ 96DPI = 794px x 1123px)
+            clonedElement.style.width = '794px'; 
+            clonedElement.style.height = '1123px';
+            clonedElement.style.minWidth = '794px';
+            clonedElement.style.minHeight = '1123px';
             clonedElement.style.transform = 'none';
             clonedElement.style.margin = '0';
             clonedElement.style.boxShadow = 'none';
-            if (clonedElement.parentElement) {
-              clonedElement.parentElement.style.padding = '0';
-              clonedElement.parentElement.style.backgroundColor = 'white';
+            clonedElement.style.padding = '10mm 15mm'; // 표준 여백 재부여
+            
+            // 내부 스케일링 요소가 있다면 캡처 시엔 1로 초기화 (또는 contentScale 유지)
+            const innerWrapper = clonedElement.firstElementChild;
+            if (innerWrapper) {
+              innerWrapper.style.width = '100%';
+              innerWrapper.style.height = '100%';
             }
           }
         }
