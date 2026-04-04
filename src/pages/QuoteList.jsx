@@ -239,6 +239,7 @@ export default function QuoteList() {
       const canvas = await captureImage();
       if (!canvas) {
         alert("이미지 생성에 실패했습니다.");
+        setIsPreparing(false);
         return;
       }
       canvas.toBlob((blob) => {

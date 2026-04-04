@@ -38,6 +38,8 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
   };
 
   // [정제] 중복 공유 로직 제거 및 스타일 동기화
+  const sortedItems = [...items].reverse();
+
   return (
     <div className="print-template-wrapper" style={{ width: '100%', backgroundColor: '#f1f5f9', padding: '0' }}>
       <div
