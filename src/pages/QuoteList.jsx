@@ -325,6 +325,26 @@ export default function QuoteList() {
     return () => window.removeEventListener('resize', updateScale);
   }, []);
 
+  // [신규] 이미지 전용 저장 핸들러
+  const handleSaveImage = async () => {
+    setIsPreparing(true);
+    try {
+      const result = await generatePDF();
+      if (result && result.imgBlob) {
+        const baseFileName = `견적서_${selectedQuote.customerInfo.project || '미정'}_${selectedQuote.customerInfo.name || '고객'}`;
+        downloadFile(result.imgBlob, `${baseFileName}.jpg`);
+        alert("이미지가 성공적으로 저장되었습니다.");
+      } else {
+        alert("이미지 생성에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("Image saving error:", error);
+      alert("파일 저장 중 오류가 발생했습니다.");
+    } finally {
+      setIsPreparing(false);
+    }
+  };
+
   // [개선] 카카오톡 공유 핸들러 (이미지 저장 및 앨범 저장 최적화)
   const handleShareKakao = async (e) => {
     if (e) {
