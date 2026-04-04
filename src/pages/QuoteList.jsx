@@ -325,55 +325,69 @@ export default function QuoteList() {
     return () => window.removeEventListener('resize', updateScale);
   }, []);
 
-  // [신규] 이미지 전용 저장 핸들러
-  const handleSaveImage = async () => {
-    setIsPreparing(true);
-    try {
-      const result = await generatePDF();
-      if (result && result.imgBlob) {
-        const baseFileName = `견적서_${selectedQuote.customerInfo.project || '미정'}_${selectedQuote.customerInfo.name || '고객'}`;
-        downloadFile(result.imgBlob, `${baseFileName}.jpg`);
-        alert("이미지가 성공적으로 저장되었습니다.");
-      } else {
-        alert("이미지 생성에 실패했습니다.");
-      }
-    } catch (error) {
-      console.error("Image saving error:", error);
-      alert("파일 저장 중 오류가 발생했습니다.");
-    } finally {
-      setIsPreparing(false);
+  // [신규] 배경 이미지 선성성(Pre-capture) 상태 관리
+  const [preparedData, setPreparedData] = useState(null);
+
+  // [신규] 상세페이지 오픈 시 배경에서 미리 견적서 파일 생성 (제스처 지연 방지)
+  useEffect(() => {
+    if (selectedQuote) {
+      setPreparedData(null); // 초기화
+      const timer = setTimeout(async () => {
+        try {
+          const result = await generatePDF();
+          if (result) {
+            const baseFileName = `견적서_${selectedQuote.customerInfo.project || '미정'}_${selectedQuote.customerInfo.name || '고객'}`;
+            const imgFile = new File([result.imgBlob], `${baseFileName}.jpg`, { type: 'image/jpeg' });
+            const pdfFile = new File([result.pdfBlob], `${baseFileName}.pdf`, { type: 'application/pdf' });
+            
+            setPreparedData({
+              ...result,
+              imgFile,
+              pdfFile,
+              fileName: baseFileName
+            });
+          }
+        } catch (err) {
+          console.error("Pre-capture failed:", err);
+        }
+      }, 600); // UI 렌더링 완료 후 안정적으로 캡처 시작
+      return () => clearTimeout(timer);
     }
+  }, [selectedQuote]);
+
+  // [개선] 이미지 전용 저장 핸들러 (선 생성된 데이터 사용)
+  const handleSaveImage = async () => {
+    if (!preparedData) {
+      alert("데이터를 준비 중입니다. 잠시만 기다려주세요.");
+      return;
+    }
+    
+    downloadFile(preparedData.imgBlob, `${preparedData.fileName}.jpg`);
+    if (!isMobileTarget) alert("이미지가 성공적으로 저장되었습니다.");
   };
 
-  // [개선] 카카오톡 공유 핸들러 (이미지 저장 및 앨범 저장 최적화)
+  // [개선] 카카오톡 공유 핸들러 (즉시 실행 - 탭 없이 앨범 저장 및 카톡 연동)
   const handleShareKakao = async (e) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
 
-    // 설치된 PWA(앱) 환경인지 확인
+    if (!preparedData) {
+      alert("견적서를 생성 중입니다. 잠시만 기다려주세요.");
+      return;
+    }
+
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     
     setIsPreparing(true);
     try {
-      // 1. 고화질 견적서 생성 (PDF/이미지 동시 준비)
-      const result = await generatePDF();
-      if (!result) {
-        alert("견적서 생성에 실패했습니다. 다시 시도해주세요.");
-        return;
-      }
+      const { pdfBlob, imgBlob, dataUrl, imgFile, pdfFile, fileName } = preparedData;
 
-      const { pdfBlob, imgBlob, dataUrl } = result;
-      const baseFileName = `견적서_${selectedQuote.customerInfo.project || '미정'}_${selectedQuote.customerInfo.name || '고객'}`;
-      const imgFile = new File([imgBlob], `${baseFileName}.jpg`, { type: 'image/jpeg' });
-
-      // 2. [기기 및 접속 환경별 분기 처리]
+      // 1. [기기 및 접속 환경별 분기 처리]
       if (isStandalone) {
         /** [1] 설치형 앱(PWA): 기존 PDF 방식 유지 **/
-        const pdfFile = new File([pdfBlob], `${baseFileName}.pdf`, { type: 'application/pdf' });
-        downloadFile(pdfBlob, `${baseFileName}.pdf`);
-
+        downloadFile(pdfBlob, `${fileName}.pdf`);
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
           await navigator.share({
             files: [pdfFile],
@@ -383,7 +397,7 @@ export default function QuoteList() {
         }
       } else if (isMobileTarget) {
         /** [2] 모바일 웹(브라우저): 통합 공유창 (이미지 저장 + 카톡 연동) **/
-        // 앨범 저장을 위해 downloadFile 대신 navigator.share의 '이미지 저장' 활용 권장 (가장 확실한 방법)
+        // [핵심] 여기서 전송하는 파일이 앨범 저장([이미지 저장] 버튼)과 카톡 공유를 모두 담당합니다.
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [imgFile] })) {
           try {
             await navigator.share({
@@ -392,26 +406,23 @@ export default function QuoteList() {
               text: `${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.`,
             });
           } catch (shareErr) {
-            if (shareErr.name !== 'AbortError') {
-              // 실패 시 폴백 (이미지 저장 강제)
-              downloadFile(imgBlob, `${baseFileName}.jpg`);
-            }
+            if (shareErr.name !== 'AbortError') throw shareErr;
           }
         } else {
-          // 공유 미지원 환경(일부 구형 웹)
-          downloadFile(imgBlob, `${baseFileName}.jpg`);
+          // 지원하지 않는 구형 브라우저 등
+          downloadFile(imgBlob, `${fileName}.jpg`);
+          alert("파일이 다운로드되었습니다. 갤러리 앱에서 확인해주세요.");
         }
       } else {
-        /** [3] PC 웹: 이미지 다운로드 + 고화질 카톡 피드 **/
-        // 우선 이미지 파일 저장 (PC 로컬)
-        downloadFile(imgBlob, `${baseFileName}.jpg`);
+        /** [3] PC 웹: 이미지 다운로드 + 고화질 카톡 피드 (링크 최소화) **/
+        downloadFile(imgBlob, `${fileName}.jpg`);
 
         if (window.Kakao && window.Kakao.isInitialized()) {
-          // 이미지 업로드 및 전송 연동
           const uploadResult = await window.Kakao.Share.uploadImage({
             file: [imgFile]
           });
           const shareImageUrl = uploadResult.infos.original.url;
+          
           window.Kakao.Share.sendDefault({
             objectType: 'feed',
             content: {
@@ -433,7 +444,6 @@ export default function QuoteList() {
               },
             ],
           });
-          alert("고화질 견적서 이미지가 저장되었습니다. 카카오톡 전송 창이 열립니다.");
         }
       }
     } catch (error) {
