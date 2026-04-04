@@ -355,17 +355,36 @@ export default function QuoteList() {
     }
   }, [selectedQuote]);
 
-  // [개선] 이미지 전용 저장 핸들러 (선 생성된 데이터 사용)
+  // [개선] 이미지 전용 저장 핸들러 (모바일 웹: 공유 모달 형식으로 앨범 저장 유도)
   const handleSaveImage = async () => {
     if (!preparedData) {
       alert("데이터를 준비 중입니다. 잠시만 기다려주세요.");
       return;
     }
-    downloadFile(preparedData.imgBlob, `${preparedData.fileName}.jpg`);
-    if (!isMobileTarget) alert("이미지가 성공적으로 저장되었습니다.");
+
+    if (isMobileTarget) {
+      /** 모바일 웹: 통합 공유 모달 실행 (카톡 공유와 동일) **/
+      // 여기서 [이미지 저장]을 선택하면 사진첩(앨범)으로 바로 들어갑니다.
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [preparedData.imgFile] })) {
+        try {
+          await navigator.share({
+            files: [preparedData.imgFile],
+            title: `[이미지저장] ${preparedData.fileName}`,
+          });
+        } catch (shareErr) {
+          if (shareErr.name !== 'AbortError') throw shareErr;
+        }
+      } else {
+        downloadFile(preparedData.imgBlob, `${preparedData.fileName}.jpg`);
+      }
+    } else {
+      /** PC 웹: 기존 방식(직접 다운로드) 유지 **/
+      downloadFile(preparedData.imgBlob, `${preparedData.fileName}.jpg`);
+      alert("이미지가 성공적으로 저장되었습니다.");
+    }
   };
 
-  // [개선] 카카오톡 공유 핸들러 (즉시 실행 - 오직 공유 기능만 제공)
+  // [개선] 카카오톡 공유 핸들러 (즉시 실행 - 파일 기반 공유 고도화)
   const handleShareKakao = async (e) => {
     if (e) {
       e.preventDefault();
@@ -381,14 +400,12 @@ export default function QuoteList() {
     
     setIsPreparing(true);
     try {
-      const { imgFile, pdfFile } = preparedData;
+      const { pdfBlob, imgBlob, imgFile, pdfFile, fileName } = preparedData;
 
       // 1. [기기 및 접속 환경별 분기 처리]
       if (isStandalone) {
-        /** [1] 설치형 앱(PWA): PDF 저장 + 통합 공유창 **/
-        const { pdfBlob, pdfFile, fileName } = preparedData;
+        /** [1] 설치형 앱(PWA): PDF 저장 + PDF 파일 공유 **/
         downloadFile(pdfBlob, `${fileName}.pdf`);
-
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
           await navigator.share({
             files: [pdfFile],
@@ -397,9 +414,7 @@ export default function QuoteList() {
           });
         }
       } else if (isMobileTarget) {
-        /** [2] 모바일 웹(브라우저): 기존 기능 유지 + 통합 공유창 자동 실행 **/
-        const { imgFile } = preparedData;
-        
+        /** [2] 모바일 웹(브라우저): 통합 공유창 (이미지 파일 그대로 전송) **/
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [imgFile] })) {
           try {
             await navigator.share({
@@ -410,15 +425,30 @@ export default function QuoteList() {
           } catch (shareErr) {
             if (shareErr.name !== 'AbortError') throw shareErr;
           }
+        } else {
+          downloadFile(imgBlob, `${fileName}.jpg`);
+          alert("파일이 다운로드되었습니다. 갤러리 앱에서 확인해주세요.");
         }
       } else {
-        /** [3] PC 웹: PDF 저장 + 카카오톡 공유창 실행 (동시 실행) **/
-        const { pdfBlob, imgFile, fileName } = preparedData;
-        
-        // 1. PDF 파일 즉시 저장
+        /** [3] PC 웹: PDF 파일 직접 공유 시도 + 카톡 피드 백업 (최종 로직) **/
+        // 우선 PDF 파일 즉시 저장 (사장님 필수 요청)
         downloadFile(pdfBlob, `${fileName}.pdf`);
 
-        // 2. 카카오톡 공유창 실행
+        // 1. 진짜 '파일' 공유 시도 (시스템 공유창이 지원될 경우)
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+          try {
+            await navigator.share({
+              files: [pdfFile],
+              title: `[TAD견적서] ${fileName}`,
+              text: '견적서 PDF 파일입니다.',
+            });
+            return; // 성공 시 카톡 피드 생략 (파일 전송 완료)
+          } catch (e) {
+            if (e.name !== 'AbortError') console.error("Native share failed:", e);
+          }
+        }
+
+        // 2. 폴백: 시각적으로 이미지만 강조된 카톡 전용 피드
         if (window.Kakao && window.Kakao.isInitialized()) {
           const uploadResult = await window.Kakao.Share.uploadImage({
             file: [imgFile]
@@ -429,7 +459,7 @@ export default function QuoteList() {
             objectType: 'feed',
             content: {
               title: `[TAD견적서] ${selectedQuote.customerInfo.project || '안내'}`,
-              description: `${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.\n금액: ${selectedQuote.grandTotal.toLocaleString()}원`,
+              description: `금액: ${selectedQuote.grandTotal.toLocaleString()}원`, 
               imageUrl: shareImageUrl,
               link: {
                 mobileWebUrl: window.location.origin,
@@ -438,7 +468,7 @@ export default function QuoteList() {
             },
             buttons: [
               {
-                title: '자세히 보기',
+                title: '견적 상세 보기', 
                 link: {
                   mobileWebUrl: window.location.origin,
                   webUrl: window.location.origin,
