@@ -342,17 +342,25 @@ export default function QuoteList() {
     return () => window.removeEventListener('resize', updateScale);
   }, []);
 
+  // [신규] 카카오톡 공유 핸들러 (PDF 저장 + 오픈 + 카톡 연동 통합)
   const handleShareKakao = async (e) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
 
+    // [팝업 차단 방지] 사전에 PDF용 새 창 확보 (PWA와 동일한 느낌 제공)
+    const pdfWin = window.open('', '_blank');
+    if (pdfWin) {
+      pdfWin.document.write('<html><head><title>견적서 생성 중</title></head><body style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;"><div><h3>견적서를 생성 중입니다...</h3><p>잠시만 기다려주세요.</p></div></body></html>');
+    }
+
     setIsPreparing(true);
     try {
-      // [동기화] 인쇄와 동일한 단일 PDF 생성 엔진 사용
+      // 1. PDF 생성 (인쇄용 고품질 엔진 사용)
       const result = await generatePDF();
       if (!result || !result.blob) {
+        if (pdfWin) pdfWin.close();
         alert("PDF 생성에 실패했습니다. 다시 시도해주세요.");
         return;
       }
@@ -360,17 +368,25 @@ export default function QuoteList() {
       const { blob, dataUrl } = result;
       const fileName = `견적서_${selectedQuote.customerInfo.project || '미정'}_${selectedQuote.customerInfo.name || '고객'}.pdf`;
       const file = new File([blob], fileName, { type: 'application/pdf' });
+      const pdfUrl = URL.createObjectURL(blob);
 
-      // 1. [공통] PDF 기기 저장 (사장님 보관용 및 PC 첨부용)
+      // 2. [오픈] PDF 새 창 주소 업데이트 (사용자가 즉시 확인 가능)
+      if (pdfWin) {
+        pdfWin.location.href = pdfUrl;
+      } else {
+        // 팝업이 애초에 차단된 경우 다운로드로 대체
+        downloadFile(blob, fileName);
+      }
+
+      // 3. [저장] 소장용 기기 저장 (자동 다운로드)
       try {
         downloadFile(blob, fileName);
       } catch (e) {
         console.warn("Auto-download failed:", e);
       }
 
-      // [지연 제거] 브라우저 클릭 제스처 유지를 위해 즉시 실행 (중요: PC 웹 리다이렉트 방지)
-
-      // 2. [모바일/태블릿 웹/앱] 실제 PDF '파일' 그대로 공유 시도
+      // 4. [기기별 공유 실행]
+      // 모바일/태블릿: 실제 PDF '파일' 그대로 공유
       if (isMobileTarget && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
@@ -379,19 +395,17 @@ export default function QuoteList() {
             text: `${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.`,
           });
           setIsPreparing(false);
-          return; // 성공 시 종료
+          return;
         } catch (shareErr) {
-          // 사용자 취소(AbortError) 시에는 폴백 없이 중단
           if (shareErr.name === 'AbortError') {
             setIsPreparing(false);
             return;
           }
-          // 그 외 에러(권한/제스처 등) 발생 시 다음 단계인 카톡 SDK로 조용히 진행 (alert 띄우지 않음)
-          console.warn("Native share failed, switching to Kakao SDK:", shareErr.name, shareErr.message);
+          console.warn("Navigator share failed, switching to Kakao SDK:", shareErr.name);
         }
       }
 
-      // 3. [PC/웹 또는 모바일 공유 실패 시] 카카오톡 SDK 연동 (이미지 피드 방식)
+      // PC/웹 또는 모바일 공유 실패 시: 카카오톡 SDK 연동 (이미지 피드 방식)
       if (window.Kakao) {
         try {
           if (!window.Kakao.isInitialized()) {
@@ -400,7 +414,6 @@ export default function QuoteList() {
           }
 
           if (window.Kakao.isInitialized()) {
-            // 이미지 업로드 및 피드 전송
             const imgBlob = await (await fetch(dataUrl)).blob();
             const imgFile = new File([imgBlob], `quote.jpg`, { type: 'image/jpeg' });
 
@@ -432,22 +445,18 @@ export default function QuoteList() {
             });
 
             if (!isMobileTarget) {
-              alert("PC 카카오톡에서는 생성된 이미지와 링크가 전송됩니다.\n고화질 PDF 원본은 방금 다운로드된 파일을 직접 카톡창으로 드래그해주세요.");
+              alert("새 탭에서 열린 PDF를 확인해주세요.\n카카오톡으로는 고해상도 이미지와 링크가 전송됩니다.");
             }
-          } else {
-            console.error("Kakao SDK failed to initialize.");
-            if (isMobileTarget) alert("카카오톡 연결 시 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
           }
         } catch (kakaoErr) {
           console.error("Kakao SDK Error:", kakaoErr);
-          if (isMobileTarget) alert("카카오톡 실행 중 오류가 발생했습니다. 직접 다운로드된 파일을 전달해주세요.");
+          if (isMobileTarget) alert("카카오톡 실행 중 오류가 발생했습니다. 직접 파일을 전달해주세요.");
         }
       } else {
         alert("카카오톡 서비스를 불러올 수 없습니다. 네트워크를 확인해주세요.");
       }
     } catch (error) {
       console.error("Overall share process failed:", error);
-      // 사용자에게 불필요한 혼란을 줄 수 있는 전체 에러 알림은 모바일에서 최소화
       if (!isMobileTarget) alert("공유 준비 중 예상치 못한 오류가 발생했습니다.");
     } finally {
       setIsPreparing(false);
