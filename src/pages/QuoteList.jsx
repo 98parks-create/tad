@@ -361,17 +361,38 @@ export default function QuoteList() {
       const fileName = `견적서_${selectedQuote.customerInfo.project || '미정'}_${selectedQuote.customerInfo.name || '고객'}.pdf`;
       const file = new File([blob], fileName, { type: 'application/pdf' });
 
-      // 1. [우선] 기기 저장 (사장님 보관용)
+      // 1. [공통] PDF 기기 저장 (사장님 보관용 및 PC 첨부용)
       try {
         downloadFile(blob, fileName);
       } catch (e) {
         console.warn("Auto-download failed:", e);
       }
 
-      // [지연] 다운로드와 카톡 연동 사이의 충돌 방지
-      await new Promise(resolve => setTimeout(resolve, 250));
+      // [지연] 브라우저 부하 및 간섭 방지
+      await new Promise(resolve => setTimeout(resolve, 300));
 
-      // 2. [직행] 카카오톡 SDK 실행 (통합공유 창 건너뛰고 카톡으로 직접 연결)
+      // 2. [모바일/앱] 실제 PDF '파일' 그대로 공유 시도
+      if (isMobileTarget && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          // [중요] '파일 전송'을 위해서는 반드시 시스템 공유 메뉴(통합공유)를 사용해야 합니다.
+          await navigator.share({
+            files: [file],
+            title: `[TAD견적서] ${selectedQuote.customerInfo.project || '안내'}`,
+            text: `${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.`,
+          });
+          setIsPreparing(false);
+          return; // 성공 시 종료
+        } catch (shareErr) {
+          if (shareErr.name !== 'AbortError') {
+            console.warn("Navigator share failed, switching to Kakao SDK:", shareErr);
+          } else {
+            setIsPreparing(false);
+            return;
+          }
+        }
+      }
+
+      // 3. [PC/웹 또는 모바일 실패 시] 카카오톡 SDK 연동 (이미지 피드 방식)
       if (window.Kakao) {
         // 초기화 확인 및 실행
         if (!window.Kakao.isInitialized()) {
@@ -384,7 +405,7 @@ export default function QuoteList() {
         }
 
         if (window.Kakao.isInitialized()) {
-          // PDF 대신 캡처된 이미지를 파일화하여 업로드 (카톡 최적화)
+          // PC에서는 파일 직접 전송이 브라우저 보안상 불가능하므로, 고화질 이미지와 링크로 대신합니다.
           const imgBlob = await (await fetch(dataUrl)).blob();
           const imgFile = new File([imgBlob], `quote.jpg`, { type: 'image/jpeg' });
 
@@ -414,6 +435,11 @@ export default function QuoteList() {
               },
             ],
           });
+
+          // PC 사용자를 위한 추가 안내 (선택적)
+          if (!isMobileTarget) {
+            alert("PC 카카오톡에서는 생성된 이미지와 링크가 전송됩니다.\n고화질 PDF 원본은 방금 다운로드된 파일을 직접 카톡창으로 드래그해주세요.");
+          }
         } else {
           alert("카카오톡 초기화에 실패했습니다. 관리자에게 문의해주세요.");
         }
