@@ -22,6 +22,14 @@ export default function QuoteList() {
   const [isPreparing, setIsPreparing] = useState(false);
   const printRef = useRef(null);
 
+  // [신규] 태블릿/모바일 통합 감지 로직 (컴포넌트 레벨로 이동)
+  const isMobileTarget = useMemo(() => {
+    if (typeof window === 'undefined' || !navigator) return false;
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0 && /Macintosh/.test(navigator.userAgent));
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator?.standalone === true;
+    return isMobile || isStandalone;
+  }, []);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
@@ -54,59 +62,46 @@ export default function QuoteList() {
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: `견적서_${selectedQuote?.customerInfo?.project || Date.now()}`,
-    pageStyle: () => {
-      // 태블릿(아이패드 데스크톱 모드 포함) 광범위 모바일 감지
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0 && /Macintosh/.test(navigator.userAgent));
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-      const isMobileTarget = isMobile || isStandalone;
-      
-      // 모바일/태블릿일 때만 강제 1페이지 및 글자 크기 축소 최적화 적용
-      if (isMobileTarget) {
-        return `
-          @page { size: A4; margin: 0; }
-          @media print {
-            html, body {
-              height: 297mm !important;
-              margin: 0 !important;
-              padding: 0 !important;
-              overflow: hidden !important;
-              background-color: white !important;
-            }
-            .print-template-wrapper { 
-              background-color: white !important; 
-              padding: 0 !important; 
-              margin: 0 !important; 
-              transform: none !important; 
-            }
-            #pdf-capture-area, .print-template { 
-              height: 297mm !important; 
-              width: 210mm !important; 
-              margin: 0 !important; 
-              padding: 10mm 15mm !important;
-              border: none !important;
-              box-shadow: none !important;
-              transform: none !important; /* 모바일 흰 화면 방지 핵심 */
-              overflow: hidden !important; 
-              display: block !important;
-              background: white !important;
-              opacity: 1 !important;
-              visibility: visible !important;
-            }
-          }
-        `;
-      }
-      
-      // PC 웹 레이아웃 (표준 A4)
-      return `
-        @page { size: A4; margin: 10mm; }
-        @media print {
-          .print-template { 
-            box-shadow: none !important;
-            margin: 0 auto !important;
-          }
+    pageStyle: isMobileTarget ? `
+      @page { size: A4; margin: 0 !important; }
+      @media print {
+        html, body {
+          height: 297mm !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: hidden !important;
+          background-color: white !important;
         }
-      `;
-    }
+        .print-template-wrapper { 
+          background-color: white !important; 
+          padding: 0 !important; 
+          margin: 0 !important; 
+          transform: none !important; 
+        }
+        #pdf-capture-area, .print-template { 
+          height: 297mm !important; 
+          width: 210mm !important; 
+          margin: 0 !important; 
+          padding: 10mm 15mm !important;
+          border: none !important;
+          box-shadow: none !important;
+          transform: none !important; /* 모바일 흰 화면 방지 핵심 */
+          overflow: hidden !important; 
+          display: block !important;
+          background: white !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+      }
+    ` : `
+      @page { size: A4; margin: 10mm; }
+      @media print {
+        .print-template { 
+          box-shadow: none !important;
+          margin: 0 auto !important;
+        }
+      }
+    `
   });
 
   const handleEdit = () => {
@@ -580,6 +575,7 @@ export default function QuoteList() {
                   attachedImages={selectedQuote.attachedImages}
                   providerInfo={companyProfile}
                   includeVat={selectedQuote.includeVat !== false}
+                  isMobile={isMobileTarget}
                 />
               </div>
             </div>

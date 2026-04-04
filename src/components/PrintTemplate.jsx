@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import html2canvas from 'html2canvas';
 
-const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, discountReason, vat, grandTotal, providerInfo, remarks, includeVat = true, attachedImages = [] }, ref) => {
+const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, discountReason, vat, grandTotal, providerInfo, remarks, includeVat = true, attachedImages = [], isMobile: isMobileProp }, ref) => {
   const itemCount = items.length;
   const hasImages = attachedImages && attachedImages.length > 0;
 
@@ -17,7 +17,8 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
   // [수정] A4 고정 높이(297mm) 및 자동 스케일링 로직 보완
   const heightInPx = 1123;
   let contentScale = 1;
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0 && /Macintosh/.test(navigator.userAgent));
+  // 태블릿(아이패드 등) 포함 광범위 모바일 감지 (Prop 우선, 없을 시 자체 감지)
+  const isMobile = isMobileProp !== undefined ? isMobileProp : (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0 && /Macintosh/.test(navigator.userAgent)));
   
   // 아이템 수와 이미지 여부에 따라 미세 스케일 조정
   if (hasImages) {
