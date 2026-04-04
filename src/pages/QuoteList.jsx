@@ -94,8 +94,8 @@ export default function QuoteList() {
     setIsPreparing(true);
     try {
       const result = await generatePDF();
-      if (result && result.blob) {
-        const url = URL.createObjectURL(result.blob);
+      if (result && result.pdfBlob) {
+        const url = URL.createObjectURL(result.pdfBlob);
         // [핵심] 준비된 창의 위치를 업데이트
         printWin.location.href = url;
       } else {
@@ -414,8 +414,11 @@ export default function QuoteList() {
           alert("파일이 다운로드되었습니다. 갤러리 앱에서 확인해주세요.");
         }
       } else {
-        /** [3] PC 웹: 이미지 다운로드 + 고화질 카톡 피드 (링크 최소화) **/
-        downloadFile(imgBlob, `${fileName}.jpg`);
+        /** [3] PC 웹: PDF 다운로드 + 미리보기 창 + 카톡 피드 (롤백) **/
+        // PDF 저장 및 미리보기 (사장님 이전 요청 방식)
+        downloadFile(pdfBlob, `${fileName}.pdf`);
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        window.open(pdfUrl, '_blank');
 
         if (window.Kakao && window.Kakao.isInitialized()) {
           const uploadResult = await window.Kakao.Share.uploadImage({
