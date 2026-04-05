@@ -8,7 +8,7 @@ export default function Guide() {
   const steps = [
     {
       title: "Step 1: 회사 정보 기입",
-      description: "내 회사의 로고와 직인을 등록하세요. 한 번만 등록하면 모든 견적서에 자동으로 박힙니다.",
+      description: "내 회사의 정보와 직인을 등록하세요. 한 번만 등록하면 모든 견적서에 자동으로 박힙니다.",
       icon: <Settings size={32} />,
       image: "/images/guide/step1.png",
       color: "var(--primary-color)",
@@ -16,7 +16,7 @@ export default function Guide() {
     },
     {
       title: "Step 2: 항목 선택",
-      description: "내 세트에서 1초 만에 소환! 필요한 자재들을 리스트에서 터치 한 번으로 불러오세요.",
+      description: "내 세트에서 1초 만에 소환! 자주 쓰는 자재들을 리스트에서 터치 한 번으로 불러오세요.",
       icon: <MousePointer2 size={32} />,
       image: "/images/guide/step2.png",
       color: "var(--accent-color)",
@@ -54,10 +54,10 @@ export default function Guide() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
         {steps.map((step, index) => (
-          <div key={index} className="card" style={{ 
-            display: 'flex', 
+          <div key={index} className="card" style={{
+            display: 'flex',
             flexDirection: window.innerWidth < 768 ? 'column' : (index % 2 === 0 ? 'row' : 'row-reverse'),
-            gap: '2.5rem', 
+            gap: '2.5rem',
             alignItems: 'center',
             padding: '2.5rem',
             borderRadius: '24px',
@@ -65,16 +65,16 @@ export default function Guide() {
             boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)'
           }}>
             <div style={{ flex: 1 }}>
-              <div style={{ 
-                width: 64, 
-                height: 64, 
-                backgroundColor: step.bg, 
-                color: step.color, 
-                borderRadius: '16px', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                marginBottom: '1.5rem' 
+              <div style={{
+                width: 64,
+                height: 64,
+                backgroundColor: step.bg,
+                color: step.color,
+                borderRadius: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '1.5rem'
               }}>
                 {step.icon}
               </div>
@@ -84,16 +84,16 @@ export default function Guide() {
               </p>
             </div>
             <div style={{ flex: 1.2, width: '100%' }}>
-              <img 
-                src={step.image} 
-                alt={step.title} 
-                style={{ 
-                  width: '100%', 
-                  height: 'auto', 
+              <img
+                src={step.image}
+                alt={step.title}
+                style={{
+                  width: '100%',
+                  height: 'auto',
                   borderRadius: '16px',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                   display: 'block'
-                }} 
+                }}
               />
             </div>
           </div>
@@ -102,12 +102,12 @@ export default function Guide() {
 
       <div style={{ textAlign: 'center', marginTop: '5rem', padding: '4rem 2rem', backgroundColor: '#f8fafc', borderRadius: '32px' }}>
         <h3 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', marginBottom: '1.5rem' }}>준비가 되셨나요?</h3>
-        <button 
-          onClick={() => navigate('/create')} 
-          className="btn btn-primary btn-bounce" 
-          style={{ 
-            padding: '1.25rem 3rem', 
-            fontSize: '1.25rem', 
+        <button
+          onClick={() => navigate('/create')}
+          className="btn btn-primary btn-bounce"
+          style={{
+            padding: '1.25rem 3rem',
+            fontSize: '1.25rem',
             fontWeight: 700,
             borderRadius: '16px',
             boxShadow: '0 10px 20px -5px rgba(59, 130, 246, 0.5)'

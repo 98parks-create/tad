@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  Calculator, 
-  FileText, 
-  MousePointer2, 
-  Send, 
-  ArrowRight, 
-  Clock, 
-  AlertCircle, 
+import {
+  Calculator,
+  FileText,
+  MousePointer2,
+  Send,
+  ArrowRight,
+  Clock,
+  AlertCircle,
   Smartphone,
   Quote,
   CheckCircle2
@@ -60,19 +60,19 @@ export default function Landing() {
 
   return (
     <div style={{ backgroundColor: '#ffffff', minHeight: '100vh', fontFamily: "'Inter', sans-serif", color: '#1e293b' }}>
-      
+
       {/* Navbar */}
-      <nav style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        padding: '1.25rem 2rem', 
-        backgroundColor: 'rgba(255,255,255,0.8)', 
+      <nav style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '1.25rem 2rem',
+        backgroundColor: 'rgba(255,255,255,0.8)',
         backdropFilter: 'blur(10px)',
-        position: 'sticky', 
-        top: 0, 
-        zIndex: 100, 
-        borderBottom: '1px solid #e2e8f0' 
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        borderBottom: '1px solid #e2e8f0'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{ width: 40, height: 40, backgroundColor: '#1d4ed8', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -108,14 +108,14 @@ export default function Landing() {
             ))}
           </div>
 
-          <button onClick={() => navigate('/signup')} className="btn-bounce" style={{ 
-            backgroundColor: '#1d4ed8', 
-            color: 'white', 
-            border: 'none', 
-            padding: '1.5rem 3rem', 
-            fontSize: '1.4rem', 
-            fontWeight: 800, 
-            borderRadius: '20px', 
+          <button onClick={() => navigate('/signup')} className="btn-bounce" style={{
+            backgroundColor: '#1d4ed8',
+            color: 'white',
+            border: 'none',
+            padding: '1.5rem 3rem',
+            fontSize: '1.4rem',
+            fontWeight: 800,
+            borderRadius: '20px',
             cursor: 'pointer',
             boxShadow: '0 20px 30px -10px rgba(29, 78, 216, 0.4)',
             transition: 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
@@ -126,23 +126,23 @@ export default function Landing() {
 
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           {/* iPhone Mockup Container */}
-          <div style={{ 
-            width: '320px', 
-            height: '650px', 
-            backgroundColor: '#000', 
-            borderRadius: '50px', 
-            padding: '12px', 
+          <div style={{
+            width: '320px',
+            height: '650px',
+            backgroundColor: '#000',
+            borderRadius: '50px',
+            padding: '12px',
             boxShadow: '0 50px 100px -20px rgba(0,0,0,0.3)',
             position: 'relative',
             border: '8px solid #1e293b'
           }}>
             <div style={{ position: 'absolute', top: '15px', left: '50%', transform: 'translateX(-50%)', width: '80px', height: '25px', backgroundColor: '#000', borderRadius: '0 0 15px 15px', zIndex: 10 }}></div>
             <div style={{ width: '100%', height: '100%', backgroundColor: '#fff', borderRadius: '38px', overflow: 'hidden' }}>
-              <video 
-                autoPlay 
-                loop 
-                muted 
-                playsInline 
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               >
                 <source src="/tadone.mp4" type="video/mp4" />
@@ -179,7 +179,7 @@ export default function Landing() {
       <section style={{ backgroundColor: '#1e3a8a', padding: '10rem 2rem', color: 'white', textAlign: 'center', overflow: 'hidden' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '5rem', opacity: 0.9 }}>이미 수많은 사장님이 TAD와 함께하고 있습니다</h2>
-          
+
           <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 768 ? '1fr' : '1fr 1fr 1fr', gap: '4rem', marginBottom: '8rem' }}>
             {stats.map((stat, i) => (
               <div key={i}>
@@ -205,12 +205,12 @@ export default function Landing() {
       <section style={{ padding: '10rem 2rem', maxWidth: '1000px', margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 768 ? '1fr' : '400px 1fr', gap: '4rem', alignItems: 'center' }}>
           <div style={{ position: 'relative' }}>
-            <div style={{ 
-              width: '100%', 
-              height: '500px', 
-              borderRadius: '40px', 
-              backgroundImage: 'url(/images/founder.png)', 
-              backgroundSize: 'cover', 
+            <div style={{
+              width: '100%',
+              height: '500px',
+              borderRadius: '40px',
+              backgroundImage: 'url(/images/founder.png)',
+              backgroundSize: 'cover',
               backgroundPosition: 'center',
               boxShadow: '0 30px 60px -15px rgba(0,0,0,0.2)'
             }}></div>
@@ -225,15 +225,15 @@ export default function Landing() {
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <p style={{ fontSize: '1.25rem', color: '#475569', lineHeight: 1.7 }}>
-                "30년 간 간판과 인테리어 외길을 걸어왔습니다. 
+                "30년 간 간판과 광고물 제조업을 걸어왔습니다.
                 차 안에서, 식당에서 고객의 독촉 전화를 받으며 엑셀을 켜야 하는 그 막막함을 누구보다 잘 알고 있습니다."
               </p>
               <p style={{ fontSize: '1.25rem', color: '#475569', lineHeight: 1.7, fontWeight: 600 }}>
-                "현장에서 얻은 노하우를 이 앱 하나에 다 녹였습니다. 
+                "현장에서 얻은 노하우를 이 앱 하나에 다 녹였습니다.
                 복잡한 계산 대신 사장님의 소중한 삶과 비즈니스에만 몰입하시기 바랍니다."
               </p>
               <div style={{ marginTop: '1rem' }}>
-                <p style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>TAD 개발 자문, 박인서 사장</p>
+                <p style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>TAD 개발 자문, 박정우 사장</p>
                 <p style={{ color: '#64748b', fontWeight: 600 }}>30년 광고/인테리어 외길 인생</p>
               </div>
             </div>
@@ -246,46 +246,46 @@ export default function Landing() {
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <h4 style={{ color: 'white', fontSize: '2rem', margin: '0 0 1rem 0', fontWeight: 800 }}>TAD Smart Quote</h4>
           <p style={{ color: '#cbd5e1', fontSize: '1.2rem', marginTop: 0, marginBottom: '3rem' }}>대한민국 자영업자를 위한 스마트 견적 자동화</p>
-          
+
           <div style={{ marginBottom: '3rem', fontSize: '1rem', lineHeight: '1.8', color: '#64748b' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1.5rem', marginBottom: '1.5rem' }}>
               <Link to="/terms" style={{ color: 'inherit', textDecoration: 'none' }}>이용약관</Link>
               <Link to="/privacy" style={{ color: 'inherit', textDecoration: 'none' }}>개인정보처리방침</Link>
               <Link to="/refund" style={{ color: 'inherit', textDecoration: 'none' }}>환불규정</Link>
             </div>
-            상호명: 태드스마트견적(TAD) | 대표자명: 박인서 | 사업자등록번호: 387-14-02824<br/>
-            사업장 소재지: 성남시 수정구 산성대로 305<br/>
-            고객센터: 010-6456-1084 | 이메일: inseopark7@naver.com
+            상호명: 태드스마트견적(TAD) | 대표자명: 박인서 | 사업자등록번호: 387-14-02824<br />
+            사업장 소재지: 성남시 수정구 산성대로 305<br />
+            고객센터: 010-6456-1084 | 이메일: 98parks@gmail.com
           </div>
           <p style={{ fontSize: '0.9rem', opacity: 0.5 }}>&copy; {new Date().getFullYear()} 태드스마트견적(TAD). All rights reserved.</p>
         </div>
       </footer>
 
       {/* Sticky Bottom CTA */}
-      <div style={{ 
-        position: 'fixed', 
-        bottom: '2rem', 
-        left: 0, 
-        right: 0, 
-        display: 'flex', 
-        justifyContent: 'center', 
-        zIndex: 1000, 
+      <div style={{
+        position: 'fixed',
+        bottom: '2rem',
+        left: 0,
+        right: 0,
+        display: 'flex',
+        justifyContent: 'center',
+        zIndex: 1000,
         padding: '0 1rem',
         opacity: scrolled ? 1 : 0,
         pointerEvents: scrolled ? 'auto' : 'none',
         transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
         transform: scrolled ? 'translateY(0)' : 'translateY(100px)'
       }}>
-        <button 
-          onClick={() => navigate('/signup')} 
-          style={{ 
-            backgroundColor: '#1d4ed8', 
-            color: 'white', 
-            border: 'none', 
-            padding: '1.2rem 4rem', 
-            fontSize: '1.2rem', 
-            fontWeight: 800, 
-            borderRadius: '100px', 
+        <button
+          onClick={() => navigate('/signup')}
+          style={{
+            backgroundColor: '#1d4ed8',
+            color: 'white',
+            border: 'none',
+            padding: '1.2rem 4rem',
+            fontSize: '1.2rem',
+            fontWeight: 800,
+            borderRadius: '100px',
             boxShadow: '0 15px 30px rgba(29, 78, 216, 0.4)',
             display: 'flex',
             alignItems: 'center',
