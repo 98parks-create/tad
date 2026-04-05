@@ -123,7 +123,9 @@ export default function QuoteList() {
       try {
         const result = await generatePDF();
         if (result && result.pdfBlob) {
-          const url = URL.createObjectURL(result.pdfBlob);
+          const fileName = `[${selectedQuote.customerInfo.project || '현장명'}]견적서.pdf`; 
+          const pdfFile = new File([result.pdfBlob], fileName, { type: 'application/pdf' });
+          const url = URL.createObjectURL(pdfFile);
           printWin.location.href = url;
         } else {
           printWin.close();
