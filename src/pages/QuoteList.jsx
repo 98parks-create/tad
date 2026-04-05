@@ -62,7 +62,7 @@ export default function QuoteList() {
   // [표준] PC 전용 인쇄 핸들러
   const handlePrintStandard = useReactToPrint({
     contentRef: printRef,
-    documentTitle: `견적서_${selectedQuote?.customerInfo?.project || Date.now()}`,
+    documentTitle: `(${selectedQuote?.customerInfo?.project || '현장명'})견적서`,
     pageStyle: `
       @page { size: A4; margin: 10mm; }
       @media print {
@@ -336,7 +336,7 @@ export default function QuoteList() {
         try {
           const result = await generatePDF();
           if (result) {
-            const baseFileName = `견적서_${selectedQuote.customerInfo.project || '미정'}_${selectedQuote.customerInfo.name || '고객'}`;
+            const baseFileName = `(${selectedQuote.customerInfo.project || '현장명'})견적서`;
             const imgFile = new File([result.imgBlob], `${baseFileName}.jpg`, { type: 'image/jpeg' });
             const pdfFile = new File([result.pdfBlob], `${baseFileName}.pdf`, { type: 'application/pdf' });
             
@@ -397,26 +397,22 @@ export default function QuoteList() {
         downloadFile(pdfBlob, `${fileName}.pdf`);
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
           await navigator.share({
-            files: [pdfFile],
-            title: `[TAD견적서] ${selectedQuote.customerInfo.project || '안내'}`,
-            text: `${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.`,
+            files: [pdfFile]
           });
         }
       } else if (isMobileTarget) {
-        /** [2] 모바일 웹(브라우저): 통합 공유창 (이미지 파일 그대로 전송) **/
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [imgFile] })) {
+        /** [2] 모바일 웹(브라우저): 통합 공유창 (PDF 파일 그대로 전송) **/
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
           try {
             await navigator.share({
-              files: [imgFile],
-              title: `[TAD견적서] ${selectedQuote.customerInfo.project || '안내'}`,
-              text: `${selectedQuote.customerInfo.name || '고객'}님 견적서입니다.`,
+              files: [pdfFile]
             });
           } catch (shareErr) {
             if (shareErr.name !== 'AbortError') throw shareErr;
           }
         } else {
-          downloadFile(imgBlob, `${fileName}.jpg`);
-          alert("파일이 다운로드되었습니다. 갤러리 앱에서 확인해주세요.");
+          downloadFile(pdfBlob, `${fileName}.pdf`);
+          alert("견적서 파일이 다운로드되었습니다.");
         }
       } else {
         /** [3] PC 웹: 이미지 복사 + PDF 저장 + PDF 즉시 열기 (진짜 "파일" 공유 연계) **/
