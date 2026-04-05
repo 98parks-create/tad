@@ -62,7 +62,7 @@ export default function QuoteList() {
   // [표준] PC 전용 인쇄 핸들러
   const handlePrintStandard = useReactToPrint({
     contentRef: printRef,
-    documentTitle: `(${selectedQuote?.customerInfo?.project || '현장명'})+견적서`,
+    documentTitle: `[${selectedQuote?.customerInfo?.project || '현장명'}]견적서`,
     pageStyle: `
       @page { size: A4; margin: 10mm; }
       @media print {
@@ -81,30 +81,61 @@ export default function QuoteList() {
       return;
     }
 
-    // 모바일/태블릿 (PWA 포함): 직접 공유 실행
-    setIsPreparing(true);
-    try {
-      const result = await generatePDF();
-      if (result && result.pdfBlob) {
-        const fileName = `(${selectedQuote.customerInfo.project || '현장명'})+견적서.pdf`; 
-        const pdfFile = new File([result.pdfBlob], fileName, { type: 'application/pdf' });
-        
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-          await navigator.share({
-            files: [pdfFile]
-          });
+    // 구분: 설치형 앱(PWA) vs 일반 모바일 웹
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator?.standalone === true;
+
+    if (isStandalone) {
+      // 앱(PWA): 직접 공유 실행
+      setIsPreparing(true);
+      try {
+        const result = await generatePDF();
+        if (result && result.pdfBlob) {
+          const fileName = `[${selectedQuote.customerInfo.project || '현장명'}]견적서.pdf`; 
+          const pdfFile = new File([result.pdfBlob], fileName, { type: 'application/pdf' });
+          
+          if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+            await navigator.share({
+              files: [pdfFile],
+              url: undefined
+            });
+          } else {
+            downloadFile(result.pdfBlob, fileName);
+          }
         } else {
-          // 공유 미지원 시 브라우저 기본 다운로드/열기 시도
-          downloadFile(result.pdfBlob, fileName);
+          alert("PDF 생성에 실패했습니다.");
         }
-      } else {
-        alert("PDF 생성에 실패했습니다.");
+      } catch (err) {
+        console.error("App print error:", err);
+        alert("출력 준비 중 오류가 발생했습니다.");
+      } finally {
+        setIsPreparing(false);
       }
-    } catch (err) {
-      console.error("Mobile print error:", err);
-      alert("출력 준비 중 오류가 발생했습니다.");
-    } finally {
-      setIsPreparing(false);
+    } else {
+      // 일반 모바일 웹: 이전 방식(새 창 열기)으로 롤백 (출력 오류 대응)
+      const printWin = window.open('', '_blank');
+      if (!printWin) {
+        alert("팝업이 차단되었습니다. 브라우저 설정에서 팝업 허용을 확인해주세요.");
+        return;
+      }
+      printWin.document.write('<html><head><title>견적서 생성 중</title></head><body style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;"><div><h3>견적서를 생성 중입니다...</h3><p>잠시만 기다려주세요.</p></div></body></html>');
+
+      setIsPreparing(true);
+      try {
+        const result = await generatePDF();
+        if (result && result.pdfBlob) {
+          const url = URL.createObjectURL(result.pdfBlob);
+          printWin.location.href = url;
+        } else {
+          printWin.close();
+          alert("PDF 생성에 실패했습니다.");
+        }
+      } catch (err) {
+        console.error("Mobile web print error:", err);
+        printWin.close();
+        alert("출력 준비 중 오류가 발생했습니다.");
+      } finally {
+        setIsPreparing(false);
+      }
     }
   };
 
@@ -333,7 +364,7 @@ export default function QuoteList() {
         try {
           const result = await generatePDF();
           if (result) {
-            const baseFileName = `(${selectedQuote.customerInfo.project || '현장명'})+견적서`;
+            const baseFileName = `[${selectedQuote.customerInfo.project || '현장명'}]견적서`;
             const imgFile = new File([result.imgBlob], `${baseFileName}.jpg`, { type: 'image/jpeg' });
             const pdfFile = new File([result.pdfBlob], `${baseFileName}.pdf`, { type: 'application/pdf' });
             
