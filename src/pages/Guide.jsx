@@ -1,78 +1,120 @@
 import React from 'react';
-import { Settings, Edit3, Send, Download } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Settings, MousePointer2, Edit3, Send, ArrowRight } from 'lucide-react';
 
 export default function Guide() {
+  const navigate = useNavigate();
+
+  const steps = [
+    {
+      title: "Step 1: 회사 정보 기입",
+      description: "내 회사의 로고와 직인을 등록하세요. 한 번만 등록하면 모든 견적서에 자동으로 박힙니다.",
+      icon: <Settings size={32} />,
+      image: "/images/guide/step1.png",
+      color: "var(--primary-color)",
+      bg: "rgba(59, 130, 246, 0.1)"
+    },
+    {
+      title: "Step 2: 항목 선택",
+      description: "내 세트에서 1초 만에 소환! 필요한 자재들을 리스트에서 터치 한 번으로 불러오세요.",
+      icon: <MousePointer2 size={32} />,
+      image: "/images/guide/step2.png",
+      color: "var(--accent-color)",
+      bg: "rgba(16, 185, 129, 0.1)"
+    },
+    {
+      title: "Step 3: 금액 수정",
+      description: "현장 상황에 맞게 톡톡 수정! 수량과 단가를 자유롭게 조정하여 최종 금액을 확인하세요.",
+      icon: <Edit3 size={32} />,
+      image: "/images/guide/step3.png",
+      color: "#f59e0b",
+      bg: "rgba(245, 158, 11, 0.1)"
+    },
+    {
+      title: "Step 4: PDF 전송",
+      description: "버튼 눌러 저장 및 카톡 공유! 완성된 견적서를 PDF로 저장하고 고객에게 즉시 전달하세요.",
+      icon: <Send size={32} />,
+      image: "/images/guide/step4.png",
+      color: "var(--success-color)",
+      bg: "rgba(34, 197, 94, 0.1)"
+    }
+  ];
+
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1rem' }}>
-      <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-        <h2 style={{ fontSize: '2.2rem', color: 'var(--primary-color)', marginBottom: '1rem', fontWeight: 800 }}>
-          3분 만에 마스터하는 태드 활용법
+    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '3rem 1.5rem' }}>
+      <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+        <h2 style={{ fontSize: '2.5rem', color: '#0f172a', marginBottom: '1.2rem', fontWeight: 800, letterSpacing: '-1px' }}>
+          TAD 시작하기: <span style={{ color: 'var(--primary-color)' }}>딱 1분 완성 가이드</span>
         </h2>
-        <p style={{ fontSize: '1.2rem', color: 'var(--text-light)', fontWeight: 500 }}>
-          누구나 쉽게 전문가급 견적서를 만들 수 있습니다.
+        <p style={{ fontSize: '1.25rem', color: '#64748b', fontWeight: 500, lineHeight: 1.6 }}>
+          현장의 노하우를 담은 가장 빠른 견적 솔루션,<br />
+          아래 단계를 따라 스마트하게 시작해 보세요.
         </p>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-        {/* Step 1 */}
-        <div className="card" style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', borderLeft: '6px solid var(--primary-color)' }}>
-          <div style={{ backgroundColor: 'var(--primary-light)', color: 'white', padding: '1rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justify: 'center', flexShrink: 0 }}>
-            <Settings size={32} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+        {steps.map((step, index) => (
+          <div key={index} className="card" style={{ 
+            display: 'flex', 
+            flexDirection: window.innerWidth < 768 ? 'column' : (index % 2 === 0 ? 'row' : 'row-reverse'),
+            gap: '2.5rem', 
+            alignItems: 'center',
+            padding: '2.5rem',
+            borderRadius: '24px',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)'
+          }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ 
+                width: 64, 
+                height: 64, 
+                backgroundColor: step.bg, 
+                color: step.color, 
+                borderRadius: '16px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                marginBottom: '1.5rem' 
+              }}>
+                {step.icon}
+              </div>
+              <h3 style={{ fontSize: '1.6rem', marginBottom: '1rem', color: '#1e293b', fontWeight: 800 }}>{step.title}</h3>
+              <p style={{ fontSize: '1.15rem', color: '#475569', lineHeight: 1.7, margin: 0 }}>
+                {step.description}
+              </p>
+            </div>
+            <div style={{ flex: 1.2, width: '100%' }}>
+              <img 
+                src={step.image} 
+                alt={step.title} 
+                style={{ 
+                  width: '100%', 
+                  height: 'auto', 
+                  borderRadius: '16px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                  display: 'block'
+                }} 
+              />
+            </div>
           </div>
-          <div>
-            <h3 style={{ fontSize: '1.4rem', marginBottom: '0.5rem', color: 'var(--text-dark)' }}>Step 1. 내 회사 설정 (내 정보)</h3>
-            <p style={{ fontSize: '1.1rem', color: 'var(--text-light)', lineHeight: 1.6 }}>
-              원활한 서비스 이용을 위해 가장 먼저 대표님의 <b>회사 정보</b>를 입력해주세요.<br/>
-              <b>상호, 대표자명, 사업자번호 등 기본 정보와 도장 사진</b>을 단 한 번만 등록해두시면 <br/>
-              앞으로 작성하시는 모든 견적서 하단에 자동으로 멋지게 날인되어 들어갑니다!
-            </p>
-          </div>
-        </div>
+        ))}
+      </div>
 
-        {/* Step 2 */}
-        <div className="card" style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', borderLeft: '6px solid var(--accent-color)' }}>
-          <div style={{ backgroundColor: 'var(--accent-color)', color: 'white', padding: '1rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justify: 'center', flexShrink: 0 }}>
-            <Edit3 size={32} />
-          </div>
-          <div>
-            <h3 style={{ fontSize: '1.4rem', marginBottom: '0.5rem', color: 'var(--text-dark)' }}>Step 2. 현장에서 바로 견적서 쓰기</h3>
-            <p style={{ fontSize: '1.1rem', color: 'var(--text-light)', lineHeight: 1.6 }}>
-              고객명, 품목, 단가만 넣으세요.<br/>
-              <b>복잡한 합계와 부가세 계산은 태드가 알아서</b> 합니다.<br/>
-              현장 증빙 사진도 스마트폰에서 바로 찍어 밑에 첨부하세요.
-            </p>
-          </div>
-        </div>
-
-        {/* Step 3 */}
-        <div className="card" style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', borderLeft: '6px solid #f59e0b' }}>
-          <div style={{ backgroundColor: '#f59e0b', color: 'white', padding: '1rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justify: 'center', flexShrink: 0 }}>
-            <Send size={32} />
-          </div>
-          <div>
-            <h3 style={{ fontSize: '1.4rem', marginBottom: '0.5rem', color: 'var(--text-dark)' }}>Step 3. 1초 만에 카톡 전송</h3>
-            <p style={{ fontSize: '1.1rem', color: 'var(--text-light)', lineHeight: 1.6 }}>
-              작성 완료된 견적서를 <b>이미지(JPG) 또는 PDF</b>로 저장해<br/>
-              고객님께 카카오톡으로 바로 보내세요.<br/>
-              깔끔한 디자인으로 사장님의 신뢰도가 2배 올라갑니다.
-            </p>
-          </div>
-        </div>
-
-        {/* Step 4 */}
-        <div className="card" style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', borderLeft: '6px solid var(--success-color)' }}>
-          <div style={{ backgroundColor: 'var(--success-color)', color: 'white', padding: '1rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justify: 'center', flexShrink: 0 }}>
-            <Download size={32} />
-          </div>
-          <div>
-            <h3 style={{ fontSize: '1.4rem', marginBottom: '0.5rem', color: 'var(--text-dark)' }}>Step 4. 퇴근 전 홈택스 마무리</h3>
-            <p style={{ fontSize: '1.1rem', color: 'var(--text-light)', lineHeight: 1.6 }}>
-              하루 일과가 끝난 후, 오늘 발행한 내역을 리스트에서 선택해<br/>
-              <b>'홈택스 엑셀 다운로드'</b> 버튼 한 번만 누르세요.<br/>
-              골치 아픈 세금계산서 발행 업무가 10초 만에 끝납니다.
-            </p>
-          </div>
-        </div>
+      <div style={{ textAlign: 'center', marginTop: '5rem', padding: '4rem 2rem', backgroundColor: '#f8fafc', borderRadius: '32px' }}>
+        <h3 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', marginBottom: '1.5rem' }}>준비가 되셨나요?</h3>
+        <button 
+          onClick={() => navigate('/create')} 
+          className="btn btn-primary btn-bounce" 
+          style={{ 
+            padding: '1.25rem 3rem', 
+            fontSize: '1.25rem', 
+            fontWeight: 700,
+            borderRadius: '16px',
+            boxShadow: '0 10px 20px -5px rgba(59, 130, 246, 0.5)'
+          }}
+        >
+          지금 바로 첫 견적 작성하기 <ArrowRight size={24} style={{ marginLeft: '0.5rem' }} />
+        </button>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { getAuth, signInWithCustomToken } from 'firebase/auth';
+import { getProfile } from '../services/profileService';
 
 export default function AuthCallback() {
   const [params] = useSearchParams();
@@ -48,8 +49,16 @@ export default function AuthCallback() {
 
         if (data.customToken) {
           const auth = getAuth();
-          await signInWithCustomToken(auth, data.customToken);
-          navigate('/');
+          const userCredential = await signInWithCustomToken(auth, data.customToken);
+          const uid = userCredential.user.uid;
+
+          // Check if profile exists to determine if it's a new user
+          const profile = await getProfile(uid);
+          if (!profile) {
+            navigate('/guide');
+          } else {
+            navigate('/');
+          }
         } else {
           throw new Error('로그인에 실패했습니다. 유효한 토큰이 없습니다.');
         }
