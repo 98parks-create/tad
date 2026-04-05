@@ -62,7 +62,7 @@ export default function QuoteList() {
   // [표준] PC 전용 인쇄 핸들러
   const handlePrintStandard = useReactToPrint({
     contentRef: printRef,
-    documentTitle: `(${selectedQuote?.customerInfo?.project || '현장명'})견적서`,
+    documentTitle: `(${selectedQuote?.customerInfo?.project || '현장명'})+견적서`,
     pageStyle: `
       @page { size: A4; margin: 10mm; }
       @media print {
@@ -81,30 +81,27 @@ export default function QuoteList() {
       return;
     }
 
-    // 모바일/태블릿 (PWA 포함): 팝업 차단 방지를 위해 즉시 창 열기 (User Gesture 확보)
-    const printWin = window.open('', '_blank');
-    if (!printWin) {
-      alert("팝업이 차단되었습니다. 브라우저 설정에서 팝업 허용을 확인해주세요.");
-      return;
-    }
-    
-    // 로딩 문구 삽입
-    printWin.document.write('<html><head><title>견적서 생성 중</title></head><body style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;"><div><h3>견적서를 생성 중입니다...</h3><p>잠시만 기다려주세요.</p></div></body></html>');
-
+    // 모바일/태블릿 (PWA 포함): 직접 공유 실행
     setIsPreparing(true);
     try {
       const result = await generatePDF();
       if (result && result.pdfBlob) {
-        const url = URL.createObjectURL(result.pdfBlob);
-        // [핵심] 준비된 창의 위치를 업데이트
-        printWin.location.href = url;
+        const fileName = `(${selectedQuote.customerInfo.project || '현장명'})+견적서.pdf`; 
+        const pdfFile = new File([result.pdfBlob], fileName, { type: 'application/pdf' });
+        
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+          await navigator.share({
+            files: [pdfFile]
+          });
+        } else {
+          // 공유 미지원 시 브라우저 기본 다운로드/열기 시도
+          downloadFile(result.pdfBlob, fileName);
+        }
       } else {
-        printWin.close();
         alert("PDF 생성에 실패했습니다.");
       }
     } catch (err) {
       console.error("Mobile print error:", err);
-      printWin.close();
       alert("출력 준비 중 오류가 발생했습니다.");
     } finally {
       setIsPreparing(false);
@@ -336,7 +333,7 @@ export default function QuoteList() {
         try {
           const result = await generatePDF();
           if (result) {
-            const baseFileName = `(${selectedQuote.customerInfo.project || '현장명'})견적서`;
+            const baseFileName = `(${selectedQuote.customerInfo.project || '현장명'})+견적서`;
             const imgFile = new File([result.imgBlob], `${baseFileName}.jpg`, { type: 'image/jpeg' });
             const pdfFile = new File([result.pdfBlob], `${baseFileName}.pdf`, { type: 'application/pdf' });
             
@@ -397,7 +394,8 @@ export default function QuoteList() {
         downloadFile(pdfBlob, `${fileName}.pdf`);
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
           await navigator.share({
-            files: [pdfFile]
+            files: [pdfFile],
+            url: undefined // 브라우저가 현재 주소를 임의로 추가하는 것을 방지
           });
         }
       } else if (isMobileTarget) {
@@ -405,7 +403,8 @@ export default function QuoteList() {
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
           try {
             await navigator.share({
-              files: [pdfFile]
+              files: [pdfFile],
+              url: undefined // 브라우저가 현재 주소를 임의로 추가하는 것을 방지
             });
           } catch (shareErr) {
             if (shareErr.name !== 'AbortError') throw shareErr;
