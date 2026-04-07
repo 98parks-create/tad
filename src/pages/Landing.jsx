@@ -12,9 +12,11 @@ import {
   Quote,
   CheckCircle2
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function Landing() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -99,11 +101,20 @@ export default function Landing() {
             복잡한 계산은 태드가, 사장님은 비즈니스에만 집중하세요.
           </p>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', backgroundColor: '#f1f5f9', padding: '1.5rem', borderRadius: '24px', marginBottom: '3rem', justifyContent: window.innerWidth < 992 ? 'center' : 'flex-start' }}>
-            {steps.map((step, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, color: '#64748b', fontSize: '0.95rem' }}>
-                <span style={{ color: '#1d4ed8' }}>{step.icon}</span> {step.name}
-                {i < steps.length - 1 && <ArrowRight size={14} style={{ opacity: 0.3 }} />}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginBottom: '3rem', width: '100%', maxWidth: '480px', marginLeft: window.innerWidth < 992 ? 'auto' : '0', marginRight: window.innerWidth < 992 ? 'auto' : '0' }}>
+            {[
+              { title: t('landing.features.f1_title'), desc: t('landing.features.f1_desc'), icon: '🚀' },
+              { title: t('landing.features.f2_title'), desc: t('landing.features.f2_desc'), icon: '📱' },
+              { title: t('landing.features.f3_title'), desc: t('landing.features.f3_desc'), icon: '💡' },
+              { title: t('landing.features.f4_title'), desc: t('landing.features.f4_desc'), icon: '📸' },
+              { title: t('landing.features.f5_title'), desc: t('landing.features.f5_desc'), icon: '🖨️' }
+            ].map((f, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', backgroundColor: '#f8fafc', padding: '1rem 1.2rem', borderRadius: '16px', border: '1px solid #e2e8f0', textAlign: 'left', transition: 'all 0.2s ease', cursor: 'default' }} onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.1)'; }} onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}>
+                <div style={{ fontSize: '2rem' }}>{f.icon}</div>
+                <div>
+                  <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '1.1rem' }}>{f.title}</div>
+                  <div style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '0.2rem', lineHeight: 1.4 }}>{f.desc}</div>
+                </div>
               </div>
             ))}
           </div>
@@ -148,6 +159,49 @@ export default function Landing() {
                 <source src="/tadone.mp4" type="video/mp4" />
               </video>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Comparison Section */}
+      <section style={{ padding: '6rem 2rem', backgroundColor: '#fff' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem', color: '#0f172a' }}>{t('landing.compare.title')}</h2>
+            <p style={{ fontSize: '1.2rem', color: '#64748b' }}>{t('landing.compare.subtitle')}</p>
+          </div>
+          <div style={{ overflowX: 'auto', borderRadius: '16px', boxShadow: '0 20px 40px -15px rgba(0,0,0,0.1)' }}>
+            <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse', textAlign: 'center', backgroundColor: '#fff' }}>
+              <thead>
+                <tr>
+                  <th style={{ width: '20%', padding: '2rem 1rem', borderBottom: '2px solid #e2e8f0', backgroundColor: '#f8fafc' }}></th>
+                  <th style={{ width: '40%', padding: '2rem 1rem', borderBottom: '2px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '1.2rem', color: '#64748b', fontWeight: 700 }}>{t('landing.compare.col_others')}</th>
+                  <th style={{ width: '40%', padding: '2rem 1rem', borderBottom: '4px solid #1d4ed8', backgroundColor: '#eff6ff', fontSize: '1.4rem', color: '#1d4ed8', fontWeight: 800 }}>{t('landing.compare.col_tad')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontWeight: 700, color: '#475569' }}>{t('landing.compare.row1_title')}</td>
+                  <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontSize: '1.2rem', textDecoration: 'line-through', color: '#94a3b8' }}>{t('landing.compare.row1_others')}</td>
+                  <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontSize: '1.4rem', fontWeight: 800, color: '#ef4444', backgroundColor: '#eff6ff' }}>{t('landing.compare.row1_tad')}</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontWeight: 700, color: '#475569' }}>{t('landing.compare.row2_title')}</td>
+                  <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', color: '#64748b' }}>{t('landing.compare.row2_others')}</td>
+                  <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontSize: '1.2rem', fontWeight: 700, color: '#1d4ed8', backgroundColor: '#eff6ff' }}>{t('landing.compare.row2_tad')}</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontWeight: 700, color: '#475569' }}>{t('landing.compare.row3_title')}</td>
+                  <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', color: '#64748b' }}>{t('landing.compare.row3_others')}</td>
+                  <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontSize: '1.2rem', fontWeight: 700, color: '#1d4ed8', backgroundColor: '#eff6ff' }}>{t('landing.compare.row3_tad')}</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '1.5rem', fontWeight: 700, color: '#475569' }}>{t('landing.compare.row4_title')}</td>
+                  <td style={{ padding: '1.5rem', color: '#64748b' }}>{t('landing.compare.row4_others')}</td>
+                  <td style={{ padding: '1.5rem', fontSize: '1.2rem', fontWeight: 700, color: '#1d4ed8', backgroundColor: '#eff6ff' }}>{t('landing.compare.row4_tad')}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
@@ -233,7 +287,7 @@ export default function Landing() {
                 복잡한 계산 대신 사장님의 소중한 삶과 비즈니스에만 몰입하시기 바랍니다."
               </p>
               <div style={{ marginTop: '1rem' }}>
-                <p style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>TAD 개발 자문, 박정우 사장</p>
+                <p style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>TAD 개발 자문, 박XX 사장</p>
                 <p style={{ color: '#64748b', fontWeight: 600 }}>30년 광고/인테리어 외길 인생</p>
               </div>
             </div>

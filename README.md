@@ -44,3 +44,12 @@ If you are developing a production application, we recommend using TypeScript wi
 - **UI Conflict Resolution:** 모바일 환경에서의 UI 요소 겹침(Overlapping) 현상 완전 해결
 - **Data Integrity:** QuoteList 인쇄 필드 누락 방지 및 DB 데이터 매칭 무결성 확보
 - **Responsive Patch:** 다양한 기기 해상도에서의 Flex/Grid 레이아웃 안정성 강화
+
+- ## 🚀 TAD v1.1 업데이트 (2026.04.07)
+
+#[주요 업데이트 내용]
+- 신규 기능: 입금기한 설정 및 미수금 현황을 한눈에 볼 수 있는 '수금 관리' 대시보드 탭 신설
+- 알림 자동화: 기한 초과 건에 대해 클릭 한 번으로 발송하는 카카오톡 재촉 알림 연동 기반 마련
+- 글로벌화: 한국어, 영어, 베트남어 다국어(i18n) 통합 팩 적용 및 언어 가변성 확보
+- 랜딩 개편: 신규 유저 유입을 높히는 5가지 핵심 기능 소개 및 직관적인 타사 가격 비교 섹션 추가
+- 버그 픽스: 견적서 작성 시 첨부하는 현장 증빙 사진이 유실되거나 인쇄 시 잘리는 현상을 오프스크린 자동 압축 방식(Base64)으로 완전히 개선

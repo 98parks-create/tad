@@ -1,0 +1,57 @@
+{
+  "landing": {
+    "features": {
+      "f1_title": "클릭 3번, 1분 컷 견적 작성",
+      "f1_desc": "복잡한 수식과 타이핑 없이 터치만으로 완성",
+      "f2_title": "카카오톡 원클릭 PDF 전송",
+      "f2_desc": "고객이 확인하기 가장 편한 형태로 즉시 발송",
+      "f3_title": "나만의 세트 단가표 저장",
+      "f3_desc": "자주 쓰는 구성은 묶어서 한 번에 불러오기",
+      "f4_title": "현장 사진 다중 첨부",
+      "f4_desc": "백 마디 말보다 확실한 사진 한 장. 견적서에 현장 전/후 사진을 바로 첨부하세요.",
+      "f5_title": "세금계산서/엑셀 자동 생성",
+      "f5_desc": "번거로운 홈택스 세금 계산서 발행, 직접 하지 마시고 버튼 하나로 해결하세요!"
+    },
+    "compare": {
+      "title": "타사와의 압도적인 가성비 비교",
+      "subtitle": "비싼 월 구독료? TAD에서는 상상할 수 없습니다.",
+      "col_others": "기존 타사 (월 3만원 대)",
+      "col_tad": "TAD (파격가)",
+      "row1_title": "월 이용료",
+      "row1_others": "33,000원",
+      "row1_tad": "9,900원",
+      "row2_title": "발행 건수",
+      "row2_others": "일부 제한",
+      "row2_tad": "무제한 ⭕",
+      "row3_title": "회사 정보/직인",
+      "row3_others": "설정 복잡",
+      "row3_tad": "1초 등록 끝",
+      "row4_title": "전송 방식",
+      "row4_others": "단순 링크",
+      "row4_tad": "PDF 자동 저장 & 카톡 전송"
+    }
+  },
+  "dashboard": {
+    "tabs": {
+      "home": "대시보드 홈",
+      "collection": "수금 관리"
+    },
+    "collection": {
+      "totalUnpaid": "총 미수금 현황",
+      "unpaidSubtitle": "입금 대기 중인 견적서 통합 금액입니다.",
+      "name": "고객명",
+      "dueDate": "결제 요청일",
+      "amount": "미수금",
+      "status": "상태",
+      "action": "작업",
+      "overdue": "지연",
+      "remind": "알림톡 재촉하기",
+      "remindSuccess": "고객에게 입금 요청 알림톡이 전송되었습니다.",
+      "noPending": "현재 입금 대기 중인 견적서가 없습니다."
+    }
+  },
+  "quote": {
+    "dueDate": "결제 요청일 (선택)",
+    "dueDatePlaceholder": "연도-월-일"
+  }
+}

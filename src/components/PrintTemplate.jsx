@@ -84,6 +84,7 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
           <div style={{ display: 'flex', justifyContent: 'space-between', textAlign: 'left', fontSize: '11pt' }}>
             <div style={{ lineHeight: '1.6' }}>
               <p style={{ margin: 0 }}><strong>견적일자:</strong> {customerInfo.date}</p>
+              {customerInfo.paymentDueDate && <p style={{ margin: 0, color: '#475569' }}><strong>결제요청일:</strong> {customerInfo.paymentDueDate}</p>}
               <div style={{ margin: '8px 0' }}>
                 <span style={{ fontSize: '15pt', fontWeight: 'bold', borderBottom: '2px solid #000', paddingBottom: '2px', display: 'inline-block' }}>
                   {customerInfo.company ? `${customerInfo.company} ` : ''}
@@ -164,7 +165,14 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
             ))}
             {Array.from({ length: Math.max(0, (hasImages ? 3 : 6) - sortedItems.length) }).map((_, i) => (
               <tr key={`empty-${i}`} style={{ height: styles.rowHeight }}>
-                <td colSpan="8" style={{ border: '1px solid #000' }}></td>
+                <td style={{ border: '1px solid #000', padding: styles.cellPadding }}></td>
+                <td style={{ border: '1px solid #000', padding: styles.cellPadding }}></td>
+                <td style={{ border: '1px solid #000', padding: styles.cellPadding }}></td>
+                <td style={{ border: '1px solid #000', padding: styles.cellPadding }}></td>
+                <td style={{ border: '1px solid #000', padding: styles.cellPadding }}></td>
+                <td style={{ border: '1px solid #000', padding: styles.cellPadding }}></td>
+                <td style={{ border: '1px solid #000', padding: styles.cellPadding }}></td>
+                <td style={{ border: '1px solid #000', padding: styles.cellPadding }}></td>
               </tr>
             ))}
           </tbody>
@@ -176,16 +184,19 @@ const PrintTemplate = forwardRef(({ customerInfo, items, subTotal, discount, dis
           {/* 현장 증빙 사진 (좌측 여백 활용) */}
           <div style={{ flex: 1, paddingRight: '15px' }}>
             {attachedImages && attachedImages.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <span style={{ fontSize: '8pt', color: '#64748b', fontWeight: 'bold' }}>[ 현장 증빙 사진 ]</span>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  {attachedImages.map((img, idx) => (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={{ fontSize: '9pt', color: '#475569', fontWeight: 'bold' }}>[ 현장 증빙 사진 ]</span>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'nowrap', width: '100%', maxWidth: '370px' }}>
+                  {attachedImages.slice(0, 3).map((img, idx) => (
                     <div key={idx} style={{
-                      width: '65px', height: '65px',
-                      border: '1px solid #cbd5e1', borderRadius: '4px', overflow: 'hidden',
-                      backgroundColor: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                      flex: attachedImages.length === 1 ? 'none' : '1',
+                      width: attachedImages.length === 1 ? '160px' : 'auto',
+                      height: '130px', 
+                      border: '1px solid #94a3b8', borderRadius: '6px', overflow: 'hidden',
+                      backgroundColor: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
                     }}>
-                      <img src={img} alt={`증빙사진 ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} crossOrigin="anonymous" />
+                      <img src={img} alt={`증빙사진 ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
                   ))}
                 </div>

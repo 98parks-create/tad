@@ -7,20 +7,22 @@ import { saveQuote, getQuotes } from '../services/quoteService';
 import { getProfile } from '../services/profileService';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function CreateQuote() {
   const { currentUser } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const editQuote = location.state?.editQuote;
 
-  const [customerInfo, setCustomerInfo] = useState(editQuote?.customerInfo || { name: '', company: '', phone: '', project: '', date: new Date().toISOString().split('T')[0] });
+  const [customerInfo, setCustomerInfo] = useState(editQuote?.customerInfo || { name: '', company: '', phone: '', project: '', date: new Date().toISOString().split('T')[0], paymentDueDate: '' });
   const [items, setItems] = useState(editQuote?.items || []);
   const [includeVat, setIncludeVat] = useState(editQuote ? editQuote.includeVat : true);
   const [discount, setDiscount] = useState(editQuote?.discount || 0);
   const [discountReason, setDiscountReason] = useState(editQuote?.discountReason || '');
   const [remarks, setRemarks] = useState(editQuote?.remarks || '');
-  const [attachedImages, setAttachedImages] = useState([]);
+  const [attachedImages, setAttachedImages] = useState(editQuote?.attachedImages || []);
   const [isSaving, setIsSaving] = useState(false);
   const [companyProfile, setCompanyProfile] = useState(null);
   const printRef = useRef(null);
@@ -80,10 +82,35 @@ export default function CreateQuote() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser, editQuote]);
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
-    const newImages = files.map(file => URL.createObjectURL(file));
-    setAttachedImages(prev => [...prev, ...newImages]);
+    
+    for (const file of files) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          // 압축 비율 설정 (최대 너비 800px)
+          if (width > 800) {
+            height = Math.round((height * 800) / width);
+            width = 800;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // 압축된 Base64 데이터 추출
+          const base64Url = canvas.toDataURL('image/jpeg', 0.8);
+          setAttachedImages(prev => [...prev, base64Url]);
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const removeAttachedImage = (index) => {
@@ -197,7 +224,7 @@ export default function CreateQuote() {
     
     setIsSaving(true);
     try {
-      await saveQuote(currentUser.uid, { customerInfo, items, subTotal, discount, discountReason, vat, grandTotal, includeVat, remarks, status: 'pending' }, editId);
+      await saveQuote(currentUser.uid, { customerInfo, items, subTotal, discount, discountReason, vat, grandTotal, includeVat, remarks, attachedImages, status: 'pending' }, editId);
       if (!editId) {
         localStorage.removeItem(`tad_quote_draft_${currentUser.uid}`);
       }
@@ -239,6 +266,10 @@ export default function CreateQuote() {
           <div className="form-group">
             <label>견적일자</label>
             <input type="date" value={customerInfo.date} onChange={e => setCustomerInfo({...customerInfo, date: e.target.value})} />
+          </div>
+          <div className="form-group">
+            <label>{t('quote.dueDate')}</label>
+            <input type="date" value={customerInfo.paymentDueDate || ''} onChange={e => setCustomerInfo({...customerInfo, paymentDueDate: e.target.value})} />
           </div>
         </div>
       </div>
@@ -434,7 +465,7 @@ export default function CreateQuote() {
         </div>
       </div>
 
-      <div style={{ display: 'none' }}>
+      <div style={{ position: 'absolute', top: '-9999px', left: '-9999px', pointerEvents: 'none' }}>
         <PrintTemplate 
           ref={printRef}
           customerInfo={customerInfo}
@@ -460,10 +491,10 @@ export default function CreateQuote() {
             <h2 style={{ fontSize: '1.4rem', marginBottom: '1rem', color: '#0f172a' }}>무료 작성 한도 초과</h2>
             <p style={{ color: '#475569', lineHeight: '1.6', marginBottom: '2rem', fontSize: '1rem' }}>
               무료 버전에서 제공하는 누적 견적서 발급 횟수 <b>(삭제 내역 포함 총 3건)</b>를 모두 소진하셨습니다.<br/><br/>
-              <b>월 19,900원</b>의 PRO 요금제로 파격 업그레이드 하시면 <b>무제한 작성</b>과 함께 맞춤형 단가표, PDF 직인 삽입 등 모든 프리미엄 기능을 마음껏 누리실 수 있습니다!
+              <b>월 9,900원</b>의 PRO 요금제로 파격 업그레이드 하시면 <b>무제한 작성</b>과 함께 맞춤형 단가표, PDF 직인 삽입 등 모든 프리미엄 기능을 마음껏 누리실 수 있습니다!
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-              <button className="btn btn-primary" onClick={() => setShowPaymentModal(true)} style={{ width: '100%', padding: '0.9rem', fontSize: '1.05rem', fontWeight: 'bold' }}>PRO 무제한 기능 개방 (월 19,900원)</button>
+              <button className="btn btn-primary" onClick={() => setShowPaymentModal(true)} style={{ width: '100%', padding: '0.9rem', fontSize: '1.05rem', fontWeight: 'bold' }}>PRO 무제한 기능 개방 (월 9,900원)</button>
               <button className="btn btn-outline" onClick={() => navigate('/list')} style={{ width: '100%' }}>목록으로 돌아가기</button>
             </div>
           </div>

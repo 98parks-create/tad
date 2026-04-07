@@ -46,7 +46,7 @@ export default function PaymentModal({ onClose, onSuccess }) {
                 <CreditCard size={24} color="#4f46e5" />
               </div>
               <h2 style={{ fontSize: '1.3rem', margin: '0 0 0.5rem 0', color: '#1e293b' }}>무통장 입금 / 간편송금</h2>
-              <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>PRO 요금제 (월 19,900원)</p>
+              <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>PRO 요금제 (월 9,900원)</p>
             </div>
 
             <div style={{ backgroundColor: '#f8fafc', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', border: '1px solid #e2e8f0', fontSize: '0.9rem', lineHeight: '1.5' }}>

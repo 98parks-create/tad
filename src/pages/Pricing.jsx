@@ -12,7 +12,8 @@ export default function Pricing() {
           복잡한 건 빼고, 혜택만 담았습니다
         </h2>
         <p style={{ fontSize: '1.2rem', color: 'var(--text-light)', fontWeight: 500 }}>
-          커피 4잔 값으로 한 달 내내 스마트해지세요.
+          <span style={{color: 'var(--primary-color)', fontWeight: 700}}>광고비를 줄여 사장님들께 돌려드립니다.</span><br/>
+          커피 2잔 값으로 한 달 내내 스마트해지세요.
         </p>
       </div>
 
@@ -24,7 +25,7 @@ export default function Pricing() {
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
           <h3 style={{ fontSize: '1.8rem', color: 'var(--text-dark)', marginBottom: '0.5rem' }}>Pro 무제한 플랜</h3>
           <div style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--primary-color)' }}>
-            월 19,900<span style={{ fontSize: '1.5rem', fontWeight: 500, color: 'var(--text-light)' }}>원</span>
+            월 9,900<span style={{ fontSize: '1.5rem', fontWeight: 500, color: 'var(--text-light)' }}>원</span>
           </div>
         </div>
 
