@@ -186,10 +186,32 @@ function CollectionTab({ quotesData, getRemainingDays, t }) {
     return sum + val;
   }, 0);
 
-  const handleRemindClick = (quoteId) => {
-    alert(t('dashboard.collection.remindSuccess'));
-    // 나중에 실제 API 호출 로직이 들어갈 곳
-    // fetch('/api/send-alimtalk', { method: 'POST', body: JSON.stringify({ quoteId }) });
+  const handleRemindClick = async (quote) => {
+    const customerName = quote.customerInfo?.name || quote.customerInfo?.company || '고객';
+    const project = quote.customerInfo?.project || '현장';
+    const amount = typeof quote.grandTotal === 'string' ? quote.grandTotal : Number(quote.grandTotal).toLocaleString();
+    
+    const message = `[TAD] 안녕하세요 ${customerName}님, ${project} 건의 미수금 ${amount}원 입금 요청드립니다. 확인 부탁드립니다. 감사합니다.`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: '입금 요청 안내',
+          text: message,
+        });
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error("Share failed:", err);
+        }
+      }
+    } else {
+      // Fallback for PC or browsers without Share API
+      const confirmSms = window.confirm(`이 브라우저에서는 직접 공유가 지원되지 않습니다.\n\n내용:\n${message}\n\n확인 버튼을 누르면 문자(SMS) 앱 연결을 시도합니다.`);
+      if (confirmSms) {
+        const phone = quote.customerInfo?.phone?.replace(/[^0-9]/g, '') || '';
+        window.location.href = `sms:${phone}?body=${encodeURIComponent(message)}`;
+      }
+    }
   };
 
   return (
@@ -240,7 +262,7 @@ function CollectionTab({ quotesData, getRemainingDays, t }) {
                     </td>
                     <td style={{ padding: '1rem' }}>
                       <button 
-                        onClick={() => handleRemindClick(q.id)}
+                        onClick={() => handleRemindClick(q)}
                         style={{ backgroundColor: '#fee2e2', color: '#ef4444', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', fontWeight: 600, cursor: 'pointer' }}
                       >
                         {t('dashboard.collection.remind')}

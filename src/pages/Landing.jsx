@@ -170,40 +170,62 @@ export default function Landing() {
             <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem', color: '#0f172a' }}>{t('landing.compare.title')}</h2>
             <p style={{ fontSize: '1.2rem', color: '#64748b' }}>{t('landing.compare.subtitle')}</p>
           </div>
-          <div style={{ overflowX: 'auto', borderRadius: '16px', boxShadow: '0 20px 40px -15px rgba(0,0,0,0.1)' }}>
-            <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse', textAlign: 'center', backgroundColor: '#fff' }}>
-              <thead>
-                <tr>
-                  <th style={{ width: '20%', padding: '2rem 1rem', borderBottom: '2px solid #e2e8f0', backgroundColor: '#f8fafc' }}></th>
-                  <th style={{ width: '40%', padding: '2rem 1rem', borderBottom: '2px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '1.2rem', color: '#64748b', fontWeight: 700 }}>{t('landing.compare.col_others')}</th>
-                  <th style={{ width: '40%', padding: '2rem 1rem', borderBottom: '4px solid #1d4ed8', backgroundColor: '#eff6ff', fontSize: '1.4rem', color: '#1d4ed8', fontWeight: 800 }}>{t('landing.compare.col_tad')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontWeight: 700, color: '#475569' }}>{t('landing.compare.row1_title')}</td>
-                  <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontSize: '1.2rem', textDecoration: 'line-through', color: '#94a3b8' }}>{t('landing.compare.row1_others')}</td>
-                  <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontSize: '1.4rem', fontWeight: 800, color: '#ef4444', backgroundColor: '#eff6ff' }}>{t('landing.compare.row1_tad')}</td>
-                </tr>
-                <tr>
-                  <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontWeight: 700, color: '#475569' }}>{t('landing.compare.row2_title')}</td>
-                  <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', color: '#64748b' }}>{t('landing.compare.row2_others')}</td>
-                  <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontSize: '1.2rem', fontWeight: 700, color: '#1d4ed8', backgroundColor: '#eff6ff' }}>{t('landing.compare.row2_tad')}</td>
-                </tr>
-                <tr>
-                  <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontWeight: 700, color: '#475569' }}>{t('landing.compare.row3_title')}</td>
-                  <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', color: '#64748b' }}>{t('landing.compare.row3_others')}</td>
-                  <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontSize: '1.2rem', fontWeight: 700, color: '#1d4ed8', backgroundColor: '#eff6ff' }}>{t('landing.compare.row3_tad')}</td>
-                </tr>
-                <tr>
-                  <td style={{ padding: '1.5rem', fontWeight: 700, color: '#475569' }}>{t('landing.compare.row4_title')}</td>
-                  <td style={{ padding: '1.5rem', color: '#64748b' }}>{t('landing.compare.row4_others')}</td>
-                  <td style={{ padding: '1.5rem', fontSize: '1.2rem', fontWeight: 700, color: '#1d4ed8', backgroundColor: '#eff6ff' }}>{t('landing.compare.row4_tad')}</td>
-                </tr>
-              </tbody>
-            </table>
+          <div style={{ position: 'relative' }}>
+            <div style={{ overflowX: 'auto', borderRadius: '16px', boxShadow: '0 20px 40px -15px rgba(0,0,0,0.1)', WebkitOverflowScrolling: 'touch' }}>
+              <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse', textAlign: 'center', backgroundColor: '#fff' }}>
+                <thead>
+                  <tr>
+                    <th style={{ width: '20%', padding: '2rem 1rem', borderBottom: '2px solid #e2e8f0', backgroundColor: '#f8fafc' }}></th>
+                    <th style={{ width: '40%', padding: '2rem 1rem', borderBottom: '2px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '1.2rem', color: '#64748b', fontWeight: 700 }}>{t('landing.compare.col_others')}</th>
+                    <th style={{ width: '40%', padding: '2rem 1rem', borderBottom: '4px solid #1d4ed8', backgroundColor: '#eff6ff', fontSize: '1.4rem', color: '#1d4ed8', fontWeight: 800 }}>{t('landing.compare.col_tad')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontWeight: 700, color: '#475569' }}>{t('landing.compare.row1_title')}</td>
+                    <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontSize: '1.2rem', textDecoration: 'line-through', color: '#94a3b8' }}>{t('landing.compare.row1_others')}</td>
+                    <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontSize: '1.4rem', fontWeight: 800, color: '#ef4444', backgroundColor: '#eff6ff' }}>{t('landing.compare.row1_tad')}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontWeight: 700, color: '#475569' }}>{t('landing.compare.row2_title')}</td>
+                    <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', color: '#64748b' }}>{t('landing.compare.row2_others')}</td>
+                    <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontSize: '1.2rem', fontWeight: 700, color: '#1d4ed8', backgroundColor: '#eff6ff' }}>{t('landing.compare.row2_tad')}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontWeight: 700, color: '#475569' }}>{t('landing.compare.row3_title')}</td>
+                    <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', color: '#64748b' }}>{t('landing.compare.row3_others')}</td>
+                    <td style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', fontSize: '1.2rem', fontWeight: 700, color: '#1d4ed8', backgroundColor: '#eff6ff' }}>{t('landing.compare.row3_tad')}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '1.5rem', fontWeight: 700, color: '#475569' }}>{t('landing.compare.row4_title')}</td>
+                    <td style={{ padding: '1.5rem', color: '#64748b' }}>{t('landing.compare.row4_others')}</td>
+                    <td style={{ padding: '1.5rem', fontSize: '1.2rem', fontWeight: 700, color: '#1d4ed8', backgroundColor: '#eff6ff' }}>{t('landing.compare.row4_tad')}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            {/* Scroll Indicator (Mobile only) */}
+            <div className="mobile-scroll-hint" style={{ display: 'none', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginTop: '1.5rem', color: '#94a3b8', fontSize: '0.9rem', fontWeight: 600 }}>
+              <div style={{ width: '40px', height: '4px', backgroundColor: '#e2e8f0', borderRadius: '2px', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: '15px', backgroundColor: '#1d4ed8', borderRadius: '2px', animation: 'scrollHint 2s infinite ease-in-out' }}></div>
+              </div>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Smartphone size={16} /> 옆으로 밀어서 비교하기
+              </span>
+            </div>
+            <style>{`
+              @media (max-width: 768px) {
+                .mobile-scroll-hint { display: flex !important; }
+              }
+              @keyframes scrollHint {
+                0% { transform: translateX(0); }
+                50% { transform: translateX(25px); }
+                100% { transform: translateX(0); }
+              }
+            `}</style>
           </div>
         </div>
+
       </section>
 
       {/* Pain Points Section */}
