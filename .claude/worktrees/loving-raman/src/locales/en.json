@@ -1,0 +1,57 @@
+{
+  "landing": {
+    "features": {
+      "f1_title": "3 Clicks, 1 Minute Quote",
+      "f1_desc": "Create a quote with just touches without complex formulas",
+      "f2_title": "1-Click PDF KaKaoTalk Share",
+      "f2_desc": "Instantly send in the most convenient format for customers",
+      "f3_title": "Save My Custom Set Prices",
+      "f3_desc": "Bundle frequently used items and load them all at once",
+      "f4_title": "Attach Multiple Site Photos",
+      "f4_desc": "A photo is worth a thousand words. Attach before/after site photos directly to your quote.",
+      "f5_title": "Auto Tax Invoice/Excel",
+      "f5_desc": "Don't struggle with complex tax portals. Generate tax invoices with a single click!"
+    },
+    "compare": {
+      "title": "Overwhelming Value Comparison",
+      "subtitle": "Expensive subscription? Unimaginable at TAD.",
+      "col_others": "Other Services (~$25/mo)",
+      "col_tad": "TAD (Unbeatable Price)",
+      "row1_title": "Monthly Fee",
+      "row1_others": "$25.00",
+      "row1_tad": "$8.00",
+      "row2_title": "Quotations",
+      "row2_others": "Limited",
+      "row2_tad": "Unlimited ⭕",
+      "row3_title": "Company Seal Setup",
+      "row3_others": "Complex",
+      "row3_tad": "Done in 1 sec",
+      "row4_title": "Delivery Method",
+      "row4_others": "Simple Link",
+      "row4_tad": "PDF auto-save & Direct Share"
+    }
+  },
+  "dashboard": {
+    "tabs": {
+      "home": "Dashboard Home",
+      "collection": "Collection Mgmt"
+    },
+    "collection": {
+      "totalUnpaid": "Total Unpaid Amount",
+      "unpaidSubtitle": "Total amount from pending quotes.",
+      "name": "Customer Name",
+      "dueDate": "Due Date",
+      "amount": "Unpaid",
+      "status": "Status",
+      "action": "Action",
+      "overdue": "Overdue",
+      "remind": "Send Alimtalk Reminder",
+      "remindSuccess": "Payment reminder Alimtalk has been sent to the customer.",
+      "noPending": "There are no pending quotes waiting for payment."
+    }
+  },
+  "quote": {
+    "dueDate": "Payment Due Date (Optional)",
+    "dueDatePlaceholder": "YYYY-MM-DD"
+  }
+}

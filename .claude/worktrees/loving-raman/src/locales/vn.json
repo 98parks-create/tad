@@ -1,0 +1,57 @@
+{
+  "landing": {
+    "features": {
+      "f1_title": "Báo Giá 1 Phút Bằng 3 Click",
+      "f1_desc": "Hoàn thành báo giá chỉ bằng thao tác chạm, không cần công thức",
+      "f2_title": "Gửi PDF Zalo/Kakao Nhanh Chóng",
+      "f2_desc": "Gửi trực tiếp định dạng dễ xem nhất cho khách hàng",
+      "f3_title": "Lưu Bảng Giá Set Của Riêng Bạn",
+      "f3_desc": "Lưu các nhóm vật tư thường dùng và tải lại chỉ bằng 1 nút",
+      "f4_title": "Đính Kèm Nhiều Ảnh Hiện Trường",
+      "f4_desc": "Một bức ảnh bằng ngàn lời nói. Đính kèm ảnh hiện trường trước/sau trực tiếp vào báo giá.",
+      "f5_title": "Tự Động Xuất Excel/Hoá Đơn Thuế",
+      "f5_desc": "Không còn khó khăn với các hệ thống thuế phức tạp. Tạo hóa đơn thuế nhanh chóng!"
+    },
+    "compare": {
+      "title": "So sánh giá trị vượt trội",
+      "subtitle": "Phí đăng ký hàng tháng đắt đỏ? Không thể tưởng tượng được tại TAD.",
+      "col_others": "Dịch vụ khác (~600,000 VND)",
+      "col_tad": "TAD (Giá cực sốc)",
+      "row1_title": "Phí hàng tháng",
+      "row1_others": "600,000 VND",
+      "row1_tad": "170,000 VND",
+      "row2_title": "Số lượng báo giá",
+      "row2_others": "Có giới hạn",
+      "row2_tad": "Không giới hạn ⭕",
+      "row3_title": "Đóng dấu công ty",
+      "row3_others": "Phức tạp",
+      "row3_tad": "Hoàn tất trong 1 giây",
+      "row4_title": "Phương thức gửi",
+      "row4_others": "Liên kết đơn giản",
+      "row4_tad": "Tự động lưu PDF & Gửi Zalo/Kakao"
+    }
+  },
+  "dashboard": {
+    "tabs": {
+      "home": "Trang chủ thiết lập",
+      "collection": "Quản lý Thu tiền"
+    },
+    "collection": {
+      "totalUnpaid": "Tổng Tiền Chưa Thu",
+      "unpaidSubtitle": "Tổng số tiền từ các báo giá đang chờ thanh toán.",
+      "name": "Tên khách hàng",
+      "dueDate": "Hạn thanh toán",
+      "amount": "Tồn đọng",
+      "status": "Trạng thái",
+      "action": "Thao tác",
+      "overdue": "Quá hạn",
+      "remind": "Gửi Tin Nhắn Nhắc Nhở",
+      "remindSuccess": "Tin nhắn nhắc nhở thanh toán đã được gửi tới khách hàng.",
+      "noPending": "Không có báo giá nào đang chờ thanh toán."
+    }
+  },
+  "quote": {
+    "dueDate": "Hạn Thanh Toán (Tùy chọn)",
+    "dueDatePlaceholder": "Năm-Tháng-Ngày"
+  }
+}
