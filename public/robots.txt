@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Allow: /pricing
+Allow: /guide
+Allow: /terms
+Allow: /privacy
+Allow: /refund
+
+Disallow: /dashboard
+Disallow: /quotes
+Disallow: /create-quote
+Disallow: /settings
+Disallow: /admin
+Disallow: /auth-callback
+Disallow: /signup
+
+Sitemap: https://tadsmart.co.kr/sitemap.xml
