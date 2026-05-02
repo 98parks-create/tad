@@ -340,21 +340,27 @@ export default function QuoteList() {
   const [previewScale, setPreviewScale] = useState(0.85);
   const previewContainerRef = useRef(null);
 
+  const updatePreviewScale = React.useCallback(() => {
+    const el = previewContainerRef.current;
+    if (el) {
+      setPreviewScale(Math.min(el.offsetWidth / 794, 1));
+    } else {
+      setPreviewScale(Math.min((window.innerWidth - 80) / 794, 1));
+    }
+  }, []);
+
   useEffect(() => {
-    const updateScale = () => {
-      if (previewContainerRef.current) {
-        const containerWidth = previewContainerRef.current.offsetWidth;
-        setPreviewScale(Math.min(containerWidth / 794, 1));
-      } else {
-        // fallback before ref is attached
-        const availableWidth = window.innerWidth - 80;
-        setPreviewScale(Math.min(availableWidth / 794, 1));
-      }
+    if (!selectedQuote) return;
+    // RAF로 모달 DOM 렌더 완료 후 측정
+    const raf = requestAnimationFrame(() => {
+      updatePreviewScale();
+    });
+    window.addEventListener('resize', updatePreviewScale);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', updatePreviewScale);
     };
-    updateScale();
-    window.addEventListener('resize', updateScale);
-    return () => window.removeEventListener('resize', updateScale);
-  }, [selectedQuote]);
+  }, [selectedQuote, updatePreviewScale]);
 
   // [신규] 배경 이미지 선성성(Pre-capture) 상태 관리
   const [preparedData, setPreparedData] = useState(null);
