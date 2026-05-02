@@ -338,22 +338,23 @@ export default function QuoteList() {
   };
 
   const [previewScale, setPreviewScale] = useState(0.85);
+  const previewContainerRef = useRef(null);
 
   useEffect(() => {
     const updateScale = () => {
-      if (window.innerWidth >= 1024) {
-        setPreviewScale(0.85);
-        return;
+      if (previewContainerRef.current) {
+        const containerWidth = previewContainerRef.current.offsetWidth;
+        setPreviewScale(Math.min(containerWidth / 794, 1));
+      } else {
+        // fallback before ref is attached
+        const availableWidth = window.innerWidth - 80;
+        setPreviewScale(Math.min(availableWidth / 794, 1));
       }
-      const availableWidth = window.innerWidth - 48;
-      const documentWidth = 794;
-      const newScale = availableWidth / documentWidth;
-      setPreviewScale(Math.min(newScale, 1));
     };
     updateScale();
     window.addEventListener('resize', updateScale);
     return () => window.removeEventListener('resize', updateScale);
-  }, []);
+  }, [selectedQuote]);
 
   // [신규] 배경 이미지 선성성(Pre-capture) 상태 관리
   const [preparedData, setPreparedData] = useState(null);
@@ -620,7 +621,7 @@ export default function QuoteList() {
               </button>
             </div>
 
-            <div className="print-preview-container" style={{
+            <div ref={previewContainerRef} className="print-preview-container" style={{
               width: '100%',
               backgroundColor: '#cbd5e1',
               borderRadius: '8px',
