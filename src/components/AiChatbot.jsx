@@ -52,7 +52,7 @@ export default function AiChatbot() {
         onClick={() => setIsOpen(o => !o)}
         title="AI 도우미"
         style={{
-          position: 'fixed', bottom: '5.5rem', right: '1.5rem', zIndex: 1000,
+          position: 'fixed', bottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))', right: '1.5rem', zIndex: 1000,
           width: '52px', height: '52px', borderRadius: '50%',
           backgroundColor: '#7c3aed', border: 'none', cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -67,7 +67,7 @@ export default function AiChatbot() {
 
       {isOpen && (
         <div style={{
-          position: 'fixed', bottom: '8.5rem', right: '1.5rem', zIndex: 1000,
+          position: 'fixed', bottom: 'calc(8.5rem + env(safe-area-inset-bottom, 0px))', right: '1.5rem', zIndex: 1000,
           width: 'min(340px, calc(100vw - 3rem))',
           height: '460px',
           display: 'flex', flexDirection: 'column',
