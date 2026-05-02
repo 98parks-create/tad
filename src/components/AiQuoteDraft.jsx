@@ -139,12 +139,14 @@ export default function AiQuoteDraft({ onApply }) {
 
             {result && editableItems.length > 0 && (
               <>
-                <div style={{ padding: '0.7rem 1rem', backgroundColor: '#f5f3ff', borderRadius: '6px', marginBottom: '1rem', color: '#7c3aed', fontWeight: 600, fontSize: '0.9rem' }}>
+                <div style={{ padding: '0.7rem 1rem', backgroundColor: '#f5f3ff', borderRadius: '6px', marginBottom: '0.8rem', color: '#7c3aed', fontWeight: 600, fontSize: '0.9rem' }}>
                   ✨ {result.summary}
                 </div>
-                <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginBottom: '0.8rem' }}>
-                  단가·수량을 직접 수정할 수 있습니다. 체크박스로 추가할 항목을 선택하세요.
-                </p>
+                <div style={{ padding: '0.75rem 1rem', backgroundColor: '#fffbeb', border: '1px solid #fcd34d', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem', color: '#92400e', lineHeight: '1.6' }}>
+                  <strong>📝 AI 초안 안내</strong><br />
+                  AI가 작업 내용을 분석해 항목과 단가를 자동 추천했습니다. <b>단가·수량·규격은 실제 현장에 맞게 직접 수정</b>하세요.<br />
+                  불필요한 항목은 체크 해제로 제외할 수 있습니다.
+                </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.2rem' }}>
                   {editableItems.map((item, i) => (
