@@ -110,6 +110,10 @@ ${catalog}
   "summary": "견적 요약 한 줄"
 }`;
 
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return res.status(500).json({ error: 'ANTHROPIC_API_KEY 환경변수가 설정되지 않았습니다.' });
+  }
+
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -129,7 +133,10 @@ ${catalog}
       })
     });
 
-    if (!response.ok) throw new Error(`API error: ${response.status}`);
+    if (!response.ok) {
+      const errBody = await response.text();
+      throw new Error(`Anthropic API ${response.status}: ${errBody}`);
+    }
 
     const data = await response.json();
     const text = data.content[0].text;
@@ -138,7 +145,6 @@ ${catalog}
 
     const result = JSON.parse(jsonMatch[0]);
 
-    // total 재계산 (AI 오류 방지)
     result.items = result.items.map(item => ({
       ...item,
       total: (item.unitPrice || 0) * (item.quantity || 1)
@@ -153,6 +159,6 @@ ${catalog}
     return res.status(200).json(result);
   } catch (error) {
     console.error('AI quote-draft error:', error);
-    return res.status(500).json({ error: 'AI 초안 생성에 실패했습니다.' });
+    return res.status(500).json({ error: error.message || 'AI 초안 생성에 실패했습니다.' });
   }
 }

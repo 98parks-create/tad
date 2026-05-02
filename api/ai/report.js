@@ -66,12 +66,15 @@ export default async function handler(req, res) {
       })
     });
 
-    if (!response.ok) throw new Error(`API error: ${response.status}`);
+    if (!response.ok) {
+      const errBody = await response.text();
+      throw new Error(`Anthropic API ${response.status}: ${errBody}`);
+    }
 
     const data = await response.json();
     return res.status(200).json({ report: data.content[0].text, stats });
   } catch (error) {
     console.error('AI report error:', error);
-    return res.status(500).json({ error: '리포트 생성에 실패했습니다.' });
+    return res.status(500).json({ error: error.message || '리포트 생성에 실패했습니다.' });
   }
 }

@@ -45,12 +45,15 @@ Q: 미수금 관리? A: 대시보드에서 결제기한 초과 건을 추적할 
       })
     });
 
-    if (!response.ok) throw new Error(`API error: ${response.status}`);
+    if (!response.ok) {
+      const errBody = await response.text();
+      throw new Error(`Anthropic API ${response.status}: ${errBody}`);
+    }
 
     const data = await response.json();
     return res.status(200).json({ reply: data.content[0].text });
   } catch (error) {
     console.error('AI chat error:', error);
-    return res.status(500).json({ error: '응답 생성에 실패했습니다.' });
+    return res.status(500).json({ error: error.message || '응답 생성에 실패했습니다.' });
   }
 }
