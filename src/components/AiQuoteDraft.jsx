@@ -126,10 +126,39 @@ export default function AiQuoteDraft({ onApply }) {
               className="btn btn-primary"
               onClick={handleGenerate}
               disabled={loading || !description.trim()}
-              style={{ width: '100%', marginBottom: '1.5rem', backgroundColor: '#7c3aed', borderColor: '#7c3aed' }}
+              style={{ width: '100%', marginBottom: loading ? '1rem' : '1.5rem', backgroundColor: '#7c3aed', borderColor: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
             >
-              {loading ? '✨ AI 분석 중...' : '✨ 항목 추천받기'}
+              {loading ? (
+                <>
+                  <span style={{
+                    width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.4)',
+                    borderTopColor: 'white', borderRadius: '50%',
+                    display: 'inline-block', animation: 'spin 0.8s linear infinite', flexShrink: 0
+                  }} />
+                  AI가 견적을 분석하는 중...
+                </>
+              ) : '✨ 항목 추천받기'}
             </button>
+
+            {loading && (
+              <div style={{ padding: '1.2rem', backgroundColor: '#f5f3ff', borderRadius: '10px', marginBottom: '1.5rem', textAlign: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginBottom: '0.7rem' }}>
+                  {[0, 1, 2].map(i => (
+                    <span key={i} style={{
+                      width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#7c3aed', display: 'inline-block',
+                      animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite`
+                    }} />
+                  ))}
+                </div>
+                <p style={{ margin: 0, color: '#7c3aed', fontWeight: 600, fontSize: '0.9rem' }}>작업 내용을 분석하고 있습니다</p>
+                <p style={{ margin: '0.3rem 0 0', color: '#a78bfa', fontSize: '0.8rem' }}>AI가 적합한 품목과 단가를 추천 중입니다. 10~20초 소요됩니다.</p>
+              </div>
+            )}
+
+            <style>{`
+              @keyframes spin { to { transform: rotate(360deg); } }
+              @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-8px); } }
+            `}</style>
 
             {error && (
               <div style={{ padding: '0.8rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#dc2626', marginBottom: '1rem', fontSize: '0.9rem' }}>
