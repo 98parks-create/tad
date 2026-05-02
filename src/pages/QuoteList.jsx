@@ -621,20 +621,28 @@ export default function QuoteList() {
             </div>
 
             <div className="print-preview-container" style={{
-              display: 'flex',
-              justifyContent: 'center',
-              overflow: 'hidden',
               width: '100%',
               backgroundColor: '#cbd5e1',
               borderRadius: '8px',
-              padding: '1rem 0'
+              padding: '1rem 0',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'flex-start'
             }}>
               <div style={{
+                width: `${794 * previewScale}px`,
+                height: `${1123 * previewScale}px`,
+                position: 'relative',
+                flexShrink: 0
+              }}>
+              <div style={{
                 transform: `scale(${previewScale})`,
-                transformOrigin: 'top center',
+                transformOrigin: 'top left',
                 transition: 'transform 0.2s ease',
                 width: '794px',
-                minWidth: '794px'
+                position: 'absolute',
+                top: 0,
+                left: 0
               }}>
                 <PrintTemplate
                   ref={printRef}
@@ -651,6 +659,7 @@ export default function QuoteList() {
                   includeVat={selectedQuote.includeVat !== false}
                   isMobile={isMobileTarget}
                 />
+              </div>
               </div>
             </div>
           </div>
