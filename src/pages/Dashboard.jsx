@@ -3,6 +3,7 @@ import { getQuotes } from '../services/quoteService';
 import { getProfile } from '../services/profileService';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
+import AiReport from '../components/AiReport';
 
 export default function Dashboard() {
   const { currentUser } = useAuth();
@@ -159,6 +160,10 @@ export default function Dashboard() {
                 <h4 style={{ color: '#d97706', margin: '0 0 0.5rem 0', fontSize: '1.1rem' }}>이번 달 확정 매출 (승인 완료 기준)</h4>
                 <p style={{ fontSize: '3rem', fontWeight: 800, margin: 0, color: 'var(--text-dark)' }}>{stats.monthlyRevenue.toLocaleString()} <span style={{ fontSize: '1.2rem', fontWeight: 500 }}>원</span></p>
               </div>
+            </div>
+
+            <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
+              <AiReport quotes={quotesData} />
             </div>
 
             <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid #e2e8f0' }}>

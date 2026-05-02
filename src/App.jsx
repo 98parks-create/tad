@@ -19,6 +19,7 @@ import Pricing from './pages/Pricing';
 import Guide from './pages/Guide';
 import Footer from './components/Footer';
 import Chatbot from './components/Chatbot';
+import AiChatbot from './components/AiChatbot';
 import MoreMenuModal from './components/MoreMenuModal';
 import './index.css';
 
@@ -150,6 +151,7 @@ function AppContent() {
         )}
         {renderPwaInstallGuide()}
         <Chatbot />
+        <AiChatbot />
         <Footer />
       </div>
     );
@@ -250,8 +252,9 @@ function AppContent() {
         )}
         {renderPwaInstallGuide()}
         <Chatbot />
+        <AiChatbot />
         <Footer />
-        
+
         {/* Mobile Bottom Tab Bar */}
         <nav className="bottom-nav">
           <NavLink to="/" className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`} onClick={() => setIsMoreMenuOpen(false)}>

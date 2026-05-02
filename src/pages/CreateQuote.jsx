@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { industries, materialCategoriesByIndustry } from '../data/materials';
 import { Save, Plus, Trash2, Lock, Check, Copy } from 'lucide-react';
+import AiQuoteDraft from '../components/AiQuoteDraft';
 import PrintTemplate from '../components/PrintTemplate';
 import PaymentModal from '../components/PaymentModal';
 import { saveQuote, getQuotes } from '../services/quoteService';
@@ -277,7 +278,19 @@ export default function CreateQuote() {
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <h3 style={{ margin: 0 }}>견적 항목 상세</h3>
-          <button className="btn btn-outline" onClick={addItem}><Plus size={18} /> 항목 추가</button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <AiQuoteDraft onApply={data => {
+              const newItems = Array.isArray(data) ? data : (data.items || []);
+              setItems(prev => [...newItems, ...prev]);
+              if (!Array.isArray(data)) {
+                if (data.customerInfo?.project && !customerInfo.project)
+                  setCustomerInfo(prev => ({ ...prev, ...data.customerInfo }));
+                if (data.remarks && !remarks)
+                  setRemarks(data.remarks);
+              }
+            }} />
+            <button className="btn btn-outline" onClick={addItem}><Plus size={18} /> 항목 추가</button>
+          </div>
         </div>
         
         {items.length === 0 ? (

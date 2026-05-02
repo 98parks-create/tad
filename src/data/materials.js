@@ -1,7 +1,13 @@
 export const industries = [
   { id: 'sign', name: '간판/광고물' },
   { id: 'interior', name: '인테리어' },
+  { id: 'wallpaper', name: '도배/장판' },
+  { id: 'tile', name: '타일' },
+  { id: 'furniture', name: '가구/목공' },
+  { id: 'painting', name: '도장/방수' },
+  { id: 'electrical', name: '전기/조명' },
   { id: 'facility', name: '설비' },
+  { id: 'demolition', name: '철거/해체' },
   { id: 'clean_move', name: '청소대행/이사' },
   { id: 'other', name: '기타 (직접입력)' }
 ];
@@ -217,6 +223,210 @@ export const materialCategoriesByIndustry = {
         { id: "cml2", name: "여성 도우미 추가", unitPrice: 130000, unit: "ea", type: "quantity" },
         { id: "cml3", name: "계단/수작업 할증비", unitPrice: 50000, unit: "ea", type: "quantity" },
         { id: "cml4", name: "대형 폐기물 처리 대행", unitPrice: 30000, unit: "ea", type: "quantity" }
+      ]
+    }
+  ],
+  wallpaper: [
+    {
+      id: "wp_paper",
+      name: "도배지",
+      items: [
+        { id: "wp1", name: "실크벽지", unitPrice: 35000, unit: "㎡", type: "area" },
+        { id: "wp2", name: "합지벽지", unitPrice: 20000, unit: "㎡", type: "area" },
+        { id: "wp3", name: "수입벽지", unitPrice: 65000, unit: "㎡", type: "area" },
+        { id: "wp4", name: "천장지(합지)", unitPrice: 18000, unit: "㎡", type: "area" },
+        { id: "wp5", name: "포인트벽지", unitPrice: 45000, unit: "㎡", type: "area" }
+      ]
+    },
+    {
+      id: "wp_floor",
+      name: "바닥재",
+      items: [
+        { id: "wf1", name: "강화마루", unitPrice: 90000, unit: "㎡", type: "area" },
+        { id: "wf2", name: "강마루", unitPrice: 120000, unit: "㎡", type: "area" },
+        { id: "wf3", name: "LPL장판", unitPrice: 25000, unit: "㎡", type: "area" },
+        { id: "wf4", name: "PVC장판(두꺼운)", unitPrice: 35000, unit: "㎡", type: "area" },
+        { id: "wf5", name: "온돌마루", unitPrice: 110000, unit: "㎡", type: "area" },
+        { id: "wf6", name: "카펫타일", unitPrice: 40000, unit: "㎡", type: "area" }
+      ]
+    },
+    {
+      id: "wp_labor",
+      name: "시공 인건비",
+      items: [
+        { id: "wl1", name: "도배 전문기공(1인)", unitPrice: 250000, unit: "인", type: "quantity" },
+        { id: "wl2", name: "장판/마루 기공(1인)", unitPrice: 280000, unit: "인", type: "quantity" },
+        { id: "wl3", name: "기존 도배지 제거", unitPrice: 8000, unit: "㎡", type: "area" },
+        { id: "wl4", name: "퍼티/초배 작업", unitPrice: 12000, unit: "㎡", type: "area" }
+      ]
+    }
+  ],
+  tile: [
+    {
+      id: "tile_mat",
+      name: "타일 자재",
+      items: [
+        { id: "t1", name: "일반 바닥타일(300×300)", unitPrice: 25000, unit: "㎡", type: "area" },
+        { id: "t2", name: "포세린타일(600×600)", unitPrice: 55000, unit: "㎡", type: "area" },
+        { id: "t3", name: "대형타일(800×800)", unitPrice: 80000, unit: "㎡", type: "area" },
+        { id: "t4", name: "욕실벽타일(300×600)", unitPrice: 35000, unit: "㎡", type: "area" },
+        { id: "t5", name: "모자이크타일", unitPrice: 65000, unit: "㎡", type: "area" },
+        { id: "t6", name: "외부테라스타일", unitPrice: 45000, unit: "㎡", type: "area" }
+      ]
+    },
+    {
+      id: "tile_work",
+      name: "타일 시공",
+      items: [
+        { id: "tw1", name: "타일 시공(일반)", unitPrice: 35000, unit: "㎡", type: "area" },
+        { id: "tw2", name: "타일 시공(대형)", unitPrice: 50000, unit: "㎡", type: "area" },
+        { id: "tw3", name: "타일 철거", unitPrice: 20000, unit: "㎡", type: "area" },
+        { id: "tw4", name: "줄눈 작업", unitPrice: 8000, unit: "㎡", type: "area" },
+        { id: "tw5", name: "방수 모르타르 작업", unitPrice: 25000, unit: "㎡", type: "area" }
+      ]
+    },
+    {
+      id: "tile_labor",
+      name: "시공 인건비",
+      items: [
+        { id: "tl1", name: "타일 전문기공(1인)", unitPrice: 350000, unit: "인", type: "quantity" },
+        { id: "tl2", name: "타일 조공(1인)", unitPrice: 200000, unit: "인", type: "quantity" },
+        { id: "tl3", name: "폐기물 처리", unitPrice: 150000, unit: "ea", type: "quantity" }
+      ]
+    }
+  ],
+  furniture: [
+    {
+      id: "fur_custom",
+      name: "가구 제작",
+      items: [
+        { id: "fc1", name: "붙박이장(폭 1m당)", unitPrice: 350000, unit: "m", type: "quantity" },
+        { id: "fc2", name: "주방상부장(폭 1m당)", unitPrice: 280000, unit: "m", type: "quantity" },
+        { id: "fc3", name: "주방하부장(폭 1m당)", unitPrice: 320000, unit: "m", type: "quantity" },
+        { id: "fc4", name: "신발장(폭 1m당)", unitPrice: 250000, unit: "m", type: "quantity" },
+        { id: "fc5", name: "책상/테이블 제작", unitPrice: 400000, unit: "ea", type: "quantity" },
+        { id: "fc6", name: "수납장/서랍장 제작", unitPrice: 300000, unit: "ea", type: "quantity" }
+      ]
+    },
+    {
+      id: "fur_wood",
+      name: "목공사",
+      items: [
+        { id: "fw1", name: "가벽 설치", unitPrice: 150000, unit: "㎡", type: "area" },
+        { id: "fw2", name: "천장 덴조", unitPrice: 180000, unit: "㎡", type: "area" },
+        { id: "fw3", name: "문/문틀 교체", unitPrice: 450000, unit: "ea", type: "quantity" },
+        { id: "fw4", name: "몰딩/걸레받이", unitPrice: 20000, unit: "m", type: "quantity" },
+        { id: "fw5", name: "계단 난간 제작", unitPrice: 250000, unit: "m", type: "quantity" }
+      ]
+    },
+    {
+      id: "fur_labor",
+      name: "시공 인건비",
+      items: [
+        { id: "fl1", name: "목수/가구 전문기공(1인)", unitPrice: 320000, unit: "인", type: "quantity" },
+        { id: "fl2", name: "조공(1인)", unitPrice: 180000, unit: "인", type: "quantity" },
+        { id: "fl3", name: "도장/마감 기공(1인)", unitPrice: 280000, unit: "인", type: "quantity" }
+      ]
+    }
+  ],
+  painting: [
+    {
+      id: "paint_mat",
+      name: "도장 자재",
+      items: [
+        { id: "pm1", name: "내부 수성페인트", unitPrice: 30000, unit: "㎡", type: "area" },
+        { id: "pm2", name: "외부 수성페인트", unitPrice: 35000, unit: "㎡", type: "area" },
+        { id: "pm3", name: "에폭시 바닥도장", unitPrice: 45000, unit: "㎡", type: "area" },
+        { id: "pm4", name: "친환경 도료(항균)", unitPrice: 50000, unit: "㎡", type: "area" },
+        { id: "pm5", name: "외벽 탄성코트", unitPrice: 55000, unit: "㎡", type: "area" }
+      ]
+    },
+    {
+      id: "paint_proof",
+      name: "방수 공사",
+      items: [
+        { id: "pp1", name: "우레탄 방수(옥상)", unitPrice: 45000, unit: "㎡", type: "area" },
+        { id: "pp2", name: "FRP 방수", unitPrice: 65000, unit: "㎡", type: "area" },
+        { id: "pp3", name: "욕실 방수(시멘트)", unitPrice: 35000, unit: "㎡", type: "area" },
+        { id: "pp4", name: "누수 부분 보수", unitPrice: 200000, unit: "ea", type: "quantity" },
+        { id: "pp5", name: "실리콘 코킹", unitPrice: 15000, unit: "m", type: "quantity" }
+      ]
+    },
+    {
+      id: "paint_labor",
+      name: "시공 인건비",
+      items: [
+        { id: "pl1", name: "도장 전문기공(1인)", unitPrice: 280000, unit: "인", type: "quantity" },
+        { id: "pl2", name: "방수 전문기공(1인)", unitPrice: 320000, unit: "인", type: "quantity" },
+        { id: "pl3", name: "조공(1인)", unitPrice: 170000, unit: "인", type: "quantity" },
+        { id: "pl4", name: "가설/비계 설치", unitPrice: 80000, unit: "㎡", type: "area" }
+      ]
+    }
+  ],
+  electrical: [
+    {
+      id: "elec_work",
+      name: "전기 공사",
+      items: [
+        { id: "ew1", name: "배선/전선 증설", unitPrice: 80000, unit: "ea", type: "quantity" },
+        { id: "ew2", name: "분전함 교체", unitPrice: 350000, unit: "ea", type: "quantity" },
+        { id: "ew3", name: "콘센트/스위치 교체", unitPrice: 15000, unit: "ea", type: "quantity" },
+        { id: "ew4", name: "전열선(난방필름) 설치", unitPrice: 65000, unit: "㎡", type: "area" },
+        { id: "ew5", name: "CCTV 설치(카메라 1대)", unitPrice: 150000, unit: "ea", type: "quantity" },
+        { id: "ew6", name: "인터폰/도어락 설치", unitPrice: 80000, unit: "ea", type: "quantity" }
+      ]
+    },
+    {
+      id: "elec_light",
+      name: "조명",
+      items: [
+        { id: "el1", name: "다운라이트 3인치", unitPrice: 25000, unit: "ea", type: "quantity" },
+        { id: "el2", name: "다운라이트 6인치", unitPrice: 35000, unit: "ea", type: "quantity" },
+        { id: "el3", name: "레일조명(1m)", unitPrice: 45000, unit: "m", type: "quantity" },
+        { id: "el4", name: "간접조명 설치", unitPrice: 25000, unit: "m", type: "quantity" },
+        { id: "el5", name: "LED 패널등 교체", unitPrice: 40000, unit: "ea", type: "quantity" },
+        { id: "el6", name: "외부 방수등 설치", unitPrice: 55000, unit: "ea", type: "quantity" }
+      ]
+    },
+    {
+      id: "elec_labor",
+      name: "시공 인건비",
+      items: [
+        { id: "ecl1", name: "전기 전문기공(1인)", unitPrice: 300000, unit: "인", type: "quantity" },
+        { id: "ecl2", name: "전기 조공(1인)", unitPrice: 180000, unit: "인", type: "quantity" }
+      ]
+    }
+  ],
+  demolition: [
+    {
+      id: "dem_work",
+      name: "철거/해체",
+      items: [
+        { id: "dw1", name: "실내 전체 철거", unitPrice: 150000, unit: "㎡", type: "area" },
+        { id: "dw2", name: "천장 철거", unitPrice: 50000, unit: "㎡", type: "area" },
+        { id: "dw3", name: "바닥재 철거", unitPrice: 30000, unit: "㎡", type: "area" },
+        { id: "dw4", name: "타일 철거", unitPrice: 20000, unit: "㎡", type: "area" },
+        { id: "dw5", name: "가벽/파티션 철거", unitPrice: 80000, unit: "㎡", type: "area" },
+        { id: "dw6", name: "간판/구조물 철거", unitPrice: 200000, unit: "ea", type: "quantity" }
+      ]
+    },
+    {
+      id: "dem_waste",
+      name: "폐기물 처리",
+      items: [
+        { id: "dww1", name: "폐기물 1톤 처리", unitPrice: 250000, unit: "ea", type: "quantity" },
+        { id: "dww2", name: "폐기물 2.5톤 처리", unitPrice: 450000, unit: "ea", type: "quantity" },
+        { id: "dww3", name: "폐기물 5톤 처리", unitPrice: 700000, unit: "ea", type: "quantity" },
+        { id: "dww4", name: "대형 폐기물(개당)", unitPrice: 30000, unit: "ea", type: "quantity" }
+      ]
+    },
+    {
+      id: "dem_labor",
+      name: "시공 인건비",
+      items: [
+        { id: "dl1", name: "철거 전문기공(1인)", unitPrice: 250000, unit: "인", type: "quantity" },
+        { id: "dl2", name: "철거 조공(1인)", unitPrice: 160000, unit: "인", type: "quantity" },
+        { id: "dl3", name: "크레인/장비 대여", unitPrice: 350000, unit: "ea", type: "quantity" }
       ]
     }
   ],

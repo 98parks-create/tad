@@ -13,6 +13,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import AiDemoSection from '../components/AiDemoSection';
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -162,6 +163,8 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      <AiDemoSection />
 
       {/* Comparison Section */}
       <section style={{ padding: '6rem 2rem', backgroundColor: '#fff' }}>
