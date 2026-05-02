@@ -257,7 +257,7 @@ export default function Landing() {
       {/* Social Proof (Data) Section */}
       <section style={{ backgroundColor: '#1e3a8a', padding: '10rem 2rem', color: 'white', textAlign: 'center', overflow: 'hidden' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '5rem', opacity: 0.9 }}>이미 수많은 사장님이 TAD와 함께하고 있습니다</h2>
+          <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '5rem', color: '#ffffff' }}>이미 수많은 사장님이 TAD와 함께하고 있습니다</h2>
 
           <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 768 ? '1fr' : '1fr 1fr 1fr', gap: '4rem', marginBottom: '8rem' }}>
             {stats.map((stat, i) => (
