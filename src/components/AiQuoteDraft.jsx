@@ -91,14 +91,22 @@ export default function AiQuoteDraft({ onApply }) {
       </button>
 
       {isOpen && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.75)', zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
-          <div className="card" style={{ width: '90%', maxWidth: '680px', maxHeight: '90vh', overflowY: 'auto', padding: '2rem' }}>
+        <div style={{
+          position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.75)',
+          zIndex: 9998, display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+          backdropFilter: 'blur(4px)', overflowY: 'auto', padding: '1rem'
+        }}>
+          <div style={{
+            width: '100%', maxWidth: '640px', backgroundColor: 'white',
+            borderRadius: '12px', padding: '1.25rem', margin: 'auto',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+          }}>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#7c3aed' }}>
-                <Sparkles size={22} /> AI 견적 초안 생성
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem' }}>
+              <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#7c3aed', fontSize: '1rem' }}>
+                <Sparkles size={20} /> AI 견적 초안 생성
               </h3>
-              <button onClick={handleClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-light)' }}>
+              <button onClick={handleClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-light)', padding: '0.25rem' }}>
                 <X size={24} />
               </button>
             </div>
@@ -118,7 +126,7 @@ export default function AiQuoteDraft({ onApply }) {
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 placeholder="예: 강남역 앞 카페 간판 교체. 가로 3m, 세로 1.2m 채널 간판 제작 및 설치. 크레인 필요."
-                style={{ width: '100%', minHeight: '90px', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', resize: 'vertical', boxSizing: 'border-box' }}
+                style={{ width: '100%', minHeight: '80px', padding: '0.7rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', resize: 'vertical' }}
               />
             </div>
 
@@ -126,58 +134,45 @@ export default function AiQuoteDraft({ onApply }) {
               className="btn btn-primary"
               onClick={handleGenerate}
               disabled={loading || !description.trim()}
-              style={{ width: '100%', marginBottom: loading ? '1rem' : '1.5rem', backgroundColor: '#7c3aed', borderColor: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+              style={{ width: '100%', marginBottom: '1rem', backgroundColor: '#7c3aed', borderColor: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
             >
               {loading ? (
                 <>
-                  <span style={{
-                    width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.4)',
-                    borderTopColor: 'white', borderRadius: '50%',
-                    display: 'inline-block', animation: 'spin 0.8s linear infinite', flexShrink: 0
-                  }} />
-                  AI가 견적을 분석하는 중...
+                  <span className="ai-spinner" />
+                  AI가 분석하는 중...
                 </>
               ) : '✨ 항목 추천받기'}
             </button>
 
             {loading && (
-              <div style={{ padding: '1.2rem', backgroundColor: '#f5f3ff', borderRadius: '10px', marginBottom: '1.5rem', textAlign: 'center' }}>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginBottom: '0.7rem' }}>
+              <div style={{ padding: '1rem', backgroundColor: '#f5f3ff', borderRadius: '10px', marginBottom: '1rem', textAlign: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginBottom: '0.6rem' }}>
                   {[0, 1, 2].map(i => (
-                    <span key={i} style={{
-                      width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#7c3aed', display: 'inline-block',
-                      animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite`
-                    }} />
+                    <span key={i} className={`ai-dot ai-dot-${i}`} />
                   ))}
                 </div>
                 <p style={{ margin: 0, color: '#7c3aed', fontWeight: 600, fontSize: '0.9rem' }}>작업 내용을 분석하고 있습니다</p>
-                <p style={{ margin: '0.3rem 0 0', color: '#a78bfa', fontSize: '0.8rem' }}>AI가 적합한 품목과 단가를 추천 중입니다. 10~20초 소요됩니다.</p>
+                <p style={{ margin: '0.2rem 0 0', color: '#a78bfa', fontSize: '0.78rem' }}>AI가 품목과 단가를 추천 중입니다. 10~20초 소요됩니다.</p>
               </div>
             )}
 
-            <style>{`
-              @keyframes spin { to { transform: rotate(360deg); } }
-              @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-8px); } }
-            `}</style>
-
             {error && (
-              <div style={{ padding: '0.8rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#dc2626', marginBottom: '1rem', fontSize: '0.9rem' }}>
+              <div style={{ padding: '0.75rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#dc2626', marginBottom: '1rem', fontSize: '0.88rem' }}>
                 {error}
               </div>
             )}
 
             {result && editableItems.length > 0 && (
               <>
-                <div style={{ padding: '0.7rem 1rem', backgroundColor: '#f5f3ff', borderRadius: '6px', marginBottom: '0.8rem', color: '#7c3aed', fontWeight: 600, fontSize: '0.9rem' }}>
+                <div style={{ padding: '0.6rem 0.9rem', backgroundColor: '#f5f3ff', borderRadius: '6px', marginBottom: '0.7rem', color: '#7c3aed', fontWeight: 600, fontSize: '0.88rem' }}>
                   ✨ {result.summary}
                 </div>
-                <div style={{ padding: '0.75rem 1rem', backgroundColor: '#fffbeb', border: '1px solid #fcd34d', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem', color: '#92400e', lineHeight: '1.6' }}>
+                <div style={{ padding: '0.65rem 0.9rem', backgroundColor: '#fffbeb', border: '1px solid #fcd34d', borderRadius: '8px', marginBottom: '0.9rem', fontSize: '0.82rem', color: '#92400e', lineHeight: '1.55' }}>
                   <strong>📝 AI 초안 안내</strong><br />
-                  AI가 작업 내용을 분석해 항목과 단가를 자동 추천했습니다. <b>단가·수량·규격은 실제 현장에 맞게 직접 수정</b>하세요.<br />
-                  불필요한 항목은 체크 해제로 제외할 수 있습니다.
+                  단가·수량·규격은 실제 현장에 맞게 <b>직접 수정</b>하세요. 불필요한 항목은 체크 해제로 제외할 수 있습니다.
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.2rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
                   {editableItems.map((item, i) => (
                     <div
                       key={i}
@@ -190,59 +185,59 @@ export default function AiQuoteDraft({ onApply }) {
                     >
                       <div
                         onClick={() => toggleSelect(i)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem 1rem', cursor: 'pointer' }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.7rem 0.9rem', cursor: 'pointer' }}
                       >
                         <div style={{
-                          width: '22px', height: '22px', borderRadius: '4px', flexShrink: 0,
+                          width: '20px', height: '20px', borderRadius: '4px', flexShrink: 0,
                           backgroundColor: selected.includes(i) ? '#7c3aed' : '#e2e8f0',
                           display: 'flex', alignItems: 'center', justifyContent: 'center'
                         }}>
-                          {selected.includes(i) && <Check size={14} color="white" />}
+                          {selected.includes(i) && <Check size={12} color="white" />}
                         </div>
-                        <div style={{ flex: 1, fontWeight: 700, fontSize: '0.95rem' }}>{item.name}</div>
-                        <div style={{ fontWeight: 700, color: '#7c3aed', fontSize: '0.95rem', flexShrink: 0 }}>
+                        <div style={{ flex: 1, fontWeight: 700, fontSize: '0.88rem', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</div>
+                        <div style={{ fontWeight: 700, color: '#7c3aed', fontSize: '0.88rem', flexShrink: 0, marginLeft: '0.3rem' }}>
                           {(item.total || 0).toLocaleString()}원
                         </div>
                       </div>
 
                       <div
-                        style={{ padding: '0 1rem 0.9rem 1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.5rem' }}
+                        style={{ padding: '0 0.9rem 0.8rem 0.9rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}
                         onClick={e => e.stopPropagation()}
                       >
                         <div>
-                          <label style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginBottom: '0.2rem' }}>규격</label>
+                          <label style={{ fontSize: '0.72rem', color: '#64748b', display: 'block', marginBottom: '0.15rem' }}>규격</label>
                           <input type="text" value={item.specification || ''} onChange={e => updateItem(i, 'specification', e.target.value)}
-                            style={{ width: '100%', padding: '0.35rem 0.5rem', border: '1px solid #e2e8f0', borderRadius: '5px', fontSize: '0.85rem', boxSizing: 'border-box' }} />
+                            style={{ width: '100%', padding: '0.3rem 0.45rem', border: '1px solid #e2e8f0', borderRadius: '5px', fontSize: '0.82rem' }} />
                         </div>
                         <div>
-                          <label style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginBottom: '0.2rem' }}>수량</label>
+                          <label style={{ fontSize: '0.72rem', color: '#64748b', display: 'block', marginBottom: '0.15rem' }}>수량</label>
                           <input type="number" min="0.1" step="0.1" value={item.quantity} onChange={e => updateItem(i, 'quantity', e.target.value)}
-                            style={{ width: '100%', padding: '0.35rem 0.5rem', border: '1px solid #e2e8f0', borderRadius: '5px', fontSize: '0.85rem', boxSizing: 'border-box' }} />
+                            style={{ width: '100%', padding: '0.3rem 0.45rem', border: '1px solid #e2e8f0', borderRadius: '5px', fontSize: '0.82rem' }} />
                         </div>
                         <div>
-                          <label style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginBottom: '0.2rem' }}>단위</label>
+                          <label style={{ fontSize: '0.72rem', color: '#64748b', display: 'block', marginBottom: '0.15rem' }}>단위</label>
                           <input type="text" value={item.unit || ''} onChange={e => updateItem(i, 'unit', e.target.value)}
-                            style={{ width: '100%', padding: '0.35rem 0.5rem', border: '1px solid #e2e8f0', borderRadius: '5px', fontSize: '0.85rem', boxSizing: 'border-box' }} />
+                            style={{ width: '100%', padding: '0.3rem 0.45rem', border: '1px solid #e2e8f0', borderRadius: '5px', fontSize: '0.82rem' }} />
                         </div>
                         <div>
-                          <label style={{ fontSize: '0.75rem', color: '#7c3aed', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>단가 (수정가능)</label>
+                          <label style={{ fontSize: '0.72rem', color: '#7c3aed', fontWeight: 700, display: 'block', marginBottom: '0.15rem' }}>단가 ✏️</label>
                           <input type="number" min="0" value={item.unitPrice} onChange={e => updateItem(i, 'unitPrice', e.target.value)}
-                            style={{ width: '100%', padding: '0.35rem 0.5rem', border: '2px solid #c4b5fd', borderRadius: '5px', fontSize: '0.85rem', boxSizing: 'border-box', fontWeight: 600 }} />
+                            style={{ width: '100%', padding: '0.3rem 0.45rem', border: '2px solid #c4b5fd', borderRadius: '5px', fontSize: '0.82rem', fontWeight: 600 }} />
                         </div>
                         <div style={{ gridColumn: '1 / -1' }}>
-                          <label style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginBottom: '0.2rem' }}>비고</label>
+                          <label style={{ fontSize: '0.72rem', color: '#64748b', display: 'block', marginBottom: '0.15rem' }}>비고</label>
                           <input type="text" value={item.remarks || ''} onChange={e => updateItem(i, 'remarks', e.target.value)}
-                            placeholder="특이사항 입력"
-                            style={{ width: '100%', padding: '0.35rem 0.5rem', border: '1px solid #e2e8f0', borderRadius: '5px', fontSize: '0.85rem', boxSizing: 'border-box' }} />
+                            placeholder="특이사항"
+                            style={{ width: '100%', padding: '0.3rem 0.45rem', border: '1px solid #e2e8f0', borderRadius: '5px', fontSize: '0.82rem' }} />
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div style={{ backgroundColor: '#f8fafc', borderRadius: '8px', padding: '1rem', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: '#64748b', fontSize: '0.9rem' }}>선택 {selected.length}개 소계</span>
-                  <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#7c3aed' }}>{selectedTotal.toLocaleString()}원</span>
+                <div style={{ backgroundColor: '#f8fafc', borderRadius: '8px', padding: '0.85rem 1rem', marginBottom: '0.9rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#64748b', fontSize: '0.88rem' }}>선택 {selected.length}개 소계</span>
+                  <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#7c3aed' }}>{selectedTotal.toLocaleString()}원</span>
                 </div>
 
                 <button

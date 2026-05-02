@@ -9,6 +9,13 @@ export default function AiChatbot() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -46,13 +53,27 @@ export default function AiChatbot() {
     }
   };
 
+  // 모바일: 왼쪽 하단 / 데스크톱: 오른쪽 하단
+  const btnBottom = isMobile
+    ? 'calc(72px + env(safe-area-inset-bottom, 0px))'
+    : '1.5rem';
+  const btnLeft = isMobile ? '1rem' : 'auto';
+  const btnRight = isMobile ? 'auto' : '1.5rem';
+
+  const panelBottom = isMobile
+    ? 'calc(132px + env(safe-area-inset-bottom, 0px))'
+    : '4.5rem';
+  const panelLeft = isMobile ? '0.5rem' : 'auto';
+  const panelRight = isMobile ? 'auto' : '1.5rem';
+  const panelWidth = isMobile ? 'calc(100vw - 1rem)' : 'min(340px, calc(100vw - 3rem))';
+
   return (
     <>
       <button
         onClick={() => setIsOpen(o => !o)}
         title="AI 도우미"
         style={{
-          position: 'fixed', bottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))', right: '1.5rem', zIndex: 1000,
+          position: 'fixed', bottom: btnBottom, left: btnLeft, right: btnRight, zIndex: 1000,
           width: '52px', height: '52px', borderRadius: '50%',
           backgroundColor: '#7c3aed', border: 'none', cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -67,9 +88,9 @@ export default function AiChatbot() {
 
       {isOpen && (
         <div style={{
-          position: 'fixed', bottom: 'calc(8.5rem + env(safe-area-inset-bottom, 0px))', right: '1.5rem', zIndex: 1000,
-          width: 'min(340px, calc(100vw - 3rem))',
-          height: '460px',
+          position: 'fixed', bottom: panelBottom, left: panelLeft, right: panelRight, zIndex: 1000,
+          width: panelWidth,
+          height: '440px',
           display: 'flex', flexDirection: 'column',
           backgroundColor: 'white', borderRadius: '16px',
           boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
@@ -98,8 +119,8 @@ export default function AiChatbot() {
             ))}
             {loading && (
               <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                <div style={{ padding: '0.65rem 0.95rem', backgroundColor: '#f1f5f9', borderRadius: '12px 12px 12px 2px', color: '#94a3b8', fontSize: '0.85rem' }}>
-                  답변 생성 중...
+                <div style={{ padding: '0.65rem 0.95rem', backgroundColor: '#f1f5f9', borderRadius: '12px 12px 12px 2px', display: 'flex', gap: '4px', alignItems: 'center' }}>
+                  {[0,1,2].map(i => <span key={i} className={`ai-dot ai-dot-${i}`} style={{ backgroundColor: '#94a3b8' }} />)}
                 </div>
               </div>
             )}
