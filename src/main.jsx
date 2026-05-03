@@ -7,6 +7,7 @@ import App from './App.jsx'
 
 // Manual Service Worker Registration
 registerSW({ immediate: true })
+if (import.meta.env.DEV === false) { console.debug('v', __BUILD_TS__); }
 
 // Initialize Kakao SDK
 if (window.Kakao && !window.Kakao.isInitialized()) {

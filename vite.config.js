@@ -101,6 +101,9 @@ export default defineConfig(({ mode }) => {
       }
     })
   ],
+  define: {
+    __BUILD_TS__: JSON.stringify(Date.now()),
+  },
   build: {
     chunkSizeWarningLimit: 1600,
   },
