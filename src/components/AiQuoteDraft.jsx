@@ -2,6 +2,21 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Sparkles, X, Check, RotateCcw } from 'lucide-react';
 import { industries } from '../data/materials';
 
+const thStyle = {
+  padding: '4px 3px', backgroundColor: '#f1f5f9',
+  border: '1px solid #000', textAlign: 'center',
+  fontWeight: 700, color: '#003366', fontSize: '0.68rem'
+};
+const tdStyle = {
+  padding: '4px 3px', border: '1px solid #000',
+  verticalAlign: 'middle', overflow: 'hidden'
+};
+const inlineInput = {
+  border: 'none', background: 'transparent',
+  fontSize: '0.72rem', width: '100%', padding: 0,
+  fontFamily: 'inherit', outline: 'none'
+};
+
 const LOADING_STYLES = `
   @keyframes ai-spin-lg { to { transform: rotate(360deg); } }
   @keyframes ai-pulse-icon { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.18);opacity:0.7} }
@@ -190,149 +205,131 @@ export default function AiQuoteDraft({ onApply }) {
             {/* ── 결과 화면 ── */}
             {result && !loading ? (
               <>
-                {/* 결과 헤더 (sticky) */}
+                {/* 결과 헤더 */}
                 <div style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '0.85rem 1rem', borderBottom: '1px solid #e2e8f0',
+                  padding: '0.75rem 1rem', borderBottom: '2px solid #003366',
                   backgroundColor: '#faf5ff', flexShrink: 0
                 }}>
                   <div>
-                    <div style={{ fontWeight: 700, color: '#7c3aed', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <Sparkles size={16} /> AI 생성 결과 ({editableItems.length}개 항목)
+                    <div style={{ fontWeight: 700, color: '#003366', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <Sparkles size={15} color="#7c3aed" /> AI 견적 초안 ({editableItems.length}개 항목)
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: '#a78bfa', marginTop: '2px' }}>{result.summary}</div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                      📝 단가·수량을 현장에 맞게 수정하세요. 체크 해제로 항목 제외 가능.
+                    </div>
                   </div>
                   <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>
                     <button
                       onClick={() => { setResult(null); setError(''); }}
-                      style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.78rem', padding: '0.35rem 0.6rem', backgroundColor: '#f3e8ff', border: '1px solid #c4b5fd', color: '#7c3aed', borderRadius: '6px', cursor: 'pointer' }}
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', padding: '0.3rem 0.55rem', backgroundColor: '#f3e8ff', border: '1px solid #c4b5fd', color: '#7c3aed', borderRadius: '6px', cursor: 'pointer' }}
                     >
-                      <RotateCcw size={13} /> 다시 생성
+                      <RotateCcw size={12} /> 다시
                     </button>
-                    <button onClick={handleClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: '0.3rem' }}>
+                    <button onClick={handleClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: '0.25rem' }}>
                       <X size={20} />
                     </button>
                   </div>
                 </div>
 
-                {/* 안내 배너 */}
-                <div style={{ padding: '0.5rem 1rem', backgroundColor: '#fffbeb', borderBottom: '1px solid #fde68a', fontSize: '0.75rem', color: '#92400e', flexShrink: 0 }}>
-                  📝 <strong>단가·수량은 실제 현장에 맞게 수정</strong>하세요. 체크 해제로 항목 제외 가능.
-                </div>
-
-                {/* compact 테이블 헤더 */}
-                <div style={{
-                  display: 'grid', gridTemplateColumns: '24px 1fr 52px 36px 32px 72px',
-                  gap: '0.25rem', padding: '0.3rem 0.75rem',
-                  backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0',
-                  fontSize: '0.65rem', color: '#64748b', fontWeight: 600,
-                  flexShrink: 0
-                }}>
-                  <span></span>
-                  <span>품목명</span>
-                  <span style={{ textAlign: 'center' }}>규격</span>
-                  <span style={{ textAlign: 'center' }}>수량</span>
-                  <span style={{ textAlign: 'center' }}>단위</span>
-                  <span style={{ textAlign: 'right' }}>단가/합계</span>
-                </div>
-
-                {/* 항목 목록 — 스크롤 가능 */}
-                <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                  {editableItems.map((item, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: '24px 1fr 52px 36px 32px 72px',
-                        gap: '0.25rem',
-                        alignItems: 'center',
-                        padding: '0.45rem 0.75rem',
-                        borderBottom: '1px solid #f1f5f9',
-                        backgroundColor: selected.includes(i) ? '#faf5ff' : 'white',
-                        transition: 'background-color 0.15s'
-                      }}
-                    >
-                      {/* 체크박스 */}
-                      <div
-                        onClick={() => toggleSelect(i)}
-                        style={{
-                          width: '18px', height: '18px', borderRadius: '4px', cursor: 'pointer', flexShrink: 0,
-                          backgroundColor: selected.includes(i) ? '#7c3aed' : '#e2e8f0',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center'
-                        }}
-                      >
-                        {selected.includes(i) && <Check size={11} color="white" />}
-                      </div>
-
-                      {/* 품목명 */}
-                      <input
-                        type="text"
-                        value={item.name}
-                        onChange={e => updateItem(i, 'name', e.target.value)}
-                        style={{
-                          border: 'none', borderBottom: '1px solid #e2e8f0',
-                          fontSize: '0.8rem', fontWeight: 600, padding: '0.15rem 0.2rem',
-                          backgroundColor: 'transparent', width: '100%', minWidth: 0,
-                          color: 'var(--text-dark)'
-                        }}
-                      />
-
-                      {/* 규격 */}
-                      <input
-                        type="text"
-                        value={item.specification || ''}
-                        onChange={e => updateItem(i, 'specification', e.target.value)}
-                        placeholder="-"
-                        style={{
-                          border: '1px solid #e2e8f0', borderRadius: '4px',
-                          fontSize: '0.7rem', padding: '0.2rem 0.25rem',
-                          textAlign: 'center', width: '100%', backgroundColor: '#fafafa'
-                        }}
-                      />
-
-                      {/* 수량 */}
-                      <input
-                        type="number"
-                        value={item.quantity}
-                        onChange={e => updateItem(i, 'quantity', e.target.value)}
-                        style={{
-                          border: '1px solid #e2e8f0', borderRadius: '4px',
-                          fontSize: '0.7rem', padding: '0.2rem 0.15rem',
-                          textAlign: 'center', width: '100%', backgroundColor: '#fafafa'
-                        }}
-                      />
-
-                      {/* 단위 */}
-                      <input
-                        type="text"
-                        value={item.unit || ''}
-                        onChange={e => updateItem(i, 'unit', e.target.value)}
-                        style={{
-                          border: '1px solid #e2e8f0', borderRadius: '4px',
-                          fontSize: '0.7rem', padding: '0.2rem 0.15rem',
-                          textAlign: 'center', width: '100%', backgroundColor: '#fafafa'
-                        }}
-                      />
-
-                      {/* 단가 + 합계 */}
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', alignItems: 'flex-end' }}>
-                        <input
-                          type="number"
-                          value={item.unitPrice}
-                          onChange={e => updateItem(i, 'unitPrice', e.target.value)}
-                          style={{
-                            border: '1.5px solid #c4b5fd', borderRadius: '4px',
-                            fontSize: '0.68rem', padding: '0.2rem 0.25rem',
-                            textAlign: 'right', width: '100%', fontWeight: 600,
-                            backgroundColor: '#fdf4ff', color: '#6d28d9'
-                          }}
-                        />
-                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--primary-color)', whiteSpace: 'nowrap' }}>
-                          {(item.total || 0).toLocaleString()}원
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                {/* 항목 테이블 — PrintTemplate 스타일 */}
+                <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', padding: '0.5rem 0.6rem' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.72rem', border: '2px solid #000', tableLayout: 'fixed' }}>
+                    <colgroup>
+                      <col style={{ width: '22px' }} />
+                      <col style={{ width: '20px' }} />
+                      <col />
+                      <col style={{ width: '46px' }} />
+                      <col style={{ width: '30px' }} />
+                      <col style={{ width: '28px' }} />
+                      <col style={{ width: '62px' }} />
+                      <col style={{ width: '62px' }} />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th style={thStyle}>✓</th>
+                        <th style={thStyle}>No</th>
+                        <th style={thStyle}>품목/자재명</th>
+                        <th style={thStyle}>규격</th>
+                        <th style={thStyle}>수량</th>
+                        <th style={thStyle}>단위</th>
+                        <th style={{ ...thStyle, textAlign: 'right' }}>단가</th>
+                        <th style={{ ...thStyle, textAlign: 'right' }}>공급가액</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {editableItems.map((item, i) => (
+                        <tr key={i} style={{ backgroundColor: selected.includes(i) ? '#faf5ff' : 'white' }}>
+                          {/* 체크박스 */}
+                          <td style={{ ...tdStyle, textAlign: 'center', padding: '3px 2px' }}>
+                            <div
+                              onClick={() => toggleSelect(i)}
+                              style={{
+                                width: '16px', height: '16px', borderRadius: '3px', cursor: 'pointer',
+                                backgroundColor: selected.includes(i) ? '#7c3aed' : '#e2e8f0',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                margin: '0 auto'
+                              }}
+                            >
+                              {selected.includes(i) && <Check size={10} color="white" />}
+                            </div>
+                          </td>
+                          {/* No */}
+                          <td style={{ ...tdStyle, textAlign: 'center', color: '#64748b' }}>{i + 1}</td>
+                          {/* 품목명 */}
+                          <td style={tdStyle}>
+                            <input
+                              type="text"
+                              value={item.name}
+                              onChange={e => updateItem(i, 'name', e.target.value)}
+                              style={inlineInput}
+                            />
+                          </td>
+                          {/* 규격 */}
+                          <td style={{ ...tdStyle, textAlign: 'center' }}>
+                            <input
+                              type="text"
+                              value={item.specification || ''}
+                              onChange={e => updateItem(i, 'specification', e.target.value)}
+                              placeholder="-"
+                              style={{ ...inlineInput, textAlign: 'center' }}
+                            />
+                          </td>
+                          {/* 수량 */}
+                          <td style={{ ...tdStyle, textAlign: 'center' }}>
+                            <input
+                              type="number"
+                              value={item.quantity}
+                              onChange={e => updateItem(i, 'quantity', e.target.value)}
+                              style={{ ...inlineInput, textAlign: 'center' }}
+                            />
+                          </td>
+                          {/* 단위 */}
+                          <td style={{ ...tdStyle, textAlign: 'center' }}>
+                            <input
+                              type="text"
+                              value={item.unit || ''}
+                              onChange={e => updateItem(i, 'unit', e.target.value)}
+                              style={{ ...inlineInput, textAlign: 'center' }}
+                            />
+                          </td>
+                          {/* 단가 */}
+                          <td style={{ ...tdStyle, textAlign: 'right' }}>
+                            <input
+                              type="number"
+                              value={item.unitPrice}
+                              onChange={e => updateItem(i, 'unitPrice', e.target.value)}
+                              style={{ ...inlineInput, textAlign: 'right', color: '#6d28d9', fontWeight: 600 }}
+                            />
+                          </td>
+                          {/* 공급가액 */}
+                          <td style={{ ...tdStyle, textAlign: 'right', fontWeight: 700, color: '#003366' }}>
+                            {(item.total || 0).toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
 
                 {/* 하단 고정: 소계 + 적용 버튼 */}
