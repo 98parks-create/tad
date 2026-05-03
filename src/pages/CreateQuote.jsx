@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { industries, materialCategoriesByIndustry } from '../data/materials';
-import { Save, Plus, Trash2, Lock, Check, Copy } from 'lucide-react';
+import { Save, Plus, Trash2, Lock, Check, Copy, ChevronDown, ChevronUp } from 'lucide-react';
 import AiQuoteDraft from '../components/AiQuoteDraft';
 import PrintTemplate from '../components/PrintTemplate';
 import PaymentModal from '../components/PaymentModal';
@@ -30,6 +30,8 @@ export default function CreateQuote() {
   const [editId] = useState(editQuote?.id || null);
   const [showPaywall, setShowPaywall] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [expandedItems, setExpandedItems] = useState({});
+  const toggleItemExpand = (id) => setExpandedItems(prev => ({ ...prev, [id]: !prev[id] }));
 
   // 로컬스토리지 임시저장 불러오기
   React.useEffect(() => {
@@ -140,7 +142,9 @@ export default function CreateQuote() {
   };
 
   const addItem = () => {
-    setItems([{ id: Date.now(), industry: 'sign', categoryId: '', itemId: '', specification: '', unit: '', remarks: '', width: '', height: '', quantity: 1, name: '', unitPrice: '', type: '', total: 0 }, ...items]);
+    const newId = Date.now();
+    setItems([{ id: newId, industry: 'sign', categoryId: '', itemId: '', specification: '', unit: '', remarks: '', width: '', height: '', quantity: 1, name: '', unitPrice: '', type: '', total: 0 }, ...items]);
+    setExpandedItems(prev => ({ ...prev, [newId]: true }));
   };
 
   const removeItem = (id) => {
@@ -299,98 +303,120 @@ export default function CreateQuote() {
             우측 상단의 '항목 추가' 버튼을 눌러 자재 및 시공비를 입력하세요.
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {items.map((item, index) => (
-              <div key={item.id} style={{ display: 'flex', flexDirection: 'column', border: '1px solid var(--border-color)', padding: '1rem', borderRadius: '8px', position: 'relative', gap: '0.75rem' }}>
-                <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
-                  
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label>업종</label>
-                    <select value={item.industry || 'sign'} onChange={e => handleItemChange(item.id, 'industry', e.target.value)}>
-                      {industries.map(ind => (
-                        <option key={ind.id} value={ind.id}>{ind.name}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label>카테고리</label>
-                    <select value={item.categoryId} onChange={e => handleItemChange(item.id, 'categoryId', e.target.value)} disabled={item.industry === 'other' && !(companyProfile?.customMaterials && companyProfile.customMaterials.length > 0)}>
-                      <option value="">-- 선택 --</option>
-                      {getCategoriesForIndustry(item.industry || 'sign').map(cat => (
-                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label>기본 구분 (선택)</label>
-                    <select value={item.itemId} onChange={e => handleItemChange(item.id, 'itemId', e.target.value)} disabled={!item.categoryId}>
-                      <option value="">-- 자재/종류 선택 --</option>
-                      {getCategoriesForIndustry(item.industry || 'sign').find(c => c.id === item.categoryId)?.items?.map(mat => (
-                        <option key={mat.id} value={mat.id}>{mat.name}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label>상세 품목명 (수정가능)</label>
-                    <input type="text" placeholder="품목/자재명 입력" value={item.name} onChange={e => handleItemChange(item.id, 'name', e.target.value)} />
-                  </div>
-
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label>규격/사양</label>
-                    <input type="text" placeholder="예: 1200x2400" value={item.specification} onChange={e => handleItemChange(item.id, 'specification', e.target.value)} />
-                  </div>
-
-                  {item.type === 'area' && (
-                    <>
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label>가로 (mm)</label>
-                        <input type="number" placeholder="w" value={item.width} onChange={e => handleItemChange(item.id, 'width', e.target.value)} />
+          <>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.4rem', marginBottom: '0.4rem' }}>
+              <button className="btn btn-outline" style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem' }} onClick={() => { const all = {}; items.forEach(i => { all[i.id] = true; }); setExpandedItems(all); }}>모두 펼치기</button>
+              <button className="btn btn-outline" style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem' }} onClick={() => setExpandedItems({})}>모두 접기</button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              {items.map((item, index) => {
+                const isExpanded = expandedItems[item.id] === true;
+                return (
+                  <div key={item.id} style={{ border: `1.5px solid ${isExpanded ? 'var(--primary-color)' : 'var(--border-color)'}`, borderRadius: '8px', overflow: 'hidden', backgroundColor: 'white', transition: 'border-color 0.15s' }}>
+                    {/* 요약 헤더 - 항상 표시 */}
+                    <div
+                      onClick={() => toggleItemExpand(item.id)}
+                      style={{ display: 'grid', gridTemplateColumns: '22px 1fr auto auto auto', gap: '0.4rem', alignItems: 'center', padding: '0.6rem 0.75rem', cursor: 'pointer', backgroundColor: isExpanded ? '#eff6ff' : '#fafafa', userSelect: 'none', WebkitUserSelect: 'none' }}
+                    >
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'white', backgroundColor: isExpanded ? 'var(--primary-color)' : '#94a3b8', borderRadius: '3px', padding: '1px 0', textAlign: 'center' }}>{index + 1}</span>
+                      <div style={{ overflow: 'hidden', minWidth: 0 }}>
+                        <span style={{ fontWeight: 600, fontSize: '0.88rem', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: item.name ? 'var(--text-dark)' : '#94a3b8' }}>
+                          {item.name || '품목명 미입력'}
+                        </span>
+                        {!isExpanded && (item.specification || item.quantity) && (
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-light)', display: 'block' }}>
+                            {[item.specification, item.quantity ? `${item.quantity}${item.unit || ''}` : null].filter(Boolean).join(' · ')}
+                          </span>
+                        )}
                       </div>
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label>세로 (mm)</label>
-                        <input type="number" placeholder="h" value={item.height} onChange={e => handleItemChange(item.id, 'height', e.target.value)} />
-                      </div>
-                    </>
-                  )}
-
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label>수량 및 단위</label>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <input type="number" min="1" value={item.quantity} onChange={e => handleItemChange(item.id, 'quantity', e.target.value)} style={{ flex: 1, minWidth: '60px' }} />
-                      <input type="text" placeholder="단위(식/SET)" value={item.unit || ''} onChange={e => handleItemChange(item.id, 'unit', e.target.value)} style={{ width: '80px' }} />
+                      {!isExpanded && item.unitPrice > 0 && (
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', whiteSpace: 'nowrap' }}>{Number(item.unitPrice).toLocaleString()}원</span>
+                      )}
+                      <span style={{ fontWeight: 700, color: 'var(--primary-color)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                        {Number(item.total || 0).toLocaleString()}원
+                      </span>
+                      {isExpanded ? <ChevronUp size={15} color="#94a3b8" /> : <ChevronDown size={15} color="#94a3b8" />}
                     </div>
-                  </div>
 
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label>단가 (수정가능)</label>
-                    <input type="number" min="0" value={item.unitPrice} onChange={e => handleItemChange(item.id, 'unitPrice', e.target.value)} />
+                    {/* 펼쳐진 편집 폼 */}
+                    {isExpanded && (
+                      <div style={{ padding: '0.85rem', borderTop: '1px solid var(--border-color)' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.75rem' }}>
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label>업종</label>
+                            <select value={item.industry || 'sign'} onChange={e => handleItemChange(item.id, 'industry', e.target.value)}>
+                              {industries.map(ind => (<option key={ind.id} value={ind.id}>{ind.name}</option>))}
+                            </select>
+                          </div>
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label>카테고리</label>
+                            <select value={item.categoryId} onChange={e => handleItemChange(item.id, 'categoryId', e.target.value)} disabled={item.industry === 'other' && !(companyProfile?.customMaterials?.length > 0)}>
+                              <option value="">-- 선택 --</option>
+                              {getCategoriesForIndustry(item.industry || 'sign').map(cat => (<option key={cat.id} value={cat.id}>{cat.name}</option>))}
+                            </select>
+                          </div>
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label>기본 구분 (선택)</label>
+                            <select value={item.itemId} onChange={e => handleItemChange(item.id, 'itemId', e.target.value)} disabled={!item.categoryId}>
+                              <option value="">-- 자재/종류 선택 --</option>
+                              {getCategoriesForIndustry(item.industry || 'sign').find(c => c.id === item.categoryId)?.items?.map(mat => (<option key={mat.id} value={mat.id}>{mat.name}</option>))}
+                            </select>
+                          </div>
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label>상세 품목명 ✏️</label>
+                            <input type="text" placeholder="품목/자재명 입력" value={item.name} onChange={e => handleItemChange(item.id, 'name', e.target.value)} />
+                          </div>
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label>규격/사양</label>
+                            <input type="text" placeholder="예: 1200x2400" value={item.specification} onChange={e => handleItemChange(item.id, 'specification', e.target.value)} />
+                          </div>
+                          {item.type === 'area' && (
+                            <>
+                              <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label>가로 (mm)</label>
+                                <input type="number" placeholder="w" value={item.width} onChange={e => handleItemChange(item.id, 'width', e.target.value)} />
+                              </div>
+                              <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label>세로 (mm)</label>
+                                <input type="number" placeholder="h" value={item.height} onChange={e => handleItemChange(item.id, 'height', e.target.value)} />
+                              </div>
+                            </>
+                          )}
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label>수량 및 단위</label>
+                            <div style={{ display: 'flex', gap: '0.4rem' }}>
+                              <input type="number" min="1" value={item.quantity} onChange={e => handleItemChange(item.id, 'quantity', e.target.value)} style={{ flex: 1, minWidth: '55px' }} />
+                              <input type="text" placeholder="단위" value={item.unit || ''} onChange={e => handleItemChange(item.id, 'unit', e.target.value)} style={{ width: '70px' }} />
+                            </div>
+                          </div>
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label>단가 ✏️</label>
+                            <input type="number" min="0" value={item.unitPrice} onChange={e => handleItemChange(item.id, 'unitPrice', e.target.value)} />
+                          </div>
+                          <div className="form-group" style={{ marginBottom: 0, gridColumn: '1 / -1' }}>
+                            <label>비고</label>
+                            <input type="text" placeholder="특이사항이나 세부 요청사항" value={item.remarks} onChange={e => handleItemChange(item.id, 'remarks', e.target.value)} />
+                          </div>
+                          <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--bg-color)', padding: '0.45rem 0.85rem', borderRadius: '6px' }}>
+                            <span style={{ fontWeight: 500, color: 'var(--text-light)', fontSize: '0.88rem' }}>항목 소계</span>
+                            <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary-color)' }}>{Number(item.total || 0).toLocaleString()} 원</span>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end', marginTop: '0.65rem' }}>
+                          <button className="btn btn-outline" style={{ color: 'var(--primary-color)', padding: '0.35rem 0.7rem', fontSize: '0.82rem', gap: '0.25rem' }} onClick={() => duplicateItem(item, index)}>
+                            <Copy size={14} /> 복사
+                          </button>
+                          <button className="btn btn-outline" style={{ color: 'var(--danger-color)', borderColor: 'var(--danger-color)', padding: '0.35rem 0.7rem', fontSize: '0.82rem', gap: '0.25rem' }} onClick={() => removeItem(item.id)}>
+                            <Trash2 size={14} /> 삭제
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  
-                  <div className="form-group" style={{ marginBottom: 0, gridColumn: '1 / -1' }}>
-                    <label>비고</label>
-                    <input type="text" placeholder="특이사항이나 세부 요청사항을 입력하세요" value={item.remarks} onChange={e => handleItemChange(item.id, 'remarks', e.target.value)} />
-                  </div>
-
-                  <div className="form-group" style={{ marginBottom: 0, gridColumn: '1 / -1', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--bg-color)', padding: '0.5rem 1rem', borderRadius: '6px' }}>
-                    <span style={{ fontWeight: 500, color: 'var(--text-light)' }}>항목 소계:</span>
-                    <span style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--primary-color)' }}>{Number(item.total || 0).toLocaleString()} 원</span>
-                  </div>
-
-                </div>
-                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                  <button className="btn btn-outline" style={{ color: 'var(--primary-color)', padding: '0.4rem 0.8rem', fontSize: '0.85rem', gap: '0.3rem' }} onClick={() => duplicateItem(item, index)} title="이 항목 그대로 복사하여 바로 아래에 줄 추가">
-                    <Copy size={16} /> 복사
-                  </button>
-                  <button className="btn btn-outline" style={{ color: 'var(--danger-color)', borderColor: 'var(--danger-color)', padding: '0.4rem 0.8rem', fontSize: '0.85rem', gap: '0.3rem' }} onClick={() => removeItem(item.id)} title="이 항목 삭제">
-                    <Trash2 size={16} /> 삭제
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
       <div className="card" style={{ marginTop: '2rem' }}>
