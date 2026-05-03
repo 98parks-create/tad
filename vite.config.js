@@ -68,6 +68,11 @@ export default defineConfig(({ mode }) => {
       registerType: 'autoUpdate',
       injectRegister: 'auto',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png', '192x192.png', '512x512.png'],
+      workbox: {
+        additionalManifestEntries: [
+          { url: 'index.html', revision: `v20260503-2` }
+        ]
+      },
       devOptions: {
         enabled: true
       },
