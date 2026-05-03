@@ -129,19 +129,19 @@ export default function AiQuoteDraft({ onApply }) {
       {isOpen && (
         <div style={{
           position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.75)',
-          zIndex: 9998, display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-          backdropFilter: 'blur(4px)', overflowY: 'auto', padding: '0.75rem'
+          zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          backdropFilter: 'blur(4px)', padding: '0.5rem'
         }}>
           <style>{LOADING_STYLES}</style>
 
           <div style={{
-            width: '100%', maxWidth: '600px',
+            width: '100%', maxWidth: '560px',
             backgroundColor: 'white', borderRadius: '14px',
-            margin: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
             position: 'relative', overflow: 'hidden',
             display: 'flex', flexDirection: 'column',
-            minHeight: result ? 'calc(100dvh - 1.5rem)' : 'auto',
-            maxHeight: 'calc(100dvh - 1.5rem)'
+            height: (result || loading) ? 'calc(100dvh - 1rem)' : 'auto',
+            maxHeight: 'calc(100dvh - 1rem)'
           }}>
 
             {/* ── 로딩 풀오버레이 ── */}
