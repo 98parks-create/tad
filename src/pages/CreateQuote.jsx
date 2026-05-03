@@ -276,9 +276,9 @@ export default function CreateQuote() {
       </div>
 
       <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <div className="quote-items-header">
           <h3 style={{ margin: 0 }}>견적 항목 상세</h3>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div className="quote-items-actions">
             <AiQuoteDraft onApply={data => {
               const newItems = Array.isArray(data) ? data : (data.items || []);
               setItems(prev => [...newItems, ...prev]);
@@ -292,6 +292,7 @@ export default function CreateQuote() {
             <button className="btn btn-outline" onClick={addItem}><Plus size={18} /> 항목 추가</button>
           </div>
         </div>
+
         
         {items.length === 0 ? (
           <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-light)', border: '1px dashed var(--border-color)', borderRadius: '8px' }}>
@@ -300,7 +301,7 @@ export default function CreateQuote() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {items.map((item, index) => (
-              <div key={item.id} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', border: '1px solid var(--border-color)', padding: '1rem', borderRadius: '8px', position: 'relative' }}>
+              <div key={item.id} style={{ display: 'flex', flexDirection: 'column', border: '1px solid var(--border-color)', padding: '1rem', borderRadius: '8px', position: 'relative', gap: '0.75rem' }}>
                 <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
                   
                   <div className="form-group" style={{ marginBottom: 0 }}>
@@ -379,12 +380,12 @@ export default function CreateQuote() {
                   </div>
 
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <button className="btn-icon" style={{ color: 'var(--primary-color)', backgroundColor: 'var(--bg-color)', cursor: 'pointer', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '0.4rem' }} onClick={() => duplicateItem(item, index)} title="이 항목 그대로 복사하여 바로 아래에 줄 추가">
-                    <Copy size={20} />
+                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                  <button className="btn btn-outline" style={{ color: 'var(--primary-color)', padding: '0.4rem 0.8rem', fontSize: '0.85rem', gap: '0.3rem' }} onClick={() => duplicateItem(item, index)} title="이 항목 그대로 복사하여 바로 아래에 줄 추가">
+                    <Copy size={16} /> 복사
                   </button>
-                  <button className="btn-icon" style={{ color: 'var(--danger-color)', backgroundColor: 'rgba(239, 68, 68, 0.1)', cursor: 'pointer', border: 'none', borderRadius: '4px', padding: '0.4rem' }} onClick={() => removeItem(item.id)} title="이 항목 삭제">
-                    <Trash2 size={20} />
+                  <button className="btn btn-outline" style={{ color: 'var(--danger-color)', borderColor: 'var(--danger-color)', padding: '0.4rem 0.8rem', fontSize: '0.85rem', gap: '0.3rem' }} onClick={() => removeItem(item.id)} title="이 항목 삭제">
+                    <Trash2 size={16} /> 삭제
                   </button>
                 </div>
               </div>

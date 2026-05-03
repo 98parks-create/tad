@@ -341,26 +341,20 @@ export default function QuoteList() {
   const previewContainerRef = useRef(null);
 
   const updatePreviewScale = React.useCallback(() => {
-    const el = previewContainerRef.current;
-    if (el) {
-      setPreviewScale(Math.min(el.offsetWidth / 794, 1));
-    } else {
-      setPreviewScale(Math.min((window.innerWidth - 80) / 794, 1));
+    if (window.innerWidth >= 1024) {
+      setPreviewScale(0.85);
+      return;
     }
+    // 모바일: 모달 overlay(32px) + card padding(48px) = 80px 제외
+    const available = window.innerWidth - 80;
+    setPreviewScale(Math.min(available / 794, 1));
   }, []);
 
   useEffect(() => {
-    if (!selectedQuote) return;
-    // RAF로 모달 DOM 렌더 완료 후 측정
-    const raf = requestAnimationFrame(() => {
-      updatePreviewScale();
-    });
+    updatePreviewScale();
     window.addEventListener('resize', updatePreviewScale);
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener('resize', updatePreviewScale);
-    };
-  }, [selectedQuote, updatePreviewScale]);
+    return () => window.removeEventListener('resize', updatePreviewScale);
+  }, [updatePreviewScale]);
 
   // [신규] 배경 이미지 선성성(Pre-capture) 상태 관리
   const [preparedData, setPreparedData] = useState(null);
@@ -591,43 +585,45 @@ export default function QuoteList() {
       )}
 
       {selectedQuote && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '1rem' }}>
-          <div className="card" style={{ width: '100%', maxWidth: '850px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
-            <button onClick={() => setSelectedQuote(null)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem' }}>
-              <X size={24} color="#64748b" />
-            </button>
-            <h2 style={{ marginBottom: '1.5rem', paddingRight: '2rem' }}>견적서 상세현황</h2>
-
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-              <button className="btn btn-primary" onClick={handlePrint}>
-                <Printer size={18} /> PDF/인쇄
-              </button>
-              <button className="btn btn-outline" onClick={handleSaveImage} disabled={isPreparing} style={{ color: '#10b981', borderColor: '#10b981' }}>
-                <ImageIcon size={18} /> 이미지 저장
-              </button>
-              <button className="btn btn-outline" onClick={handleShareKakao} disabled={isPreparing} style={{ color: '#3A1D1D', borderColor: '#FEE500', backgroundColor: '#FEE500' }}>
-                <MessageCircle size={18} /> 카톡 공유
-              </button>
-              {selectedQuote.status === 'pending' && (
-                <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#059669', borderColor: '#059669' }} onClick={handleApprove}>
-                  <CheckCircle size={18} /> 입금/승인 완료
-                </button>
-              )}
-              <button className="btn btn-outline" onClick={handleEdit}>
-                <Edit size={18} /> 수정
-              </button>
-              <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#6366f1', borderColor: '#6366f1' }} onClick={handleCopyQuote}>
-                <Copy size={18} /> 견적 복사
-              </button>
-              <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#0ea5e9', borderColor: '#0ea5e9' }} onClick={handleHometaxExport} title="국세청 홈택스 일괄발행 양식(CSV)">
-                <FileSpreadsheet size={18} /> 홈택스 엑셀
-              </button>
-              <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--danger-color)', borderColor: 'var(--danger-color)' }} onClick={handleDelete}>
-                <Trash2 size={18} /> 삭제
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', zIndex: 1000, padding: '1rem', overflowY: 'auto' }}>
+          <div className="card" style={{ width: '100%', maxWidth: '850px', position: 'relative', margin: 'auto' }}>
+            <div style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', padding: '0.5rem 0', borderBottom: '1px solid var(--border-color)' }}>
+              <h2 style={{ margin: 0 }}>견적서 상세현황</h2>
+              <button onClick={() => setSelectedQuote(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem', flexShrink: 0 }}>
+                <X size={24} color="#64748b" />
               </button>
             </div>
 
-            <div ref={previewContainerRef} className="print-preview-container" style={{
+            <div className="quote-modal-actions">
+              <button className="btn btn-primary" onClick={handlePrint}>
+                <Printer size={16} /> PDF/인쇄
+              </button>
+              <button className="btn btn-outline" onClick={handleSaveImage} disabled={isPreparing} style={{ color: '#10b981', borderColor: '#10b981' }}>
+                <ImageIcon size={16} /> 이미지
+              </button>
+              <button className="btn btn-outline" onClick={handleShareKakao} disabled={isPreparing} style={{ color: '#3A1D1D', borderColor: '#FEE500', backgroundColor: '#FEE500' }}>
+                <MessageCircle size={16} /> 카톡공유
+              </button>
+              {selectedQuote.status === 'pending' && (
+                <button className="btn btn-outline" style={{ color: '#059669', borderColor: '#059669' }} onClick={handleApprove}>
+                  <CheckCircle size={16} /> 승인완료
+                </button>
+              )}
+              <button className="btn btn-outline" onClick={handleEdit}>
+                <Edit size={16} /> 수정
+              </button>
+              <button className="btn btn-outline" style={{ color: '#6366f1', borderColor: '#6366f1' }} onClick={handleCopyQuote}>
+                <Copy size={16} /> 복사
+              </button>
+              <button className="btn btn-outline" style={{ color: '#0ea5e9', borderColor: '#0ea5e9' }} onClick={handleHometaxExport} title="국세청 홈택스 일괄발행 양식(CSV)">
+                <FileSpreadsheet size={16} /> 홈택스
+              </button>
+              <button className="btn btn-outline" style={{ color: 'var(--danger-color)', borderColor: 'var(--danger-color)' }} onClick={handleDelete}>
+                <Trash2 size={16} /> 삭제
+              </button>
+            </div>
+
+            <div className="print-preview-container" style={{
               width: '100%',
               backgroundColor: '#cbd5e1',
               borderRadius: '8px',

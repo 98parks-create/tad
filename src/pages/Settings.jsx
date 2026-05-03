@@ -186,12 +186,12 @@ export default function Settings() {
               </div>
             ) : (
               (profile.customMaterials || []).map((mat) => (
-                <div key={mat.id} style={{ display: 'grid', gridTemplateColumns: 'minmax(100px, 2fr) minmax(80px, 1fr) 60px minmax(100px, 1.5fr) 40px', gap: '0.5rem', alignItems: 'center', backgroundColor: '#f8fafc', padding: '0.8rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                  <input type="text" placeholder="품목/자재명" value={mat.name} onChange={(e) => updateCustomMaterial(mat.id, 'name', e.target.value)} style={{ padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.9rem' }} />
+                <div key={mat.id} className="custom-material-row">
+                  <input className="mat-name" type="text" placeholder="품목/자재명" value={mat.name} onChange={(e) => updateCustomMaterial(mat.id, 'name', e.target.value)} style={{ padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.9rem' }} />
                   <input type="text" placeholder="규격" value={mat.specification} onChange={(e) => updateCustomMaterial(mat.id, 'specification', e.target.value)} style={{ padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.9rem' }} />
                   <input type="text" placeholder="단위" value={mat.unit} onChange={(e) => updateCustomMaterial(mat.id, 'unit', e.target.value)} style={{ padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.9rem', textAlign: 'center' }} />
-                  <input type="number" placeholder="단가(원)" value={mat.unitPrice} onChange={(e) => updateCustomMaterial(mat.id, 'unitPrice', Number(e.target.value))} style={{ padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.9rem', textAlign: 'right' }} />
-                  <button type="button" onClick={() => removeCustomMaterial(mat.id)} style={{ backgroundColor: 'transparent', border: 'none', color: 'var(--danger-color)', cursor: 'pointer', display: 'flex', justifyContent: 'center' }} title="삭제">
+                  <input className="mat-price" type="number" placeholder="단가(원)" value={mat.unitPrice} onChange={(e) => updateCustomMaterial(mat.id, 'unitPrice', Number(e.target.value))} style={{ padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.9rem', textAlign: 'right' }} />
+                  <button className="mat-delete" type="button" onClick={() => removeCustomMaterial(mat.id)} style={{ backgroundColor: 'transparent', border: 'none', color: 'var(--danger-color)', cursor: 'pointer', display: 'flex', justifyContent: 'center' }} title="삭제">
                     <Trash2 size={18} />
                   </button>
                 </div>

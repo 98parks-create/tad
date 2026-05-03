@@ -53,19 +53,15 @@ export default function AiChatbot() {
     }
   };
 
-  // 모바일: 왼쪽 하단 / 데스크톱: 오른쪽 하단
-  const btnBottom = isMobile
-    ? 'calc(72px + env(safe-area-inset-bottom, 0px))'
-    : '1.5rem';
-  const btnLeft = isMobile ? '1rem' : 'auto';
-  const btnRight = isMobile ? 'auto' : '1.5rem';
+  // 데스크톱: 오른쪽 하단 원래 위치 유지
+  // 모바일: 오른쪽 하단, ? 버튼(56px) 위에 쌓이도록
+  const btnStyle = isMobile
+    ? { bottom: 'calc(156px + env(safe-area-inset-bottom, 0px))', right: '1rem' }
+    : { bottom: '5.5rem', right: '1.5rem' };
 
-  const panelBottom = isMobile
-    ? 'calc(132px + env(safe-area-inset-bottom, 0px))'
-    : '4.5rem';
-  const panelLeft = isMobile ? '0.5rem' : 'auto';
-  const panelRight = isMobile ? 'auto' : '1.5rem';
-  const panelWidth = isMobile ? 'calc(100vw - 1rem)' : 'min(340px, calc(100vw - 3rem))';
+  const panelStyle = isMobile
+    ? { bottom: 'calc(216px + env(safe-area-inset-bottom, 0px))', right: '0.5rem', width: 'calc(100vw - 1rem)', maxHeight: 'calc(100dvh - 260px - env(safe-area-inset-bottom, 0px))' }
+    : { bottom: '8.5rem', right: '1.5rem', width: 'min(340px, calc(100vw - 3rem))' };
 
   return (
     <>
@@ -73,7 +69,8 @@ export default function AiChatbot() {
         onClick={() => setIsOpen(o => !o)}
         title="AI 도우미"
         style={{
-          position: 'fixed', bottom: btnBottom, left: btnLeft, right: btnRight, zIndex: 1000,
+          position: 'fixed', zIndex: 1000,
+          ...btnStyle,
           width: '52px', height: '52px', borderRadius: '50%',
           backgroundColor: '#7c3aed', border: 'none', cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -88,9 +85,10 @@ export default function AiChatbot() {
 
       {isOpen && (
         <div style={{
-          position: 'fixed', bottom: panelBottom, left: panelLeft, right: panelRight, zIndex: 1000,
-          width: panelWidth,
-          height: '440px',
+          position: 'fixed', zIndex: 1000,
+          ...panelStyle,
+          height: isMobile ? undefined : '420px',
+          minHeight: '300px',
           display: 'flex', flexDirection: 'column',
           backgroundColor: 'white', borderRadius: '16px',
           boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
@@ -108,7 +106,8 @@ export default function AiChatbot() {
             {messages.map((m, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
                 <div style={{
-                  maxWidth: '82%', padding: '0.65rem 0.95rem', borderRadius: m.role === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
+                  maxWidth: '82%', padding: '0.65rem 0.95rem',
+                  borderRadius: m.role === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
                   fontSize: '0.88rem', lineHeight: '1.55', whiteSpace: 'pre-wrap',
                   backgroundColor: m.role === 'user' ? '#7c3aed' : '#f1f5f9',
                   color: m.role === 'user' ? 'white' : '#1e293b'
